@@ -19,6 +19,8 @@ identical day to day so they are easy to log and audit).
   model and market weights differ by market, say which weight produced which number.
 - Facts from notes or bundled data carry their source and date; leave out specifics you can't
   source. One small table at most in a plain answer.
+- Plain is not thin: shorten the machinery, never the checks that change the decision (date,
+  opponent, team status, injuries, recent games, line moves). Put those near the top.
 
 ## Plain answer (default for a single question)
 
@@ -32,6 +34,12 @@ Why
 - The book's price with its cut removed (no-vig) puts the over at 43.1%. A season average is
   public, so it's already in that number; I weight our projection and the market 50/50 for props.
 - That leaves an expected loss of about 1 cent per $1 bet. Nothing to size.
+
+Check before betting (anything here can flip the answer)
+- The game and price are current: date, opponent, still on the board (as of 6:40 PM ET).
+- Status: tonight's injury report and lineup news.
+- Say where each fact came from: "results through Oct 1 in the bundled data" is not the
+  same as a live feed — and say which live sources failed.
 
 What would change it
 - News the line hasn't absorbed: a starter out, a minutes bump, a pace-up matchup.
