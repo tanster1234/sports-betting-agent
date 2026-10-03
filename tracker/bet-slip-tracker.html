@@ -1,0 +1,856 @@
+<title>Bet Slip Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column — scoreboard summary, book balances, running-total chart, then bet slips with a perforated stub, then the add-bet form */
+:root {
+  --bg: #F2F5F3;
+  --surface: #FFFFFF;
+  --surface-2: #E8EDEA;
+  --ink: #14201B;
+  --ink-2: #44534D;
+  --muted: #69766F;
+  --line: #D3DBD7;
+  --accent: #2945C4;
+  --accent-ink: #FFFFFF;
+  --accent-wash: rgba(41, 69, 196, 0.10);
+  --win: #17774A;
+  --win-wash: #E1F2E8;
+  --loss: #B0281F;
+  --loss-wash: #FAE6E3;
+  --pend: #8A5900;
+  --pend-wash: #FAEFD8;
+  --push: #56625D;
+  --push-wash: #E9EDEB;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1412; --surface: #161E1B; --surface-2: #1F2925; --ink: #E6EEEA; --ink-2: #B3BFBA; --muted: #8C9994; --line: #2C3833;
+    --accent: #8FA2FF; --accent-ink: #0E1412; --accent-wash: rgba(143, 162, 255, 0.14);
+    --win: #55C98F; --win-wash: rgba(85, 201, 143, 0.14); --loss: #FF8B80; --loss-wash: rgba(255, 139, 128, 0.14);
+    --pend: #F1B84D; --pend-wash: rgba(241, 184, 77, 0.14); --push: #A5B1AC; --push-wash: rgba(165, 177, 172, 0.14);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1412; --surface: #161E1B; --surface-2: #1F2925; --ink: #E6EEEA; --ink-2: #B3BFBA; --muted: #8C9994; --line: #2C3833;
+  --accent: #8FA2FF; --accent-ink: #0E1412; --accent-wash: rgba(143, 162, 255, 0.14);
+  --win: #55C98F; --win-wash: rgba(85, 201, 143, 0.14); --loss: #FF8B80; --loss-wash: rgba(255, 139, 128, 0.14);
+  --pend: #F1B84D; --pend-wash: rgba(241, 184, 77, 0.14); --push: #A5B1AC; --push-wash: rgba(165, 177, 172, 0.14);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 780px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 48px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.01em; text-wrap: balance; margin: 0; line-height: 1.05; }
+h1 { font-size: 2.6rem; text-transform: uppercase; }
+h2 { font-size: 1.45rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.eyebrow { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 600; }
+.num, .mono { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); font-weight: 500; }
+.muted { color: var(--muted); }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.head { display: grid; gap: 6px; }
+.notice { padding: 10px 14px; border-radius: 8px; background: var(--pend-wash); color: var(--ink); font-size: 0.9rem; }
+
+/* Scoreboard */
+.board { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 16px; }
+.hero { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.hero .big { font-family: var(--font-display); font-weight: 700; font-size: 3.4rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.pos { color: var(--win); } .neg { color: var(--loss); }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--line); padding-top: 14px; }
+.stat { display: grid; gap: 2px; min-width: 0; }
+.stat .v { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat .s { font-size: 0.8rem; color: var(--muted); }
+.foot-note { font-size: 0.8rem; color: var(--muted); max-width: 65ch; }
+
+/* Books */
+.books { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.book { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; min-width: 0; }
+.book-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.book-name { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.book-bal { font-family: var(--font-display); font-weight: 700; font-size: 1.9rem; font-variant-numeric: tabular-nums; line-height: 1; }
+.book dl { margin: 0; display: grid; grid-template-columns: auto auto; gap: 2px 12px; font-size: 0.85rem; }
+.book dt { color: var(--muted); } .book dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.linkish { background: none; border: 0; padding: 0; color: var(--accent); font-size: 0.8rem; text-decoration: underline; text-underline-offset: 2px; justify-self: start; }
+.inline-edit { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.inline-edit input { width: 7em; }
+
+/* Chart */
+.chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 10px; }
+.chart-box { position: relative; min-width: 0; }
+.chart-box svg { display: block; width: 100%; height: 220px; overflow: visible; }
+.chart-box svg text { font-family: var(--font-body); font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; box-shadow: 0 6px 18px rgba(0,0,0,0.12); min-width: 150px; max-width: 220px; z-index: 2; }
+.tip strong { display: block; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.empty { border: 1px dashed var(--line); border-radius: 10px; padding: 18px; color: var(--muted); font-size: 0.9rem; text-align: center; }
+details.table-view summary { cursor: pointer; font-size: 0.85rem; color: var(--accent); }
+.table-scroll { overflow-x: auto; margin-top: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+td.r, th.r { text-align: right; }
+
+/* Bet slips */
+.section { display: grid; gap: 12px; }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.slips { display: grid; gap: 14px; }
+.slip { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; display: grid; min-width: 0; }
+.slip-body { padding: 14px 16px 12px; display: grid; gap: 10px; }
+.slip-top { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px; font-size: 0.75rem; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.chip.tier { font-family: var(--font-display); font-size: 0.9rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); }
+.chip.boost { border-color: var(--accent); color: var(--accent); }
+.when { font-size: 0.8rem; color: var(--muted); margin-left: auto; }
+.status { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.status[data-s="open"] { background: var(--pend-wash); color: var(--pend); }
+.status[data-s="won"], .status[data-s="cashout"] { background: var(--win-wash); color: var(--win); }
+.status[data-s="lost"] { background: var(--loss-wash); color: var(--loss); }
+.status[data-s="push"], .status[data-s="void"] { background: var(--push-wash); color: var(--push); }
+.slip-line { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 18px; align-items: end; }
+.odds { font-family: var(--font-display); font-weight: 700; font-size: 2.4rem; line-height: 0.95; font-variant-numeric: tabular-nums; }
+.money { display: flex; flex-wrap: wrap; gap: 4px 18px; justify-content: flex-end; text-align: right; }
+.money div { display: grid; }
+.money .k { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.money .v { font-weight: 600; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.quoted { font-size: 0.8rem; color: var(--muted); }
+.legs { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--line); }
+.leg { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.leg:last-child { border-bottom: 0; }
+.leg-btn { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); display: grid; place-items: center; font-size: 0.95rem; font-weight: 700; line-height: 1; padding: 0; }
+.leg-btn[data-r="won"] { background: var(--win-wash); border-color: var(--win); color: var(--win); }
+.leg-btn[data-r="lost"] { background: var(--loss-wash); border-color: var(--loss); color: var(--loss); }
+.leg-btn[data-r="push"] { background: var(--push-wash); border-color: var(--push); color: var(--push); }
+.leg-btn:disabled { cursor: default; opacity: 0.7; }
+.leg-pick { min-width: 0; display: grid; }
+.leg-pick .p { font-weight: 500; overflow-wrap: anywhere; }
+.leg-pick .t { font-size: 0.78rem; color: var(--muted); }
+.leg[data-r="lost"] .leg-pick .p { text-decoration: line-through; text-decoration-color: var(--loss); }
+.leg-odds { font-family: var(--font-mono); font-size: 0.85rem; color: var(--ink-2); }
+.live-line { font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; font-variant-numeric: tabular-nums; }
+.live-line .sc { font-weight: 600; color: var(--ink); }
+.live-line .ck { color: var(--muted); }
+.live-line .dt[data-now="ahead"] { color: var(--win); }
+.live-line .dt[data-now="behind"] { color: var(--loss); }
+.live-line .dt[data-now="level"] { color: var(--ink-2); }
+.badge { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 4px; padding: 0 5px; line-height: 1.5; }
+.badge.live { background: var(--loss-wash); color: var(--loss); }
+.badge.final { background: var(--push-wash); color: var(--push); }
+.live-note { font-size: 0.85rem; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.meta-line { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.82rem; color: var(--ink-2); }
+.note { font-size: 0.82rem; color: var(--muted); overflow-wrap: anywhere; }
+.stub { position: relative; border-top: 2px dashed var(--line); padding: 10px 16px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--surface); border-radius: 0 0 12px 12px; }
+.stub::before, .stub::after { content: ""; position: absolute; top: -9px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); }
+.stub::before { left: -9px; clip-path: inset(0 0 0 50%); }
+.stub::after { right: -9px; clip-path: inset(0 50% 0 0); }
+.result-text { font-weight: 600; font-variant-numeric: tabular-nums; margin-right: auto; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 5px 11px; font-size: 0.82rem; font-weight: 600; color: var(--ink); }
+.btn:hover { background: var(--surface-2); }
+.btn.win { color: var(--win); } .btn.loss { color: var(--loss); }
+.btn.danger { color: var(--loss); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.08); background: var(--accent); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.cash-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; width: 100%; }
+.cash-row input { width: 8em; }
+
+/* Form */
+.add { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.add > summary { list-style: none; cursor: pointer; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.add > summary::-webkit-details-marker { display: none; }
+.add > summary .plus { font-family: var(--font-display); font-size: 1.6rem; line-height: 1; color: var(--accent); }
+.add[open] > summary .plus { transform: rotate(45deg); }
+form { padding: 0 16px 16px; display: grid; gap: 14px; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 12px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label, .legend { font-size: 0.78rem; font-weight: 600; color: var(--ink-2); }
+.field .hint { font-size: 0.74rem; color: var(--muted); }
+input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 7px 9px; }
+textarea { min-height: 3.2em; resize: vertical; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; }
+.leg-rows { display: grid; gap: 8px; }
+.leg-row { display: grid; grid-template-columns: minmax(0, 1fr) 6.5em auto; gap: 8px; }
+.form-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.form-msg { font-size: 0.85rem; }
+.form-msg.err { color: var(--loss); } .form-msg.ok { color: var(--win); }
+
+.rg { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+
+@media (max-width: 620px) {
+  h1 { font-size: 2.1rem; }
+  .hero .big { font-size: 2.8rem; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .books { grid-template-columns: minmax(0, 1fr); }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .odds { font-size: 2rem; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .add > summary .plus { transition: transform 0.15s ease; }
+}
+</style>
+
+<main class="wrap">
+  <header class="head">
+    <p class="eyebrow">DraftKings + FanDuel · started with $200</p>
+    <h1>Bet Slip Tracker</h1>
+    <p id="live-note" class="live-note" hidden></p>
+    <p id="db-note" class="notice" hidden></p>
+  </header>
+
+  <section class="board" aria-labelledby="board-title">
+    <div class="hero">
+      <div>
+        <p class="eyebrow" id="board-title">Net profit · settled bets</p>
+        <p class="big" id="s-net">$0.00</p>
+      </div>
+      <p class="muted" id="s-net-sub">No settled bets yet</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="eyebrow">Record</span><span class="v" id="s-record">0–0</span><span class="s" id="s-record-sub">won – lost</span></div>
+      <div class="stat"><span class="eyebrow">Return on stake</span><span class="v" id="s-roi">—</span><span class="s" id="s-roi-sub">of settled stakes</span></div>
+      <div class="stat"><span class="eyebrow">In play</span><span class="v" id="s-open">$0.00</span><span class="s" id="s-open-sub">no open bets</span></div>
+      <div class="stat"><span class="eyebrow">Expected profit</span><span class="v" id="s-exp">—</span><span class="s" id="s-exp-sub">at fair odds</span></div>
+    </div>
+    <p class="foot-note">Expected profit is what a bet earns on average at fair odds (the bookmaker's cut removed). Compare it with your actual results: over a few dozen bets the gap is mostly luck.</p>
+  </section>
+
+  <section class="section" aria-labelledby="books-title">
+    <h2 id="books-title" class="eyebrow" style="font-size:0.75rem;font-family:var(--font-body)">Estimated balance by book</h2>
+    <div class="books" id="books"></div>
+  </section>
+
+  <section class="chart-card" aria-labelledby="chart-title">
+    <div class="section-head">
+      <h2 id="chart-title">Running total</h2>
+      <span class="muted" style="font-size:0.8rem">Profit after each settled bet</span>
+    </div>
+    <div class="chart-box" id="chart-box"></div>
+    <details class="table-view" id="table-view" hidden>
+      <summary>Show as table</summary>
+      <div class="table-scroll"><table id="run-table"></table></div>
+    </details>
+  </section>
+
+  <section class="section" aria-labelledby="open-title">
+    <div class="section-head"><h2 id="open-title">Open bets</h2><span class="muted" style="font-size:0.8rem">Tap a leg's circle to mark it won, lost or push</span></div>
+    <div class="slips" id="open-list"><p class="empty">Loading your bets…</p></div>
+  </section>
+
+  <section class="section" aria-labelledby="settled-title">
+    <div class="section-head"><h2 id="settled-title">Settled</h2></div>
+    <div class="slips" id="settled-list"><p class="empty">Settled bets will appear here.</p></div>
+  </section>
+
+  <details class="add" id="add-box">
+    <summary><h2>Add a bet</h2><span class="plus" aria-hidden="true">+</span></summary>
+    <form id="add-form" novalidate>
+      <div class="grid">
+        <div class="field"><label for="f-date">Game date</label><input type="date" id="f-date" required></div>
+        <div class="field"><label for="f-sport">Sport</label><input type="text" id="f-sport" list="sports" value="NCAAF"></div>
+        <div class="field"><label for="f-tier">Label</label><input type="text" id="f-tier" list="tiers" placeholder="Safe, Medium, Reach…"></div>
+        <div class="field"><label for="f-book">Book</label><select id="f-book"><option>DraftKings</option><option>FanDuel</option></select></div>
+        <div class="field"><label for="f-type">Type</label><select id="f-type"><option>Parlay</option><option>Single</option><option>Same-game parlay</option></select></div>
+        <div class="field"><label for="f-stake">Stake ($)</label><input type="number" id="f-stake" min="0" step="0.01" inputmode="decimal" placeholder="10.00"></div>
+        <div class="field"><label for="f-odds">Odds (American)</label><input type="text" id="f-odds" inputmode="text" placeholder="+109"></div>
+        <div class="field"><label for="f-return">Total return ($)</label><input type="number" id="f-return" min="0" step="0.01" inputmode="decimal"><span class="hint">Fills in from stake and odds; edit to match your slip</span></div>
+        <div class="field"><label for="f-prob">Fair chance (%)</label><input type="number" id="f-prob" min="0" max="100" step="0.1" inputmode="decimal" placeholder="optional"><span class="hint">From the analysis, if you have it</span></div>
+      </div>
+      <div class="grid">
+        <div class="field" style="grid-column: span 1"><span class="legend">Boost</span><label class="check" for="f-boost"><input type="checkbox" id="f-boost"> Used a boost</label></div>
+        <div class="field"><label for="f-quoted">Odds before boost</label><input type="text" id="f-quoted" placeholder="optional, e.g. -137"></div>
+      </div>
+      <div class="field">
+        <span class="legend">Legs</span>
+        <div class="leg-rows" id="leg-rows"></div>
+        <button type="button" class="btn" id="add-leg" style="justify-self:start">Add leg</button>
+      </div>
+      <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" placeholder="optional"></textarea></div>
+      <div class="form-actions">
+        <button type="submit" class="btn primary" id="f-save">Save bet</button>
+        <span class="form-msg" id="f-msg" role="status"></span>
+      </div>
+    </form>
+  </details>
+
+  <p class="rg">21+. Bet only what you can afford to lose. Gambling problem? Call 1-800-MY-RESET (1-800-697-3738) or 1-800-522-4700, or text 800GAM.</p>
+
+  <datalist id="sports"><option value="NCAAF"><option value="NFL"><option value="WNBA"><option value="NBA"><option value="NCAAB"><option value="MLB"><option value="NHL"></datalist>
+  <datalist id="tiers"><option value="Safe"><option value="Medium"><option value="Reach"><option value="Single"></datalist>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var BOOKS = ["DraftKings", "FanDuel"];
+  var DEFAULT_START = { DraftKings: 100, FanDuel: 100 };
+  var SETTLED = { won: 1, lost: 1, push: 1, void: 1, cashout: 1 };
+  var STATUS_LABEL = { open: "● Open", won: "✓ Won", lost: "✕ Lost", push: "= Push", void: "= Void", cashout: "$ Cashed out" };
+  var LEG_NEXT = { pending: "won", won: "lost", lost: "push", push: "pending" };
+  var LEG_ICON = { pending: "", won: "✓", lost: "✕", push: "=" };
+  var LEG_WORD = { pending: "pending", won: "won", lost: "lost", push: "push" };
+
+  var state = { db: null, bets: [], settings: null, loaded: false, writable: true, confirmDelete: null, cashOpen: {} };
+
+  // ---------- helpers ----------
+  function $(id) { return document.getElementById(id); }
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === "text") el.textContent = attrs[k];
+      else if (k === "class") el.className = attrs[k];
+      else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] !== null && attrs[k] !== undefined && attrs[k] !== false) el.setAttribute(k, attrs[k] === true ? "" : attrs[k]);
+    }
+    for (var i = 2; i < arguments.length; i++) {
+      var c = arguments[i];
+      if (c === null || c === undefined || c === false) continue;
+      el.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    }
+    return el;
+  }
+  function num(x) { var n = Number(x); return isFinite(n) ? n : 0; }
+  function parseAmerican(s) {
+    if (s === null || s === undefined) return null;
+    s = String(s).trim().replace(/−/g, "-");
+    if (!/^[+-]?\d+(\.\d+)?$/.test(s)) return null;
+    var n = Number(s);
+    return Math.abs(n) >= 100 ? n : null;
+  }
+  function decimalFromAmerican(a) { a = Number(a); return a > 0 ? 1 + a / 100 : 1 + 100 / Math.abs(a); }
+  function fmtOdds(a) {
+    if (a === null || a === undefined || a === "" || !isFinite(Number(a))) return "—";
+    a = Math.round(Number(a));
+    return a > 0 ? "+" + a : "−" + Math.abs(a);
+  }
+  function money(x) { return "$" + Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function signed(x) {
+    var r = Math.round(x * 100) / 100;
+    if (r === 0) return "$0.00";
+    return (r > 0 ? "+" : "−") + money(r);
+  }
+  function pct(x, digits) { return (x * 100).toFixed(digits === undefined ? 1 : digits) + "%"; }
+  function signClass(x) { var r = Math.round(x * 100); return r > 0 ? "pos" : r < 0 ? "neg" : ""; }
+  function fmtDate(d) {
+    if (!d) return "";
+    var dt = new Date(d.length === 10 ? d + "T12:00:00" : d);
+    if (isNaN(dt)) return d;
+    return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  }
+  function fmtKick(iso) {
+    if (!iso) return "";
+    var dt = new Date(iso);
+    if (isNaN(dt)) return "";
+    return dt.toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" });
+  }
+  function todayLocal() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function floorCents(x) { return Math.floor(x * 100 + 1e-6) / 100; }
+  function profitOf(b) { return num(b.returned) - num(b.stake); }
+  function expectedOf(b) {
+    var p = Number(b.fairProb);
+    if (!(p > 0 && p <= 1)) return null;
+    return p * num(b.toReturn) - num(b.stake);
+  }
+  function settledAt(b) { return b.settledAt || b.eventDate || b.placedAt || ""; }
+
+  // ---------- data ----------
+  function startFor(book) {
+    var s = state.settings && state.settings.startingBankroll;
+    if (s && isFinite(Number(s[book]))) return Number(s[book]);
+    return DEFAULT_START[book] || 0;
+  }
+
+  function deriveFromLegs(bet, legs) {
+    if (!legs.length) return { status: bet.status };
+    if (legs.some(function (l) { return l.result === "lost"; })) return { status: "lost", returned: 0 };
+    if (legs.every(function (l) { return l.result === "won"; })) return { status: "won", returned: num(bet.toReturn) };
+    if (legs.every(function (l) { return l.result && l.result !== "pending"; })) {
+      if (legs.every(function (l) { return l.result === "push"; })) return { status: "push", returned: num(bet.stake) };
+      return { status: "open", needsReturn: true };
+    }
+    return { status: "open" };
+  }
+
+  function write(id, patch) {
+    if (!state.db) return Promise.reject({ message: "Saving isn't available here." });
+    return state.db.collection("bets").doc(id).update(patch).catch(function (e) {
+      if (e && e.code === "invalid_argument") { state.writable = false; showNote("You can view this tracker but not change it."); render(); }
+      else showNote("Couldn't save that change. Try again in a moment.");
+      throw e;
+    });
+  }
+
+  function cycleLeg(bet, idx) {
+    var legs = (bet.legs || []).map(function (l) { return Object.assign({}, l); });
+    var cur = legs[idx].result || "pending";
+    legs[idx].result = LEG_NEXT[cur] || "won";
+    var patch = { legs: legs };
+    if (bet.status !== "cashout" && bet.status !== "void") {
+      var d = deriveFromLegs(bet, legs);
+      patch.status = d.status;
+      if (d.status === "open") { patch.returned = null; patch.settledAt = null; }
+      else { patch.returned = d.returned; patch.settledAt = bet.settledAt && bet.status === d.status ? bet.settledAt : new Date().toISOString(); }
+      if (d.needsReturn) state.cashOpen[bet.id] = "push";
+    }
+    write(bet.id, patch);
+  }
+
+  function settle(bet, status, returned) {
+    var patch = { status: status };
+    if (status === "open") { patch.returned = null; patch.settledAt = null; }
+    else { patch.returned = Math.round(num(returned) * 100) / 100; patch.settledAt = new Date().toISOString(); }
+    delete state.cashOpen[bet.id];
+    write(bet.id, patch);
+  }
+
+  function removeBet(bet) {
+    if (!state.db) return;
+    state.db.collection("bets").doc(bet.id).delete().catch(function () { showNote("Couldn't delete that bet. Try again in a moment."); });
+    state.confirmDelete = null;
+  }
+
+  function showNote(msg) { var n = $("db-note"); n.textContent = msg; n.hidden = !msg; }
+
+  // ---------- render: summary ----------
+  function renderSummary() {
+    var settled = state.bets.filter(function (b) { return SETTLED[b.status]; });
+    var open = state.bets.filter(function (b) { return !SETTLED[b.status]; });
+    var staked = settled.reduce(function (a, b) { return a + num(b.stake); }, 0);
+    var net = settled.reduce(function (a, b) { return a + profitOf(b); }, 0);
+    var w = settled.filter(function (b) { return b.status === "won" || (b.status === "cashout" && profitOf(b) > 0); }).length;
+    var l = settled.filter(function (b) { return b.status === "lost" || (b.status === "cashout" && profitOf(b) <= 0); }).length;
+    var p = settled.filter(function (b) { return b.status === "push" || b.status === "void"; }).length;
+
+    var netEl = $("s-net");
+    netEl.textContent = signed(net);
+    netEl.className = "big " + signClass(net);
+    $("s-net-sub").textContent = settled.length ? settled.length + " settled · " + money(staked) + " staked" : "No settled bets yet";
+
+    $("s-record").textContent = w + "–" + l + (p ? "–" + p : "");
+    $("s-record-sub").textContent = p ? "won – lost – push" : "won – lost";
+
+    var roi = $("s-roi");
+    roi.textContent = staked > 0 ? (net >= 0 ? "+" : "−") + pct(Math.abs(net) / staked) : "—";
+    roi.className = "v " + (staked > 0 ? signClass(net) : "");
+
+    var openStake = open.reduce(function (a, b) { return a + num(b.stake); }, 0);
+    var openRet = open.reduce(function (a, b) { return a + num(b.toReturn); }, 0);
+    $("s-open").textContent = money(openStake);
+    $("s-open-sub").textContent = open.length ? open.length + " open · could return " + money(openRet) : "no open bets";
+
+    var expSettled = 0, expOpen = 0, nExp = 0;
+    state.bets.forEach(function (b) {
+      var e = expectedOf(b);
+      if (e === null) return;
+      nExp++;
+      if (SETTLED[b.status]) expSettled += e; else expOpen += e;
+    });
+    var expEl = $("s-exp");
+    if (!nExp) { expEl.textContent = "—"; expEl.className = "v"; $("s-exp-sub").textContent = "add a fair chance to see this"; }
+    else if (settled.length) {
+      expEl.textContent = signed(expSettled); expEl.className = "v " + signClass(expSettled);
+      $("s-exp-sub").textContent = "vs " + signed(net) + " actual" + (open.length ? " · open " + signed(expOpen) : "");
+    } else {
+      expEl.textContent = signed(expOpen); expEl.className = "v " + signClass(expOpen);
+      $("s-exp-sub").textContent = "on open bets, at fair odds";
+    }
+  }
+
+  // ---------- render: books ----------
+  function renderBooks() {
+    var box = $("books");
+    box.textContent = "";
+    BOOKS.forEach(function (book) {
+      var bets = state.bets.filter(function (b) { return b.book === book; });
+      var net = bets.filter(function (b) { return SETTLED[b.status]; }).reduce(function (a, b) { return a + profitOf(b); }, 0);
+      var inPlay = bets.filter(function (b) { return !SETTLED[b.status]; }).reduce(function (a, b) { return a + num(b.stake); }, 0);
+      var start = startFor(book);
+      var bal = start + net - inPlay;
+      var editing = state.editBook === book;
+      var editor = null;
+      if (editing) {
+        var inp = h("input", { type: "number", id: "start-" + book, min: "0", step: "0.01", value: String(start), "aria-label": "Starting balance for " + book });
+        editor = h("div", { class: "inline-edit" }, inp,
+          h("button", { class: "btn", type: "button", text: "Save", onclick: function () { saveStart(book, inp.value); } }),
+          h("button", { class: "btn", type: "button", text: "Cancel", onclick: function () { state.editBook = null; render(); } }));
+      }
+      box.appendChild(h("div", { class: "book" },
+        h("div", { class: "book-top" }, h("span", { class: "book-name", text: book }), h("span", { class: "book-bal", text: money(bal) })),
+        h("dl", null,
+          h("dt", { text: "Started with" }), h("dd", { text: money(start) }),
+          h("dt", { text: "Settled profit" }), h("dd", { class: signClass(net), text: signed(net) }),
+          h("dt", { text: "In play" }), h("dd", { text: money(inPlay) })),
+        editor || (state.db && state.writable ? h("button", { class: "linkish", type: "button", text: "Change starting balance", onclick: function () { state.editBook = book; render(); } }) : null)));
+    });
+  }
+
+  function saveStart(book, value) {
+    var v = Number(value);
+    if (!(v >= 0)) return;
+    var next = {};
+    BOOKS.forEach(function (b) { next[b] = startFor(b); });
+    next[book] = Math.round(v * 100) / 100;
+    state.editBook = null;
+    if (!state.db) return;
+    state.db.doc("meta/settings").set(Object.assign({}, state.settings || {}, { startingBankroll: next })).catch(function () { showNote("Couldn't save the starting balance."); });
+  }
+
+  // ---------- render: chart ----------
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function s(tag, attrs) {
+    var el = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+  function niceStep(range, count) {
+    var raw = range / count, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p;
+  }
+
+  function renderChart() {
+    var box = $("chart-box");
+    box.textContent = "";
+    var settled = state.bets.filter(function (b) { return SETTLED[b.status]; })
+      .sort(function (a, b) { return settledAt(a) < settledAt(b) ? -1 : settledAt(a) > settledAt(b) ? 1 : 0; });
+    var tv = $("table-view");
+    if (!settled.length) {
+      box.appendChild(h("p", { class: "empty", text: "Your running total appears here after your first bet settles." }));
+      tv.hidden = true;
+      return;
+    }
+    var pts = [{ i: 0, y: 0, label: "Start", sub: "", d: 0 }];
+    var run = 0;
+    settled.forEach(function (b, k) {
+      run += profitOf(b);
+      pts.push({ i: k + 1, y: Math.round(run * 100) / 100, d: profitOf(b),
+        label: (b.tier || b.type || "Bet") + " · " + (b.book || ""),
+        sub: fmtDate(b.eventDate) + " · " + (STATUS_LABEL[b.status] || b.status).replace(/^[^ ]+ /, "") });
+    });
+
+    var W = Math.max(280, box.clientWidth || 600), H = 220;
+    var padL = 56, padR = 64, padT = 14, padB = 26;
+    var ys = pts.map(function (p) { return p.y; });
+    var lo = Math.min(0, Math.min.apply(null, ys)), hi = Math.max(0, Math.max.apply(null, ys));
+    if (hi - lo < 1) { hi += 1; lo -= 1; }
+    var step = niceStep(hi - lo, 4);
+    lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+    var n = pts.length - 1;
+    function X(i) { return padL + (n ? (i / n) : 0.5) * (W - padL - padR); }
+    function Y(v) { return padT + (hi - v) / (hi - lo) * (H - padT - padB); }
+
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + H, role: "img", tabindex: "0", "aria-label": "Running profit after each settled bet. Now " + signed(run) + "." });
+    for (var v = lo; v <= hi + step / 2; v += step) {
+      svg.appendChild(s("line", { x1: padL, x2: W - padR, y1: Y(v), y2: Y(v), stroke: "var(--line)", "stroke-width": Math.abs(v) < 1e-9 ? 1.5 : 1 }));
+      var t = s("text", { x: padL - 8, y: Y(v) + 4, "text-anchor": "end" });
+      t.textContent = signed(v).replace(".00", "");
+      svg.appendChild(t);
+    }
+    var tickEvery = Math.max(1, Math.ceil(n / 6));
+    pts.forEach(function (p) {
+      if (p.i !== 0 && p.i !== n && p.i % tickEvery) return;
+      var t = s("text", { x: X(p.i), y: H - 6, "text-anchor": p.i === 0 ? "start" : p.i === n ? "end" : "middle" });
+      t.textContent = p.i === 0 ? "Start" : "Bet " + p.i;
+      svg.appendChild(t);
+    });
+    var d = pts.map(function (p, k) { return (k ? "L" : "M") + X(p.i).toFixed(1) + " " + Y(p.y).toFixed(1); }).join(" ");
+    var area = d + " L" + X(n).toFixed(1) + " " + Y(0).toFixed(1) + " L" + X(0).toFixed(1) + " " + Y(0).toFixed(1) + " Z";
+    svg.appendChild(s("path", { d: area, fill: "var(--accent)", "fill-opacity": "0.10", stroke: "none" }));
+    svg.appendChild(s("path", { d: d, fill: "none", stroke: "var(--accent)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    var last = pts[n];
+    svg.appendChild(s("circle", { cx: X(n), cy: Y(last.y), r: 5, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2 }));
+    var endLabel = s("text", { x: X(n) + 9, y: Y(last.y) + 4, "text-anchor": "start", style: "fill: var(--ink); font-weight: 600" });
+    endLabel.textContent = signed(last.y);
+    svg.appendChild(endLabel);
+
+    var cross = s("line", { x1: 0, x2: 0, y1: padT, y2: H - padB, stroke: "var(--muted)", "stroke-width": 1, visibility: "hidden" });
+    var hot = s("circle", { r: 5, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" });
+    svg.appendChild(cross); svg.appendChild(hot);
+    var hit = s("rect", { x: padL, y: padT, width: W - padL - padR, height: H - padT - padB, fill: "transparent" });
+    svg.appendChild(hit);
+    box.appendChild(svg);
+
+    var tip = h("div", { class: "tip", hidden: true, role: "status" });
+    box.appendChild(tip);
+    var cur = n;
+    function show(i) {
+      cur = Math.max(0, Math.min(n, i));
+      var p = pts[cur], px = X(cur), py = Y(p.y);
+      cross.setAttribute("x1", px); cross.setAttribute("x2", px); cross.setAttribute("visibility", "visible");
+      hot.setAttribute("cx", px); hot.setAttribute("cy", py); hot.setAttribute("visibility", "visible");
+      tip.textContent = "";
+      tip.appendChild(h("strong", { class: signClass(p.y), text: signed(p.y) }));
+      tip.appendChild(h("span", { text: p.i === 0 ? "Starting point" : "After bet " + p.i + ": " + p.label }));
+      if (p.i) tip.appendChild(h("div", { class: "muted", text: p.sub + " · " + signed(p.d) }));
+      tip.hidden = false;
+      var scale = box.clientWidth / W;
+      var left = px * scale + 12, tw = tip.offsetWidth;
+      if (left + tw > box.clientWidth) left = px * scale - tw - 12;
+      tip.style.left = Math.max(0, left) + "px";
+      tip.style.top = Math.max(0, py * (svg.getBoundingClientRect().height / H) - 20) + "px";
+    }
+    function hide() { cross.setAttribute("visibility", "hidden"); hot.setAttribute("visibility", "hidden"); tip.hidden = true; }
+    svg.addEventListener("pointermove", function (e) {
+      var r = svg.getBoundingClientRect();
+      var x = (e.clientX - r.left) * (W / r.width);
+      var i = n ? Math.round((x - padL) / (W - padL - padR) * n) : 0;
+      show(i);
+    });
+    svg.addEventListener("pointerleave", hide);
+    svg.addEventListener("focus", function () { show(cur); });
+    svg.addEventListener("blur", hide);
+    svg.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") { show(cur - 1); e.preventDefault(); }
+      if (e.key === "ArrowRight") { show(cur + 1); e.preventDefault(); }
+    });
+
+    var tbl = $("run-table");
+    tbl.textContent = "";
+    tbl.appendChild(h("thead", null, h("tr", null, h("th", { text: "#" }), h("th", { text: "Bet" }), h("th", { text: "Date" }), h("th", { text: "Result" }), h("th", { class: "r", text: "Profit" }), h("th", { class: "r", text: "Running" }))));
+    var tb = h("tbody");
+    pts.slice(1).forEach(function (p) {
+      var b = settled[p.i - 1];
+      tb.appendChild(h("tr", null, h("td", { text: String(p.i) }), h("td", { text: p.label }), h("td", { text: fmtDate(b.eventDate) }),
+        h("td", { text: (STATUS_LABEL[b.status] || b.status) }), h("td", { class: "r " + signClass(p.d), text: signed(p.d) }), h("td", { class: "r", text: signed(p.y) })));
+    });
+    tbl.appendChild(tb);
+    tv.hidden = false;
+  }
+
+  // ---------- render: slips ----------
+  function slip(bet) {
+    var isOpen = !SETTLED[bet.status];
+    var canWrite = !!state.db && state.writable;
+    var legs = bet.legs || [];
+    var top = h("div", { class: "slip-top" },
+      bet.tier ? h("span", { class: "chip tier", text: bet.tier }) : null,
+      h("span", { class: "chip", text: bet.book || "Book" }),
+      h("span", { class: "chip", text: (bet.type || "Bet") + (legs.length > 1 ? " · " + legs.length + " legs" : "") }),
+      bet.boosted ? h("span", { class: "chip boost", text: "Boosted" }) : null,
+      h("span", { class: "when", text: (bet.sport ? bet.sport + " · " : "") + fmtDate(bet.eventDate) }));
+
+    var oddsBlock = h("div", null,
+      h("div", { class: "odds", text: fmtOdds(bet.odds) }),
+      bet.quotedOdds !== undefined && bet.quotedOdds !== null && bet.quotedOdds !== "" && Number(bet.quotedOdds) !== Number(bet.odds)
+        ? h("div", { class: "quoted", text: (bet.boosted ? "Boosted from " : "Quoted at ") + fmtOdds(bet.quotedOdds) }) : null);
+    var money2 = h("div", { class: "money" },
+      h("div", null, h("span", { class: "k", text: "Stake" }), h("span", { class: "v", text: money(num(bet.stake)) })),
+      h("div", null, h("span", { class: "k", text: isOpen ? "To return" : "Returned" }), h("span", { class: "v", text: money(isOpen ? num(bet.toReturn) : num(bet.returned)) })),
+      h("div", null, h("span", { class: "k", text: isOpen ? "Profit if it hits" : "Profit" }),
+        h("span", { class: "v " + (isOpen ? "" : signClass(profitOf(bet))), text: isOpen ? signed(num(bet.toReturn) - num(bet.stake)) : signed(profitOf(bet)) })));
+
+    var legList = null;
+    if (legs.length) {
+      legList = h("ol", { class: "legs" });
+      legs.forEach(function (l, i) {
+        var r = l.result || "pending";
+        var btn = h("button", { class: "leg-btn", type: "button", "data-r": r, disabled: !canWrite,
+          "aria-label": "Leg " + (i + 1) + ": " + LEG_WORD[r] + ". Tap to change.", text: LEG_ICON[r],
+          onclick: function () { cycleLeg(bet, i); } });
+        var lv = l.live && l.live.state && l.live.state !== "pre" ? l.live : null;
+        var extra = [lv ? "" : fmtKick(l.kickoff), (l.fairProb ? pct(Number(l.fairProb), 0) + " fair chance" : "")].filter(Boolean).join(" · ");
+        var liveLine = null;
+        if (lv) {
+          var isFinal = lv.state === "final";
+          var mark = lv.now === "ahead" ? "▲ " : lv.now === "behind" ? "▼ " : lv.now === "level" ? "= " : "";
+          liveLine = h("span", { class: "live-line" },
+            h("span", { class: "badge " + (isFinal ? "final" : "live"), text: isFinal ? "Final" : "Live" }),
+            h("span", { class: "sc", text: lv.score || "" }),
+            !isFinal && lv.clock ? h("span", { class: "ck", text: lv.clock }) : null,
+            lv.detail ? h("span", { class: "dt", "data-now": lv.now || "", text: mark + lv.detail }) : null);
+        }
+        legList.appendChild(h("li", { class: "leg", "data-r": r },
+          btn,
+          h("div", { class: "leg-pick" }, h("span", { class: "p", text: l.pick || "Leg " + (i + 1) }), liveLine, extra ? h("span", { class: "t", text: extra }) : null),
+          h("span", { class: "leg-odds", text: l.price !== undefined && l.price !== null && l.price !== "" ? fmtOdds(l.price) : "" })));
+      });
+    }
+
+    var exp = expectedOf(bet);
+    var meta = h("div", { class: "meta-line" },
+      bet.fairProb ? h("span", { text: "Fair chance " + pct(Number(bet.fairProb)) }) : null,
+      exp !== null ? h("span", { text: "Expected profit " + signed(exp) }) : null);
+
+    var body = h("div", { class: "slip-body" }, top, h("div", { class: "slip-line" }, oddsBlock, money2), legList,
+      meta.childNodes.length ? meta : null, bet.notes ? h("p", { class: "note", text: bet.notes }) : null);
+
+    // stub
+    var stub = h("div", { class: "stub" });
+    stub.appendChild(h("span", { class: "status", "data-s": bet.status || "open", text: STATUS_LABEL[bet.status] || STATUS_LABEL.open }));
+    if (!isOpen) stub.appendChild(h("span", { class: "result-text " + signClass(profitOf(bet)), text: signed(profitOf(bet)) }));
+    else stub.appendChild(h("span", { class: "result-text" }));
+    if (canWrite) {
+      if (isOpen) {
+        stub.appendChild(h("button", { class: "btn win", type: "button", text: "Won", onclick: function () { settle(bet, "won", bet.toReturn); } }));
+        stub.appendChild(h("button", { class: "btn loss", type: "button", text: "Lost", onclick: function () { settle(bet, "lost", 0); } }));
+        stub.appendChild(h("button", { class: "btn", type: "button", text: "Push / void", onclick: function () { settle(bet, "push", bet.stake); } }));
+        stub.appendChild(h("button", { class: "btn", type: "button", text: "Cash out…", onclick: function () { state.cashOpen[bet.id] = state.cashOpen[bet.id] ? null : "cash"; render(); } }));
+      } else {
+        stub.appendChild(h("button", { class: "btn", type: "button", text: "Reopen", onclick: function () { settle(bet, "open"); } }));
+      }
+      var confirming = state.confirmDelete === bet.id;
+      stub.appendChild(h("button", { class: "btn danger", type: "button", text: confirming ? "Tap again to delete" : "Delete",
+        onclick: function () {
+          if (state.confirmDelete === bet.id) { removeBet(bet); return; }
+          state.confirmDelete = bet.id; render();
+          setTimeout(function () { if (state.confirmDelete === bet.id) { state.confirmDelete = null; render(); } }, 4000);
+        } }));
+      if (isOpen && (state.cashOpen[bet.id] || bet.needsReturn)) {
+        var isPush = state.cashOpen[bet.id] === "push" || !!bet.needsReturn;
+        var ci = h("input", { type: "number", id: "cash-" + bet.id, min: "0", step: "0.01", inputmode: "decimal", placeholder: "0.00", "aria-label": "Amount the book paid back" });
+        stub.appendChild(h("div", { class: "cash-row" },
+          h("label", { for: "cash-" + bet.id, class: "muted", style: "font-size:0.82rem", text: isPush ? "A leg pushed. What did the book pay back?" : "What did the book pay back?" }),
+          ci,
+          h("button", { class: "btn primary", type: "button", text: "Save", onclick: function () {
+            var v = Number(ci.value);
+            if (!(v >= 0) || ci.value === "") { ci.focus(); return; }
+            settle(bet, isPush ? (v > num(bet.stake) ? "won" : v === num(bet.stake) ? "push" : "lost") : "cashout", v);
+          } })));
+      }
+    }
+    return h("article", { class: "slip", "data-s": bet.status || "open" }, body, stub);
+  }
+
+  function renderLists() {
+    var open = state.bets.filter(function (b) { return !SETTLED[b.status]; })
+      .sort(function (a, b) { return (a.eventDate || "") < (b.eventDate || "") ? 1 : (a.eventDate || "") > (b.eventDate || "") ? -1 : (a.order || 0) - (b.order || 0); });
+    var done = state.bets.filter(function (b) { return SETTLED[b.status]; })
+      .sort(function (a, b) { return settledAt(a) < settledAt(b) ? 1 : settledAt(a) > settledAt(b) ? -1 : 0; });
+    var ol = $("open-list"), sl = $("settled-list");
+    ol.textContent = ""; sl.textContent = "";
+    if (!state.loaded) { ol.appendChild(h("p", { class: "empty", text: state.db === false ? "Your bets are saved on claude.ai. Open this tracker there, signed in, to see them." : "Loading your bets…" })); }
+    else if (!open.length) ol.appendChild(h("p", { class: "empty", text: "No open bets. Add your next ticket with the form below." }));
+    open.forEach(function (b) { ol.appendChild(slip(b)); });
+    if (!done.length) sl.appendChild(h("p", { class: "empty", text: "Settled bets will appear here." }));
+    done.forEach(function (b) { sl.appendChild(slip(b)); });
+  }
+
+  function ago(iso) {
+    var t = Date.parse(iso);
+    if (isNaN(t)) return "";
+    var m = Math.round((Date.now() - t) / 60000);
+    return m < 1 ? "just now" : m < 60 ? m + " min ago" : new Date(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  }
+  function renderLiveNote() {
+    var note = $("live-note");
+    var tracked = state.bets.filter(function (b) { return b.liveUpdatedAt && !SETTLED[b.status]; });
+    var latest = state.bets.reduce(function (a, b) { return b.liveUpdatedAt && b.liveUpdatedAt > a ? b.liveUpdatedAt : a; }, "");
+    if (!latest) { note.hidden = true; return; }
+    note.textContent = "";
+    note.appendChild(h("span", { class: "badge " + (tracked.length ? "live" : "final"), text: tracked.length ? "Live" : "Done" }));
+    note.appendChild(h("span", { text: tracked.length ? "Scores update automatically during games" : "All tracked bets are settled" }));
+    note.appendChild(h("span", { class: "muted", "data-ago": latest, text: "· updated " + ago(latest) }));
+    note.hidden = false;
+  }
+  setInterval(function () {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ago]"), function (el) { el.textContent = "· updated " + ago(el.getAttribute("data-ago")); });
+  }, 30000);
+
+  function render() {
+    renderLiveNote();
+    renderSummary();
+    renderBooks();
+    renderChart();
+    renderLists();
+    $("f-save").disabled = !state.db || !state.writable;
+  }
+
+  // ---------- form ----------
+  var returnTouched = false;
+  function legRow(pick, price) {
+    var row = h("div", { class: "leg-row" },
+      h("input", { type: "text", class: "lr-pick", placeholder: "Pick, e.g. Miami ML at Clemson", "aria-label": "Leg pick", value: pick || "" }),
+      h("input", { type: "text", class: "lr-price", placeholder: "Odds", "aria-label": "Leg odds", value: price || "" }),
+      h("button", { class: "btn", type: "button", text: "Remove", "aria-label": "Remove this leg", onclick: function () { row.remove(); } }));
+    $("leg-rows").appendChild(row);
+    return row;
+  }
+  function autoReturn() {
+    if (returnTouched) return;
+    var st = Number($("f-stake").value), od = parseAmerican($("f-odds").value);
+    $("f-return").value = st > 0 && od !== null ? floorCents(st * decimalFromAmerican(od)).toFixed(2) : "";
+  }
+  function resetForm() {
+    $("add-form").reset();
+    $("f-date").value = todayLocal();
+    $("f-sport").value = "NCAAF";
+    $("leg-rows").textContent = "";
+    legRow(); legRow();
+    returnTouched = false;
+  }
+  $("f-stake").addEventListener("input", autoReturn);
+  $("f-odds").addEventListener("input", autoReturn);
+  $("f-return").addEventListener("input", function () { returnTouched = $("f-return").value !== ""; });
+  $("add-leg").addEventListener("click", function () { legRow().querySelector("input").focus(); });
+  $("add-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var msg = $("f-msg");
+    msg.className = "form-msg";
+    var stake = Number($("f-stake").value), odds = parseAmerican($("f-odds").value), ret = Number($("f-return").value);
+    if (!(stake > 0)) { msg.className = "form-msg err"; msg.textContent = "Enter the stake in dollars, e.g. 10.00."; $("f-stake").focus(); return; }
+    if (odds === null) { msg.className = "form-msg err"; msg.textContent = "Enter American odds, like +109 or -137."; $("f-odds").focus(); return; }
+    if (!(ret > 0)) ret = floorCents(stake * decimalFromAmerican(odds));
+    var prob = $("f-prob").value === "" ? null : Number($("f-prob").value) / 100;
+    if (prob !== null && !(prob > 0 && prob <= 1)) { msg.className = "form-msg err"; msg.textContent = "Fair chance should be between 0 and 100."; $("f-prob").focus(); return; }
+    var legs = [];
+    Array.prototype.forEach.call(document.querySelectorAll("#leg-rows .leg-row"), function (r) {
+      var pick = r.querySelector(".lr-pick").value.trim(), pr = r.querySelector(".lr-price").value.trim();
+      if (pick) legs.push({ pick: pick, price: parseAmerican(pr), result: "pending" });
+    });
+    var quoted = parseAmerican($("f-quoted").value);
+    var doc = {
+      placedAt: new Date().toISOString(), eventDate: $("f-date").value || todayLocal(), sport: $("f-sport").value.trim() || "",
+      tier: $("f-tier").value.trim(), book: $("f-book").value, type: $("f-type").value,
+      stake: Math.round(stake * 100) / 100, odds: odds, toReturn: Math.round(ret * 100) / 100,
+      boosted: $("f-boost").checked, quotedOdds: quoted, fairProb: prob,
+      status: "open", returned: null, settledAt: null, legs: legs, notes: $("f-notes").value.trim(), order: Date.now()
+    };
+    if (!state.db) { msg.className = "form-msg err"; msg.textContent = "Saving isn't available in this view."; return; }
+    $("f-save").disabled = true;
+    state.db.collection("bets").add(doc).then(function () {
+      msg.className = "form-msg ok"; msg.textContent = "Saved. It's in Open bets above.";
+      resetForm();
+    }).catch(function (err) {
+      msg.className = "form-msg err";
+      msg.textContent = err && err.code === "quota_exceeded" ? "The tracker is full. Delete some old bets, then try again." : "Couldn't save the bet. Try again in a moment.";
+    }).then(function () { $("f-save").disabled = !state.db || !state.writable; });
+  });
+  resetForm();
+
+  // ---------- boot ----------
+  render();
+  var resizeTimer = null;
+  if (window.ResizeObserver) new ResizeObserver(function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderChart, 120); }).observe($("chart-box"));
+
+  var use = window.claude && window.claude.use ? window.claude.use("db") : Promise.resolve(null);
+  Promise.resolve(use).then(function (db) {
+    if (!db) {
+      state.db = false; state.loaded = false;
+      showNote("Saving and syncing need claude.ai. Open this tracker there, signed in, to see and update your bets.");
+      render();
+      return;
+    }
+    state.db = db;
+    db.doc("meta/settings").onSnapshot(function (snap) {
+      state.settings = snap.exists ? snap.data() : null;
+      render();
+    }, function () {});
+    db.collection("bets").onSnapshot(function (snap) {
+      state.bets = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+      state.loaded = true;
+      render();
+    }, function (e) {
+      showNote(e && e.code === "revoked" ? "This tracker is no longer available in this view." : "Lost the connection to your saved bets. Reload the page to reconnect.");
+    });
+  }).catch(function () { state.db = false; render(); });
+})();
+</script>

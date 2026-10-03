@@ -364,6 +364,56 @@ def cmd_fetch(a):
     raise SystemExit(f"unknown source {a.source}")
 
 
+def cmd_live(a):
+    """Grade tracker bets from live ESPN scores; optionally write one patch file per bet."""
+    import datetime as _dt
+    import os
+
+    from . import live
+    from .fetch import espn
+
+    bets = {}
+    if os.path.isdir(a.bets):
+        for fn in sorted(os.listdir(a.bets)):
+            if fn.endswith(".json"):
+                with open(os.path.join(a.bets, fn)) as f:
+                    bets[fn[:-5]] = json.load(f)
+    else:
+        with open(a.bets) as f:
+            raw = json.load(f)
+        bets = raw if isinstance(raw, dict) else {b["id"]: b for b in raw}
+    boards = sorted({(lg["spec"].get("league", "ncaaf"), lg["spec"].get("date") or b.get("eventDate"))
+                     for b in bets.values() for lg in b.get("legs") or [] if lg.get("spec")})
+    games, errors = {}, []
+    for league, date in boards:
+        url = espn.scoreboard_url(league, date) + ("&groups=80&limit=300" if league == "ncaaf" else "")
+        try:
+            js, _ = espn.fetch_json(url)
+        except Exception as exc:  # keep grading the boards that did load
+            errors.append(f"{league} {date}: {exc}")
+            continue
+        for g in espn.parse_scoreboard(js):
+            games[str(g["event_id"])] = g
+    now = a.now or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    out = {"fetched_at": now, "games": len(games), "errors": errors, "bets": []}
+    for doc_id, bet in bets.items():
+        patch = live.apply_live(bet, games, now)
+        if patch is None:
+            continue
+        changed = patch.pop("changed")
+        legs = [f"{lg.get('pick')}: {(lg.get('live') or {}).get('state', '?')}"
+                f"{' · ' + lg['live']['detail'] if (lg.get('live') or {}).get('detail') else ''}"
+                f" [{lg.get('result') or 'pending'}]" for lg in patch["legs"]]
+        out["bets"].append({"doc_id": doc_id, "changed": changed, "status": patch.get("status", bet.get("status")),
+                            "decided": sum(1 for lg in patch["legs"] if (lg.get("result") or "pending") != "pending"),
+                            "legs": legs})
+        if a.out:
+            os.makedirs(a.out, exist_ok=True)
+            with open(os.path.join(a.out, f"{doc_id}.json"), "w") as f:
+                json.dump(patch, f, indent=1)
+    return out
+
+
 # ---------------------------------------------------------------------------
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="betlab", description="Deterministic betting math. All output is JSON.")
@@ -561,6 +611,12 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--best", action="store_true")
     s.add_argument("--min-ev", type=float, default=0.02)
     s.set_defaults(fn=cmd_fetch)
+
+    s = sub.add_parser("live", help="grade bet-tracker legs from live ESPN scores")
+    s.add_argument("--bets", required=True, help="directory of <doc_id>.json bets, or a JSON list/dict of bets")
+    s.add_argument("--out", help="write one patch file per bet here (for the tracker database)")
+    s.add_argument("--now", help="timestamp to stamp updates with (ISO, UTC); default now")
+    s.set_defaults(fn=cmd_live)
     return p
 
 
