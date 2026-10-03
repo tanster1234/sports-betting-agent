@@ -143,6 +143,7 @@ evals/                 evals.json, README, results
 examples/              real outputs: game analysis, series, props, backtest, performance review
 scripts/               refresh_wnba_data.py
 tests/                 pytest suite + real/structured fixtures
+tracker/               bet-slip tracker page (claude.ai artifact source; data stays out of git)
 ```
 
 ## Limitations (read these)
