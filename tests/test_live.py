@@ -38,6 +38,9 @@ def test_first_half_spread_settles_at_halftime_and_ignores_later_quarters():
     half = game(status="Halftime")
     half["status_name"] = "STATUS_HALFTIME"
     assert grade_leg(spec, half)["result"] == "won"
+    end_of_2nd = game(status="End of 2nd")              # what ESPN shows first, still in progress
+    assert grade_leg(spec, end_of_2nd)["result"] == "won" and grade_leg(spec, end_of_2nd)["state"] == "final"
+    assert grade_leg(spec, game(status="0:33 - 2nd"))["result"] is None
     third = game(period=3, status="2:00 - 3rd", away=("ORST", [14, 7, 0]), home=("CSU", [7, 7, 21]))
     res = grade_leg(spec, third)
     assert res["result"] == "won" and res["score"] == "1H ORST 21 – CSU 14"

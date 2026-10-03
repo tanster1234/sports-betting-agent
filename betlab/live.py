@@ -37,7 +37,10 @@ def _period_over(game: dict, period: str) -> bool:
     if game.get("state") == "post" or game.get("completed"):
         return True
     if period == "1h":
-        return (game.get("period") or 0) >= 3 or game.get("status_name") == "STATUS_HALFTIME"
+        status = str(game.get("status") or "").lower()
+        # ESPN shows "End of 2nd" (still STATUS_IN_PROGRESS) before it switches to halftime
+        return ((game.get("period") or 0) >= 3 or game.get("status_name") == "STATUS_HALFTIME"
+                or status.startswith("end of 2nd") or status.startswith("halftime"))
     return False
 
 
