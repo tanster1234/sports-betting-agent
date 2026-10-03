@@ -26,7 +26,7 @@ If you cannot run Python, say the figure is approximate.
 | 3+ way market (futures, soccer 1X2) | `python3 -m betlab odds 2.10 3.40 3.60 --method shin` |
 | EV, edge, Kelly, fair price for my prob | `python3 -m betlab ev --prob 0.56 --price -110` |
 | Same, blended with the market | `python3 -m betlab ev --prob 0.56 --price -110 --other -110 --model-weight 0.35` |
-| Worst price that still clears 2% EV | `python3 -m betlab ev --prob 0.56 --price -110 --min-ev 0.02` |
+| Worst price that still clears 2% EV | `python3 -m betlab ev --prob 0.56 --price -110 --other -110 --model-weight 0.35 --min-ev 0.02` (threshold uses the blended prob when a weight is given; `worst_acceptable_basis` says which) |
 | Spread → win prob / fair ML | `python3 -m betlab price convert --spread -6.5 --sigma 12.5` |
 | Win prob → spread | `python3 -m betlab price spread-from-prob --prob 0.7 --sigma 12.5` |
 | Price a whole game from my view | `python3 -m betlab price game --mu 5 --sigma 12.5 --total-mu 172 --total-sigma 18 --spread -4.5 --spread-prices -110 -110 --total-line 170.5 --total-prices -110 -110 --ml -190 160` |

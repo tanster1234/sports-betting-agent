@@ -193,6 +193,19 @@ def test_cli_odds_ev_kelly(capsys):
     assert out["stake"] == pytest.approx(27.5)
 
 
+def test_cli_ev_threshold_uses_blended_prob(capsys):
+    # raw model 46.75% vs a market that devigs to 43.1%: the "don't bet below" price must come
+    # from the blended probability, or it would point at prices where blended EV is negative
+    code, out = run_cli(capsys, "ev", "--prob", "0.4675", "--price", "120", "--other", "-150",
+                        "--model-weight", "0.5", "--min-ev", "0.04")
+    assert code == 0 and out["worst_acceptable_basis"] == "blended"
+    assert out["blended_prob"] == pytest.approx(0.4492, abs=1e-4)
+    assert out["worst_acceptable_decimal"] == pytest.approx(1.04 / out["blended_prob"], rel=1e-3)
+    assert out["worst_acceptable_american"] == "+132"
+    code, out = run_cli(capsys, "ev", "--prob", "0.55", "--price", "-110", "--min-ev", "0.02")
+    assert out["worst_acceptable_basis"] == "prob" and out["worst_acceptable_american"] == "-117"
+
+
 def test_cli_wnba_price_and_series(capsys):
     code, out = run_cli(capsys, "wnba", "price", "--home", "ATL", "--away", "NY", "--date", "2026-10-04", "--playoff",
                         "--spread", "-3.5", "--spread-prices", "-112", "-108", "--total-line", "168.5",

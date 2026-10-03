@@ -254,15 +254,18 @@ def prob_edge(prob: Number, decimal: Number) -> float:
     return float(prob) - breakeven_prob(decimal)
 
 
-def min_price_for_ev(prob: Number, min_ev: Number = 0.0) -> float:
+def min_price_for_ev(prob: Number, min_ev: Number = 0.0, push_prob: Number = 0.0) -> float:
     """Worst decimal price you can accept and still have EV >= min_ev.
 
-    d >= (1 + min_ev) / p.  Useful as a "don't bet below" number.
+    EV = p*d - 1 + p_push, so d >= (1 + min_ev - p_push) / p.  Useful as a "don't bet
+    below" number.
     """
-    p = float(prob)
+    p, pp = float(prob), float(push_prob)
     if not 0 < p < 1:
         raise OddsError(f"probability must be in (0,1), got {prob}")
-    return (1.0 + float(min_ev)) / p
+    if not 0 <= pp < 1 or p + pp > 1 + 1e-12:
+        raise OddsError(f"invalid probabilities win={prob} push={push_prob}")
+    return (1.0 + float(min_ev) - pp) / p
 
 
 def no_vig_line(decimals: Sequence[Number], method: str = "multiplicative") -> List[float]:

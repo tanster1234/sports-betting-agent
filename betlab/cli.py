@@ -85,8 +85,14 @@ def cmd_ev(a):
             out["blended_prob"] = _r(pb)
             out["blended_ev_pct"] = _r(100 * O.ev(pb, d, push), 3)
     if a.min_ev is not None:
-        out["worst_acceptable_decimal"] = _r(O.min_price_for_ev(p, a.min_ev))
-        out["worst_acceptable_american"] = O.format_american(O.decimal_to_american(O.min_price_for_ev(p, a.min_ev)))
+        # Threshold on the probability actually used for the decision: the blended one when a
+        # model weight is given (holding the market's fair probability fixed, i.e. shopping
+        # other books), else the raw one.
+        base = out.get("blended_prob", p)
+        wd = O.min_price_for_ev(base, a.min_ev, push)
+        out["worst_acceptable_basis"] = "blended" if "blended_prob" in out else "prob"
+        out["worst_acceptable_decimal"] = _r(wd)
+        out["worst_acceptable_american"] = O.format_american(O.decimal_to_american(wd))
     return out
 
 

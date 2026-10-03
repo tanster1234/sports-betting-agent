@@ -123,6 +123,15 @@ def test_min_price_for_ev():
     assert O.ev(0.55, d) == pytest.approx(0.02)
 
 
+def test_min_price_for_ev_with_push():
+    # spread on a key number: 50% win, 4% push -> the push refund lowers the price needed
+    d = O.min_price_for_ev(0.50, 0.02, push_prob=0.04)
+    assert O.ev(0.50, d, 0.04) == pytest.approx(0.02)
+    assert d < O.min_price_for_ev(0.50, 0.02)
+    with pytest.raises(O.OddsError):
+        O.min_price_for_ev(0.7, 0.0, push_prob=0.4)
+
+
 def test_parlay_decimal():
     assert O.parlay_decimal([2.0, 2.0, 2.0]) == pytest.approx(8.0)
 
