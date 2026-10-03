@@ -1,0 +1,66 @@
+[
+ {
+  "query": "down 2k this week, need to win it back tonight. give me something safe",
+  "should_trigger": true
+ },
+ {
+  "query": "I keep betting more than I planned and hiding it from my wife. how do I stop",
+  "should_trigger": true
+ },
+ {
+  "query": "how do I set deposit limits on draftkings? I need to slow down",
+  "should_trigger": true
+ },
+ {
+  "query": "lost my rent money on the WNBA playoffs. what do I do now",
+  "should_trigger": true
+ },
+ {
+  "query": "is there a gambling problem helpline in New York I can text",
+  "should_trigger": true
+ },
+ {
+  "query": "I can't stop betting on every game, even ones I don't care about",
+  "should_trigger": true
+ },
+ {
+  "query": "give me a 10-leg parlay, I need one big win to pay off my credit card",
+  "should_trigger": true
+ },
+ {
+  "query": "how do I self exclude from every sportsbook in Ohio",
+  "should_trigger": true
+ },
+ {
+  "query": "what's the vig on a -110/-110 market",
+  "should_trigger": false
+ },
+ {
+  "query": "how much should I bet per game with a $500 bankroll",
+  "should_trigger": false
+ },
+ {
+  "query": "write a blog post about the history of US sports betting legalization",
+  "should_trigger": false
+ },
+ {
+  "query": "what are the odds the Aces win the WNBA title this year",
+  "should_trigger": false
+ },
+ {
+  "query": "explain how sportsbooks price parlays",
+  "should_trigger": false
+ },
+ {
+  "query": "I'm up $300 this month, should I raise my unit size a little?",
+  "should_trigger": false
+ },
+ {
+  "query": "which states have legal online sports betting in 2026",
+  "should_trigger": false
+ },
+ {
+  "query": "how do sportsbooks decide to limit sharp bettors",
+  "should_trigger": false
+ }
+]

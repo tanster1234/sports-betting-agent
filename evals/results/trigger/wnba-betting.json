@@ -1,0 +1,183 @@
+{
+ "skill_name": "wnba-betting",
+ "description": "WNBA betting analysis backed by a model calibrated on 3,318 real games (2013-2026) and every 2026 DraftKings opening and closing line. Use for anything WNBA: spreads, totals, moneylines, 1H/1Q lines, team totals, player props, playoff series and Finals prices, futures/awards, injury impact (A'ja Wilson, Caitlin Clark, Napheesa Collier, Paige Bueckers...), back-to-backs, expansion teams (Valkyries, Tempo, Fire), the 2026 scoring surge, or \"what's the play tonight\" on a WNBA slate. Also use when someone applies NBA rules of thumb (home court, rest, star value) to the WNBA, or asks how WNBA markets differ \u2014 the numbers do not transfer.",
+ "method": "isolated project per call",
+ "results": [
+  {
+   "query": "Liberty at Dream tomorrow, ATL -4.5 and total 168.5. playoffs game 1. which side do you like and why",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "is A'ja Wilson over 26.5 points worth a bet vs the valkyries in the semis",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "how do I price a best-of-5 wnba series when one team has home court? book has ATL -200",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "how much is home court worth in the WNBA these days? my NBA buddy says 3 points",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "WNBA totals have gone over a ton this year with all the fouls, is there a betting angle there",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "napheesa collier is back on a minutes restriction - how much should the lynx spread move",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "Valkyries vs Wings game 3, does GS cover -6.5 at home?",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "toronto tempo and portland fire in year one - are wnba expansion teams good fades against the spread",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "Fever vs Sky, how do I turn a full game -5.5 into a fair 1st half line for the wnba",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "caitlin clark assists 8.5 over +105, she averages 8.3. bet or no bet",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "What's the Lakers spread tonight vs the Celtics and should I bet it?",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "Who won the 2025 WNBA MVP and what were her stats?",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "write a python function that converts american odds to decimal odds",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "explain how the WNBA commissioner's cup works and what the prize money is",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "I want to build a pari-mutuel betting app for my office WNBA pool in Next.js and Supabase",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "I lost my rent money gambling this week and I can't stop, what do I do",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "UConn women's march madness bracket picks for the final four",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "summarize caitlin clark's college and pro career for a school report",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "make me a calendar of all the 2026 WNBA Finals game dates and tip times",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "NFL week 5 six-point teaser legs through 3 and 7 - which games?",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  }
+ ],
+ "summary": {
+  "total": 20,
+  "passed": 20,
+  "recall_queries": "10/10",
+  "specificity_queries": "10/10",
+  "positive_trigger_rate": 1.0,
+  "negative_trigger_rate": 0.0,
+  "runs_per_query": 3,
+  "seconds": 43
+ },
+ "shared_directory_run": {
+  "note": "first attempt with skill-creator run_eval.py defaults (10 workers writing command files into one .claude/commands/); invalid because each claude -p call saw ~10 identical copies of the skill and a call to another worker's copy scored as a miss",
+  "passed": 10,
+  "total": 20,
+  "positive_trigger_rate": 0.1
+ }
+}

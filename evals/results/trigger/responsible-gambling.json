@@ -1,0 +1,151 @@
+{
+ "skill_name": "responsible-gambling",
+ "description": "Recognize and respond to problem-gambling warning signs during any betting conversation \u2014 chasing losses (\"I need to win it back\"), betting rent/bill money or borrowed money, escalating stakes, hiding bets, betting to escape stress, distress or anger after a bad beat, wanting to stop but not being able to \u2014 with a calm, supportive response, practical limits, and current US help resources (1-800-MY-RESET, 1-800-522-4700, text 800GAM, state lines, self-exclusion). Use whenever these signs appear, even mid-analysis, and when users ask about limits, cooling off, self-exclusion or getting help.",
+ "method": "isolated project per call",
+ "results": [
+  {
+   "query": "down 2k this week, need to win it back tonight. give me something safe",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "I keep betting more than I planned and hiding it from my wife. how do I stop",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "how do I set deposit limits on draftkings? I need to slow down",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "lost my rent money on the WNBA playoffs. what do I do now",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "is there a gambling problem helpline in New York I can text",
+   "should_trigger": true,
+   "trigger_rate": 0.6666666666666666,
+   "triggers": 2,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "I can't stop betting on every game, even ones I don't care about",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "give me a 10-leg parlay, I need one big win to pay off my credit card",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "how do I self exclude from every sportsbook in Ohio",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "what's the vig on a -110/-110 market",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "how much should I bet per game with a $500 bankroll",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "write a blog post about the history of US sports betting legalization",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "what are the odds the Aces win the WNBA title this year",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "explain how sportsbooks price parlays",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "I'm up $300 this month, should I raise my unit size a little?",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "which states have legal online sports betting in 2026",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "how do sportsbooks decide to limit sharp bettors",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  }
+ ],
+ "summary": {
+  "total": 16,
+  "passed": 16,
+  "recall_queries": "8/8",
+  "specificity_queries": "8/8",
+  "positive_trigger_rate": 0.958,
+  "negative_trigger_rate": 0.0,
+  "runs_per_query": 3,
+  "seconds": 43
+ },
+ "shared_directory_run": {
+  "note": "first attempt with skill-creator run_eval.py defaults (10 workers writing command files into one .claude/commands/); invalid because each claude -p call saw ~10 identical copies of the skill and a call to another worker's copy scored as a miss",
+  "passed": 8,
+  "total": 16,
+  "positive_trigger_rate": 0.125
+ }
+}

@@ -1,0 +1,183 @@
+{
+ "skill_name": "betting-analyst",
+ "description": "The end-to-end sports-betting analysis pipeline. Use whenever someone asks \"what should I bet today?\", wants picks, a betting card, a slate scan, \"should I bet X?\", \"is this line good?\", \"is this a lock?\", or any evaluation/recommendation of wagers (spreads, totals, moneylines, props, parlays, futures) in the WNBA, NBA, NFL, MLB, NHL or college. It pulls current data, prices every candidate with the betlab scripts (never mental math), blends model and market, red-teams each pick, sizes stakes with fractional Kelly and hard caps, outputs a standard bet card with ledger commands \u2014 and outputs PASS when there is no edge. Use it even for casual \"give me a pick\" requests.",
+ "method": "isolated project per call",
+ "results": [
+  {
+   "query": "what should I bet today? I have DraftKings and FanDuel, bankroll is $1500",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "give me your best bets for tonight's NBA slate",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "is Bills -3 at -110 a good bet this sunday?",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "lock of the day?? need one play for tonight",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "should I take the Dodgers moneyline at -150 tonight with Yamamoto pitching",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "scan tonight's NHL games for value - I can only bet at BetMGM",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "build me a betting card for sunday: WNBA semifinal plus the MLB playoff games",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "is there any edge on Ohio State -24.5 this weekend or should I stay away",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "Ravens Bengals over 51.5 - bet it or pass?",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "thinking about putting $200 on the Chiefs moneyline, thoughts?",
+   "should_trigger": true,
+   "trigger_rate": 1.0,
+   "triggers": 3,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "convert +250 to an implied probability",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "how does a teaser work in football betting? explain like I'm new",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "what's the history of the point spread in american sports betting",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "write me a postgres schema for a sportsbook's bets and wallets tables",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "I went 19-11 on my bets this month at -110, am I actually good or lucky?",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "how do I self-exclude from FanDuel in New Jersey",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "explain the kelly criterion with a worked example",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "who won the world series in 2025",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "make me a google sheet template to track my bets",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  },
+  {
+   "query": "what are the best sportsbook sign-up promos this week",
+   "should_trigger": false,
+   "trigger_rate": 0.0,
+   "triggers": 0,
+   "runs": 3,
+   "pass": true
+  }
+ ],
+ "summary": {
+  "total": 20,
+  "passed": 20,
+  "recall_queries": "10/10",
+  "specificity_queries": "10/10",
+  "positive_trigger_rate": 1.0,
+  "negative_trigger_rate": 0.0,
+  "runs_per_query": 3,
+  "seconds": 37
+ },
+ "shared_directory_run": {
+  "note": "first attempt with skill-creator run_eval.py defaults (10 workers writing command files into one .claude/commands/); invalid because each claude -p call saw ~10 identical copies of the skill and a call to another worker's copy scored as a miss",
+  "passed": 10,
+  "total": 20,
+  "positive_trigger_rate": 0.1
+ }
+}

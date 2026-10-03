@@ -1,0 +1,82 @@
+[
+ {
+  "query": "what should I bet today? I have DraftKings and FanDuel, bankroll is $1500",
+  "should_trigger": true
+ },
+ {
+  "query": "give me your best bets for tonight's NBA slate",
+  "should_trigger": true
+ },
+ {
+  "query": "is Bills -3 at -110 a good bet this sunday?",
+  "should_trigger": true
+ },
+ {
+  "query": "lock of the day?? need one play for tonight",
+  "should_trigger": true
+ },
+ {
+  "query": "should I take the Dodgers moneyline at -150 tonight with Yamamoto pitching",
+  "should_trigger": true
+ },
+ {
+  "query": "scan tonight's NHL games for value - I can only bet at BetMGM",
+  "should_trigger": true
+ },
+ {
+  "query": "build me a betting card for sunday: WNBA semifinal plus the MLB playoff games",
+  "should_trigger": true
+ },
+ {
+  "query": "is there any edge on Ohio State -24.5 this weekend or should I stay away",
+  "should_trigger": true
+ },
+ {
+  "query": "Ravens Bengals over 51.5 - bet it or pass?",
+  "should_trigger": true
+ },
+ {
+  "query": "thinking about putting $200 on the Chiefs moneyline, thoughts?",
+  "should_trigger": true
+ },
+ {
+  "query": "convert +250 to an implied probability",
+  "should_trigger": false
+ },
+ {
+  "query": "how does a teaser work in football betting? explain like I'm new",
+  "should_trigger": false
+ },
+ {
+  "query": "what's the history of the point spread in american sports betting",
+  "should_trigger": false
+ },
+ {
+  "query": "write me a postgres schema for a sportsbook's bets and wallets tables",
+  "should_trigger": false
+ },
+ {
+  "query": "I went 19-11 on my bets this month at -110, am I actually good or lucky?",
+  "should_trigger": false
+ },
+ {
+  "query": "how do I self-exclude from FanDuel in New Jersey",
+  "should_trigger": false
+ },
+ {
+  "query": "explain the kelly criterion with a worked example",
+  "should_trigger": false
+ },
+ {
+  "query": "who won the world series in 2025",
+  "should_trigger": false
+ },
+ {
+  "query": "make me a google sheet template to track my bets",
+  "should_trigger": false
+ },
+ {
+  "query": "what are the best sportsbook sign-up promos this week",
+  "should_trigger": false
+ }
+]
