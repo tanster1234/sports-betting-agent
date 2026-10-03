@@ -92,11 +92,21 @@ caps: per bet 3%, per game 4% (spread + ML + total on one game share this), per 
 
 ## Step 6 — Output
 
-Use the templates in `references/output-format.md`: daily card, single-game analysis, or the
-"no qualifying bets" card. Every bet shows: sport, game, market, selection, best book and price,
-fair price, blended probability, EV%, stake ($ and units), the information edge, the main risk,
-the "don't bet below" price (`ev --min-ev`), and the closing-line target. Always include the
-responsible-gambling footer and the ledger commands.
+Match the shape to the request (templates in `references/output-format.md`):
+- **One question** ("is this a bet?", "how much?", "any value?") → the *plain answer*: verdict
+  and stake in the first two lines, then the few numbers that decide it, why, what to check
+  before betting, and the bet-only-at price. Prose and at most one small table.
+- **Picks, a card, a slate, several bets** → a two-line plain summary, then the daily card or
+  single-game analysis block.
+
+Either way, every recommended bet carries: market, selection, best book and price, fair price,
+blended probability, EV%, stake ($ or % of bankroll), the information edge, the main risk, the
+"don't bet below" price (`ev --min-ev`) and the closing-line target. End with the ledger
+commands in one short block and the responsible-gambling footer.
+
+People read these answers, not auditors: the internal machinery (betlab, profile fields,
+ledger state, file paths) belongs in that closing block, not in the reasoning, and every
+term a casual bettor might not know gets a few plain words the first time it appears.
 
 ## Step 7 — Log
 

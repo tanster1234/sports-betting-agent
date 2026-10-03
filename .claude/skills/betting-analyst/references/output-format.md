@@ -1,13 +1,55 @@
 # Output formats
 
-Keep cards scannable and identical day to day so they are easy to log and audit. Numbers in
-every card come from `python3 -m betlab` output — copy them, don't retype them from memory.
+Numbers in every format come from `python3 -m betlab` output — copy them, don't retype them
+from memory. Pick the shape from the request: a single question gets the **plain answer**;
+picks, a card or a slate get a two-line plain summary followed by the **daily card** (cards stay
+identical day to day so they are easy to log and audit).
+
+## Writing rules (all formats)
+
+- First two lines: the verdict and the stake (or "no bet"), in words a casual bettor uses.
+- Define a term the first time it matters, in a few words: EV (average profit per $1 bet),
+  devig / no-vig (the price with the bookmaker's cut removed), CLV (beating the final price
+  before the game), Kelly (a staking formula; we use a quarter of it). Otherwise leave it out.
+- Keep internals out of the reasoning: no `betlab` function names, file paths, profile fields,
+  "the ledger is empty", or placeholder bankrolls. Commands live in the closing log block.
+- Advice, not house rules: "I'd keep any single bet under 3% of your bankroll ($60)", not "my
+  limits are 3%". If the bankroll is unknown, size in % and ask for it.
+- Every headline is literally true: "quarter Kelly says $121" (not "Kelly says $121"); when
+  model and market weights differ by market, say which weight produced which number.
+- Facts from notes or bundled data carry their source and date; leave out specifics you can't
+  source. One small table at most in a plain answer.
+
+## Plain answer (default for a single question)
+
+Example request: "[Player] threes 2.5, over +120 / under -150. She averages 2.6. Bet the over?"
+
+```
+**No bet at +120.** Her 2.6 average makes the over a 47% shot, but the market says 43%; blended,
+it's about 45%, just under the 45.5% that +120 needs to break even.
+
+Why
+- The book's price with its cut removed (no-vig) puts the over at 43.1%. A season average is
+  public, so it's already in that number; I weight our projection and the market 50/50 for props.
+- That leaves an expected loss of about 1 cent per $1 bet. Nothing to size.
+
+What would change it
+- News the line hasn't absorbed: a starter out, a minutes bump, a pace-up matchup.
+
+Bet only at: over +132 or better (that clears the +4% edge I require on props).
+
+Log it if you bet: python3 -m betlab ledger add ... (one block, at the end)
+
+21+. Gambling problem? Call 1-800-MY-RESET (1-800-697-3738) or 1-800-522-4700, or text 800GAM.
+```
+(Numbers from `prop --stat threes --mean 2.6 --line 2.5 --over 120 --under -150` and
+`ev --prob 0.4675 --price 120 --other -150 --model-weight 0.5 --min-ev 0.04`; regenerate yours.)
 
 ## Daily card
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DATE: Sat Oct 4, 2026 (ET)       BANKROLL: $1,000   UNIT (1%): $10
+DATE: Sun Oct 4, 2026 (ET)       BANKROLL: $1,000   UNIT (1%): $10
 EXPOSURE TODAY: $29 / $100 cap   DRAWDOWN FROM PEAK: 3.1%
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 BET 1 — WNBA · NY @ ATL (Semis G1, 3:00 PM ET)
@@ -68,11 +110,12 @@ report produces. Never headline "units won" without the CI.
 
 ## Required elements checklist
 
-- [ ] date, bankroll, unit, today's exposure, drawdown
+- [ ] verdict and stake in the first two lines, in plain words
 - [ ] best price + book + time for every bet; fair price; blended probability; EV%
-- [ ] stake in $ and units, with which cap (if any) bound
+- [ ] stake in $ (or % of bankroll if unknown), with which cap (if any) bound
 - [ ] information edge (one sentence) and main risk (one sentence)
 - [ ] don't-bet-below price and CLV target
 - [ ] passes with closest near-miss
-- [ ] ledger commands
+- [ ] cards only: date, bankroll, unit, today's exposure, drawdown
+- [ ] ledger commands in one closing block
 - [ ] responsible-gambling footer

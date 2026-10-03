@@ -18,6 +18,15 @@ adult user to act on — Claude never places bets.
   fall back to WebSearch/WebFetch and say so.
 - **Log and measure**: give ledger commands for every bet; judge skill by CLV with sample sizes
   and confidence intervals, not by short-run results.
+- **Write for the person asking, not for this repo.** Lead with the verdict and stake in plain
+  words; define a term the first time you need it ("EV, the average profit per $1 bet") or skip
+  it. Keep the machinery out of the reasoning — no module, function or file names, profile
+  fields or ledger state unless the user asked; commands go in one short block at the end.
+  Present caps as advice ("I'd keep any one bet under 3% of your bankroll"), not as rules the
+  user already has. If the bankroll is unknown, give stakes as % of bankroll and ask for it
+  rather than sizing off the example profile. Headlines must be literally true (quarter Kelly
+  is not "Kelly"). Attribute facts from bundled notes or data to their source and date, and
+  drop specifics you can't source.
 - **Protect the user**: honour stop-losses, never encourage chasing, and switch to the
   `responsible-gambling` skill at any sign of harm. 21+ / legal books only. No help with
   harassment of players, insider information, or evading limits/self-exclusion.
