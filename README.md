@@ -106,6 +106,7 @@ python3 -m betlab fetch value --league wnba --min-ev 0.02           # needs ODDS
 python3 -m betlab ledger add --sport WNBA --event "NY @ ATL" --market total --selection "Over 168.5" \
     --line 168.5 --price -110 --stake 10 --model-prob 0.544
 python3 -m betlab report --format md
+python3 -m betlab live --bets tracker-bets/ --out patches/          # grade tracker legs from live ESPN scores
 ```
 
 ## Testing — four layers
@@ -134,7 +135,7 @@ CI: `.github/workflows/tests.yml` (Python 3.9–3.13, ruff, pytest, CLI smoke te
 .claude/settings.json  allow-list for betlab / pytest commands
 CLAUDE.md              project rules for Claude
 betlab/                odds, kelly, distributions, markets, props, parlay, clv, series,
-                       ratings, wnba, lowscoring, ledger, report, backtest, profile, cli,
+                       ratings, wnba, lowscoring, ledger, report, backtest, profile, live, cli,
                        fetch/{espn, odds_api}
 config/                profile.example.json  (copy to profile.json — gitignored)
 data/wnba/             games.csv, lines_2026_draftkings.csv (+ README with provenance)

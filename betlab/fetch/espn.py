@@ -172,6 +172,7 @@ def _competitors(comp: dict) -> Dict[str, dict]:
         teams[c.get("homeAway")] = {
             "id": t.get("id"), "abbr": t.get("abbreviation"), "name": t.get("displayName"),
             "score": _num(c.get("score")), "winner": c.get("winner"),
+            "linescores": [_num(x.get("value")) for x in c.get("linescores") or [] if isinstance(x, dict)],
             "record": next((r.get("summary") for r in c.get("records", []) if r.get("name") in ("overall", "All Splits")), None)
             if c.get("records") else c.get("record"),
         }
@@ -188,6 +189,8 @@ def parse_scoreboard(js: dict) -> List[dict]:
         games.append({
             "event_id": ev.get("id"), "date": ev.get("date"), "name": ev.get("shortName") or ev.get("name"),
             "state": st.get("state"), "completed": st.get("completed"), "status": st.get("shortDetail") or st.get("description"),
+            "status_name": st.get("name"), "period": _dig(ev, "status", "period") or _dig(comp, "status", "period"),
+            "clock": _dig(ev, "status", "displayClock") or _dig(comp, "status", "displayClock"),
             "neutral": comp.get("neutralSite"), "venue": _dig(comp, "venue", "fullName"),
             "home": teams.get("home"), "away": teams.get("away"),
             "odds": [parse_odds_block(o) for o in odds],

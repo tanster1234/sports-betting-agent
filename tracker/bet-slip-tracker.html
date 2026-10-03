@@ -135,6 +135,16 @@ td.r, th.r { text-align: right; }
 .leg-pick .t { font-size: 0.78rem; color: var(--muted); }
 .leg[data-r="lost"] .leg-pick .p { text-decoration: line-through; text-decoration-color: var(--loss); }
 .leg-odds { font-family: var(--font-mono); font-size: 0.85rem; color: var(--ink-2); }
+.live-line { font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; font-variant-numeric: tabular-nums; }
+.live-line .sc { font-weight: 600; color: var(--ink); }
+.live-line .ck { color: var(--muted); }
+.live-line .dt[data-now="ahead"] { color: var(--win); }
+.live-line .dt[data-now="behind"] { color: var(--loss); }
+.live-line .dt[data-now="level"] { color: var(--ink-2); }
+.badge { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 4px; padding: 0 5px; line-height: 1.5; }
+.badge.live { background: var(--loss-wash); color: var(--loss); }
+.badge.final { background: var(--push-wash); color: var(--push); }
+.live-note { font-size: 0.85rem; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
 .meta-line { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.82rem; color: var(--ink-2); }
 .note { font-size: 0.82rem; color: var(--muted); overflow-wrap: anywhere; }
 .stub { position: relative; border-top: 2px dashed var(--line); padding: 10px 16px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--surface); border-radius: 0 0 12px 12px; }
@@ -191,6 +201,7 @@ textarea { min-height: 3.2em; resize: vertical; }
   <header class="head">
     <p class="eyebrow">DraftKings + FanDuel · started with $200</p>
     <h1>Bet Slip Tracker</h1>
+    <p id="live-note" class="live-note" hidden></p>
     <p id="db-note" class="notice" hidden></p>
   </header>
 
@@ -645,10 +656,21 @@ textarea { min-height: 3.2em; resize: vertical; }
         var btn = h("button", { class: "leg-btn", type: "button", "data-r": r, disabled: !canWrite,
           "aria-label": "Leg " + (i + 1) + ": " + LEG_WORD[r] + ". Tap to change.", text: LEG_ICON[r],
           onclick: function () { cycleLeg(bet, i); } });
-        var extra = [fmtKick(l.kickoff), (l.fairProb ? pct(Number(l.fairProb), 0) + " fair chance" : "")].filter(Boolean).join(" · ");
+        var lv = l.live && l.live.state && l.live.state !== "pre" ? l.live : null;
+        var extra = [lv ? "" : fmtKick(l.kickoff), (l.fairProb ? pct(Number(l.fairProb), 0) + " fair chance" : "")].filter(Boolean).join(" · ");
+        var liveLine = null;
+        if (lv) {
+          var isFinal = lv.state === "final";
+          var mark = lv.now === "ahead" ? "▲ " : lv.now === "behind" ? "▼ " : lv.now === "level" ? "= " : "";
+          liveLine = h("span", { class: "live-line" },
+            h("span", { class: "badge " + (isFinal ? "final" : "live"), text: isFinal ? "Final" : "Live" }),
+            h("span", { class: "sc", text: lv.score || "" }),
+            !isFinal && lv.clock ? h("span", { class: "ck", text: lv.clock }) : null,
+            lv.detail ? h("span", { class: "dt", "data-now": lv.now || "", text: mark + lv.detail }) : null);
+        }
         legList.appendChild(h("li", { class: "leg", "data-r": r },
           btn,
-          h("div", { class: "leg-pick" }, h("span", { class: "p", text: l.pick || "Leg " + (i + 1) }), extra ? h("span", { class: "t", text: extra }) : null),
+          h("div", { class: "leg-pick" }, h("span", { class: "p", text: l.pick || "Leg " + (i + 1) }), liveLine, extra ? h("span", { class: "t", text: extra }) : null),
           h("span", { class: "leg-odds", text: l.price !== undefined && l.price !== null && l.price !== "" ? fmtOdds(l.price) : "" })));
       });
     }
@@ -682,8 +704,8 @@ textarea { min-height: 3.2em; resize: vertical; }
           state.confirmDelete = bet.id; render();
           setTimeout(function () { if (state.confirmDelete === bet.id) { state.confirmDelete = null; render(); } }, 4000);
         } }));
-      if (isOpen && state.cashOpen[bet.id]) {
-        var isPush = state.cashOpen[bet.id] === "push";
+      if (isOpen && (state.cashOpen[bet.id] || bet.needsReturn)) {
+        var isPush = state.cashOpen[bet.id] === "push" || !!bet.needsReturn;
         var ci = h("input", { type: "number", id: "cash-" + bet.id, min: "0", step: "0.01", inputmode: "decimal", placeholder: "0.00", "aria-label": "Amount the book paid back" });
         stub.appendChild(h("div", { class: "cash-row" },
           h("label", { for: "cash-" + bet.id, class: "muted", style: "font-size:0.82rem", text: isPush ? "A leg pushed. What did the book pay back?" : "What did the book pay back?" }),
@@ -712,7 +734,29 @@ textarea { min-height: 3.2em; resize: vertical; }
     done.forEach(function (b) { sl.appendChild(slip(b)); });
   }
 
+  function ago(iso) {
+    var t = Date.parse(iso);
+    if (isNaN(t)) return "";
+    var m = Math.round((Date.now() - t) / 60000);
+    return m < 1 ? "just now" : m < 60 ? m + " min ago" : new Date(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  }
+  function renderLiveNote() {
+    var note = $("live-note");
+    var tracked = state.bets.filter(function (b) { return b.liveUpdatedAt && !SETTLED[b.status]; });
+    var latest = state.bets.reduce(function (a, b) { return b.liveUpdatedAt && b.liveUpdatedAt > a ? b.liveUpdatedAt : a; }, "");
+    if (!latest) { note.hidden = true; return; }
+    note.textContent = "";
+    note.appendChild(h("span", { class: "badge " + (tracked.length ? "live" : "final"), text: tracked.length ? "Live" : "Done" }));
+    note.appendChild(h("span", { text: tracked.length ? "Scores update automatically during games" : "All tracked bets are settled" }));
+    note.appendChild(h("span", { class: "muted", "data-ago": latest, text: "· updated " + ago(latest) }));
+    note.hidden = false;
+  }
+  setInterval(function () {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ago]"), function (el) { el.textContent = "· updated " + ago(el.getAttribute("data-ago")); });
+  }, 30000);
+
   function render() {
+    renderLiveNote();
     renderSummary();
     renderBooks();
     renderChart();
