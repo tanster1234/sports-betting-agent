@@ -1,0 +1,32 @@
+[
+  {
+    "id": "e1a2b3c4d5e6f708192a3b4c5d6e7f80",
+    "sport_key": "basketball_wnba",
+    "sport_title": "WNBA",
+    "commence_time": "2026-10-04T19:00:00Z",
+    "home_team": "Atlanta Dream",
+    "away_team": "New York Liberty",
+    "bookmakers": [
+      {"key": "draftkings", "title": "DraftKings", "last_update": "2026-10-04T15:00:00Z", "markets": [
+        {"key": "h2h", "last_update": "2026-10-04T15:00:00Z", "outcomes": [{"name": "Atlanta Dream", "price": -160}, {"name": "New York Liberty", "price": 134}]},
+        {"key": "spreads", "last_update": "2026-10-04T15:00:00Z", "outcomes": [{"name": "Atlanta Dream", "price": -112, "point": -3.5}, {"name": "New York Liberty", "price": -108, "point": 3.5}]},
+        {"key": "totals", "last_update": "2026-10-04T15:00:00Z", "outcomes": [{"name": "Over", "price": -110, "point": 168.5}, {"name": "Under", "price": -110, "point": 168.5}]}
+      ]},
+      {"key": "fanduel", "title": "FanDuel", "last_update": "2026-10-04T15:01:00Z", "markets": [
+        {"key": "h2h", "outcomes": [{"name": "Atlanta Dream", "price": -158}, {"name": "New York Liberty", "price": 132}]},
+        {"key": "spreads", "outcomes": [{"name": "Atlanta Dream", "price": -110, "point": -3.5}, {"name": "New York Liberty", "price": -110, "point": 3.5}]},
+        {"key": "totals", "outcomes": [{"name": "Over", "price": -108, "point": 168.5}, {"name": "Under", "price": -112, "point": 168.5}]}
+      ]},
+      {"key": "pinnacle", "title": "Pinnacle", "last_update": "2026-10-04T15:02:00Z", "markets": [
+        {"key": "h2h", "outcomes": [{"name": "Atlanta Dream", "price": -155}, {"name": "New York Liberty", "price": 140}]},
+        {"key": "spreads", "outcomes": [{"name": "Atlanta Dream", "price": -106, "point": -3.5}, {"name": "New York Liberty", "price": -104, "point": 3.5}]},
+        {"key": "totals", "outcomes": [{"name": "Over", "price": -105, "point": 168.5}, {"name": "Under", "price": -105, "point": 168.5}]}
+      ]},
+      {"key": "betmgm", "title": "BetMGM", "last_update": "2026-10-04T14:40:00Z", "markets": [
+        {"key": "h2h", "outcomes": [{"name": "Atlanta Dream", "price": -165}, {"name": "New York Liberty", "price": 155}]},
+        {"key": "spreads", "outcomes": [{"name": "Atlanta Dream", "price": -110, "point": -3.5}, {"name": "New York Liberty", "price": -110, "point": 3.5}]},
+        {"key": "totals", "outcomes": [{"name": "Over", "price": -110, "point": 168.5}, {"name": "Under", "price": -110, "point": 168.5}]}
+      ]}
+    ]
+  }
+]

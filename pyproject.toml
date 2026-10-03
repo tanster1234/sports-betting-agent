@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "betlab"
+version = "1.0.0"
+description = "Deterministic, tested sports-betting math and WNBA model used by the Claude Code skills in this repo"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff>=0.4"]
+data = ["pandas>=2", "pyarrow>=14"]
+
+[project.scripts]
+betlab = "betlab.cli:main"
+
+[tool.setuptools]
+packages = ["betlab", "betlab.fetch"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I"]
+ignore = ["E501", "B008", "B905", "E731", "E741"]

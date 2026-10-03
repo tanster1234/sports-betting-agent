@@ -1,0 +1,23 @@
+# personal configuration and betting history — never commit
+config/profile.json
+data/ledger/
+*.jsonl.bak
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+.venv/
+venv/
+
+# skill-eval scratch workspaces (summaries are committed under evals/results/)
+*-workspace/
+
+# editors / OS
+.DS_Store
+.idea/
+.vscode/

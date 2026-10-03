@@ -1,0 +1,73 @@
+{
+  "_fixture_note": "Constructed to mirror observed ESPN scoreboard payloads: event 1 uses the 2026 DraftKings odds schema (no homeTeamOdds.moneyLine; moneyline/pointSpread/total open+close strings), event 2 the 2024 ESPN BET schema (open/current blocks with american values).",
+  "leagues": [{"abbreviation": "WNBA"}],
+  "season": {"type": 3, "year": 2026},
+  "provider": {"id": "100", "name": "DraftKings"},
+  "events": [
+    {
+      "id": "401918030",
+      "date": "2026-10-04T19:00Z",
+      "name": "New York Liberty at Atlanta Dream",
+      "shortName": "NY @ ATL",
+      "status": {"type": {"id": "1", "name": "STATUS_SCHEDULED", "state": "pre", "completed": false, "description": "Scheduled", "shortDetail": "10/4 - 3:00 PM EDT"}},
+      "competitions": [
+        {
+          "id": "401918030",
+          "neutralSite": false,
+          "venue": {"fullName": "State Farm Arena"},
+          "notes": [{"headline": "Semifinals - Game 1"}],
+          "competitors": [
+            {"homeAway": "home", "score": "0", "team": {"id": "20", "abbreviation": "ATL", "displayName": "Atlanta Dream"}, "records": [{"name": "overall", "summary": "30-14"}]},
+            {"homeAway": "away", "score": "0", "team": {"id": "9", "abbreviation": "NY", "displayName": "New York Liberty"}, "records": [{"name": "overall", "summary": "26-18"}]}
+          ],
+          "odds": [
+            {
+              "provider": {"id": "100", "name": "DraftKings", "priority": 1},
+              "details": "ATL -3.5",
+              "overUnder": 168.5,
+              "spread": -3.5,
+              "awayTeamOdds": {"favorite": false, "underdog": true, "favoriteAtOpen": false},
+              "homeTeamOdds": {"favorite": true, "underdog": false, "favoriteAtOpen": true},
+              "moneyline": {"home": {"close": {"odds": "-160"}, "open": {"odds": "-150"}}, "away": {"close": {"odds": "+134"}, "open": {"odds": "+126"}}},
+              "pointSpread": {"home": {"close": {"line": "-3.5", "odds": "-112"}, "open": {"line": "-2.5", "odds": "-110"}}, "away": {"close": {"line": "+3.5", "odds": "-108"}, "open": {"line": "+2.5", "odds": "-110"}}},
+              "total": {"over": {"close": {"line": "o168.5", "odds": "-110"}, "open": {"line": "o166.5", "odds": "-110"}}, "under": {"close": {"line": "u168.5", "odds": "-110"}, "open": {"line": "u166.5", "odds": "-110"}}}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "401620999",
+      "date": "2024-08-15T23:00Z",
+      "name": "Seattle Storm at Indiana Fever",
+      "shortName": "SEA @ IND",
+      "status": {"type": {"id": "3", "name": "STATUS_FINAL", "state": "post", "completed": true, "description": "Final", "shortDetail": "Final"}},
+      "competitions": [
+        {
+          "id": "401620999",
+          "neutralSite": false,
+          "competitors": [
+            {"homeAway": "home", "score": "92", "winner": true, "team": {"id": "5", "abbreviation": "IND", "displayName": "Indiana Fever"}},
+            {"homeAway": "away", "score": "75", "winner": false, "team": {"id": "14", "abbreviation": "SEA", "displayName": "Seattle Storm"}}
+          ],
+          "odds": [
+            {
+              "provider": {"id": "58", "name": "ESPN BET"},
+              "details": "SEA -1.5",
+              "overUnder": 166.5,
+              "spread": 1.5,
+              "awayTeamOdds": {"favorite": true, "moneyLine": -125, "spreadOdds": -110.0,
+                                "open": {"moneyLine": {"value": 1.769, "american": "-130"}, "spreadOdds": {"american": "-110"}},
+                                "current": {"moneyLine": {"value": 1.8, "american": "-125"}, "spreadOdds": {"american": "-110"}}},
+              "homeTeamOdds": {"favorite": false, "moneyLine": 105, "spreadOdds": -110.0,
+                                "open": {"moneyLine": {"value": 2.1, "american": "+110"}, "spreadOdds": {"american": "-110"}, "pointSpread": {"american": "+2.5"}},
+                                "current": {"moneyLine": {"value": 2.05, "american": "+105"}, "spreadOdds": {"american": "-110"}}},
+              "open": {"over": {"value": 1.909, "american": "-110"}, "under": {"value": 1.909, "american": "-110"}, "total": {"value": 165.5, "alternateDisplayValue": "165.5"}},
+              "current": {"over": {"value": 1.87, "american": "-115"}, "under": {"value": 1.95, "american": "-105"}, "total": {"value": 166.5, "alternateDisplayValue": "166.5"}}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

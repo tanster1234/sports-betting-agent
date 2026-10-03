@@ -1,0 +1,37 @@
+{
+  "_fixture_note": "Constructed to mirror the ESPN injuries payload shape (teams -> injuries[]); one entry has no athlete.id so the parser must recover it from links.",
+  "injuries": [
+    {
+      "id": "17",
+      "displayName": "Las Vegas Aces",
+      "injuries": [
+        {
+          "id": "9001",
+          "status": "Day-To-Day",
+          "date": "2026-10-02T18:00Z",
+          "shortComment": "Wilson (ankle) is questionable for Game 1.",
+          "longComment": "Wilson tweaked her right ankle late in Game 3 and is listed questionable.",
+          "athlete": {"id": "3149391", "displayName": "A'ja Wilson", "position": {"abbreviation": "C"}, "links": []},
+          "type": {"name": "INJURY_STATUS_DAYTODAY", "description": "Day-To-Day"},
+          "details": {"type": "Ankle", "returnDate": "2026-10-04", "fantasyStatus": {"description": "GTD"}}
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "displayName": "Indiana Fever",
+      "injuries": [
+        {
+          "id": "9002",
+          "status": "Out",
+          "date": "2026-09-20T18:00Z",
+          "shortComment": "Out for the season (knee).",
+          "athlete": {"displayName": "Example Player", "position": {"abbreviation": "F"},
+                      "links": [{"href": "https://www.espn.com/wnba/player/_/id/4433403/example-player"}]},
+          "type": {"name": "INJURY_STATUS_OUT", "description": "Out"},
+          "details": {"type": "Knee"}
+        }
+      ]
+    }
+  ]
+}

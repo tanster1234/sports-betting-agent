@@ -1,0 +1,32 @@
+{
+  "_README": "Copy to config/profile.json (gitignored) and edit. Only keys you change are needed; the rest fall back to betlab/profile.py DEFAULTS.",
+  "bankroll": 1000,
+  "unit_pct": 0.01,
+  "_unit_note": "1 unit = 1% of bankroll. Units are a display convenience; stakes come from fractional Kelly + caps.",
+  "kelly_multiplier": 0.25,
+  "prop_kelly_multiplier": 0.15,
+  "max_bet_pct": 0.03,
+  "max_daily_pct": 0.10,
+  "max_game_pct": 0.04,
+  "max_sport_pct": 0.08,
+  "min_stake": 1,
+  "round_to": 1,
+  "min_ev": {
+    "spread": 0.02, "total": 0.02, "moneyline": 0.025, "team_total": 0.03, "period": 0.03,
+    "prop": 0.04, "parlay": 0.08, "sgp": 0.10, "future": 0.06, "series": 0.03
+  },
+  "_min_ev_note": "EV thresholds apply AFTER blending the model with the devigged market price.",
+  "model_weight": {
+    "default": {"spread": 0.15, "total": 0.2, "moneyline": 0.15, "prop": 0.5},
+    "WNBA": {"spread": 0.15, "total": 0.35, "moneyline": 0.15, "prop": 0.5}
+  },
+  "_model_weight_note": "Weight on YOUR model vs the market in logit space. Raise only after your CLV proves the model adds information.",
+  "devig_method": "multiplicative",
+  "stop_loss_drawdown_pct": 0.20,
+  "daily_stop_loss_pct": 0.05,
+  "books": ["DraftKings", "FanDuel", "BetMGM", "Caesars", "Fanatics", "theScore Bet"],
+  "state": null,
+  "sports": ["WNBA", "NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"],
+  "timezone": "America/New_York",
+  "ledger_path": "data/ledger/bets.jsonl"
+}

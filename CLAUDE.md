@@ -1,0 +1,61 @@
+# Sports betting agent — project instructions
+
+This repo is a disciplined sports-betting analysis system for Claude Code: skills in
+`.claude/skills/` (workflows and domain knowledge, WNBA in depth) plus `betlab/`, a tested,
+standard-library-only Python package that does every calculation. Output is analysis for an
+adult user to act on — Claude never places bets.
+
+## Always
+
+- **Do all betting math with `python3 -m betlab ...`** (run from the repo root). Conversions,
+  devig, EV, Kelly, CLV, series, props, parlays — no mental arithmetic on odds.
+- **Start from the market.** Blend model probabilities with the devigged market price
+  (profile `model_weight`) before computing EV; raw model probabilities are overconfident.
+- **Require a computed edge and a stated information edge** for any recommendation; otherwise
+  output PASS with fair prices and "bet only at X or better" numbers.
+- **Size with fractional Kelly + caps** (`python3 -m betlab stake`), never by confidence tiers.
+- **Use current data** with timestamps; if live fetches are blocked (sandbox network policy),
+  fall back to WebSearch/WebFetch and say so.
+- **Log and measure**: give ledger commands for every bet; judge skill by CLV with sample sizes
+  and confidence intervals, not by short-run results.
+- **Protect the user**: honour stop-losses, never encourage chasing, and switch to the
+  `responsible-gambling` skill at any sign of harm. 21+ / legal books only. No help with
+  harassment of players, insider information, or evading limits/self-exclusion.
+
+## Skills (invoke the relevant ones; `betting-analyst` orchestrates)
+
+| Skill | Use for |
+|---|---|
+| `betting-analyst` | "what should I bet", picks, slate scans, single-game analysis, output card |
+| `wnba-betting` | anything WNBA — calibrated model, 2026 context, playoffs, props notes |
+| `multi-sport-context` | NBA / NFL / MLB / NHL / NCAAF / NCAAB context and pricing |
+| `odds-math` | conversions, devig, EV, hold, CLV, parlays, alt lines |
+| `player-props` | props and same-game parlays |
+| `sports-data-ingestion` | schedules, injuries, odds, line shopping, value scans |
+| `bet-red-team` | bias checklist + adversarial subagent before a bet |
+| `bankroll-management` | stakes, caps, drawdowns, stop-loss |
+| `bet-tracking` | ledger, closing lines, performance reviews |
+| `backtesting` | testing strategies honestly; bundled 2026 WNBA backtest |
+| `responsible-gambling` | warning signs, limits, help resources |
+
+## Configuration
+
+- Bettor profile: `config/profile.json` (gitignored; copy `config/profile.example.json`). Holds
+  bankroll, Kelly fraction, caps, EV thresholds, model weights, books, state, ledger path.
+- Odds API key: `export ODDS_API_KEY=...` (optional; ESPN fetches need no key).
+- Ledger: `data/ledger/bets.jsonl` (gitignored, append-only, hash-chained).
+
+## Development
+
+```bash
+python3 -m pytest -q          # ~240 tests, a few seconds, stdlib + pytest only
+ruff check betlab tests       # lint (config in pyproject.toml)
+python3 -m betlab -h          # CLI help
+```
+- `betlab` must stay standard-library only (no numpy/pandas) so skills run anywhere.
+- WNBA numbers in skills come from `.claude/skills/wnba-betting/references/calibration.md`;
+  golden-number tests in `tests/test_ratings_wnba.py` and `tests/test_backtest_fetch_cli.py`
+  guard them — update the doc and tests together if the model changes.
+- Bundled data (`data/wnba/`) is refreshed with `scripts/refresh_wnba_data.py` (needs pandas +
+  pyarrow and GitHub access).
+- Skill evals live in `evals/` (see `evals/README.md`).

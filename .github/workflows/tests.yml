@@ -1,0 +1,29 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install test tools (betlab itself has no dependencies)
+        run: python -m pip install --upgrade pip pytest ruff
+      - name: Lint
+        run: ruff check betlab tests
+      - name: Unit, property and golden-number tests
+        run: python -m pytest -q
+      - name: CLI smoke test
+        run: |
+          python -m betlab odds -110 -110
+          python -m betlab wnba predict --home ATL --away NY --date 2026-10-04 --playoff
+          python -m betlab backtest --markets total --price-at open --model-weight 0.35
