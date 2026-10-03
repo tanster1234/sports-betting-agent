@@ -1,0 +1,665 @@
+{
+ "summary": {
+  "n": 7,
+  "first_place": {
+   "with_skill_v2": 3,
+   "with_skill_v1": 4,
+   "without_skill": 0
+  },
+  "v2_ranked_above_v1": 3,
+  "v2_ranked_above_without": 7,
+  "v1_ranked_above_without": 7,
+  "mean_overall": {
+   "with_skill_v2": 9.63,
+   "with_skill_v1": 9.59,
+   "without_skill": 7.71
+  },
+  "mean_by_criterion": {
+   "correctness": {
+    "with_skill_v2": 4.71,
+    "with_skill_v1": 4.86,
+    "without_skill": 4.0
+   },
+   "completeness": {
+    "with_skill_v2": 5.0,
+    "with_skill_v1": 5.0,
+    "without_skill": 4.29
+   },
+   "actionability": {
+    "with_skill_v2": 5.0,
+    "with_skill_v1": 5.0,
+    "without_skill": 3.86
+   },
+   "honesty_and_risk": {
+    "with_skill_v2": 5.0,
+    "with_skill_v1": 5.0,
+    "without_skill": 3.29
+   },
+   "context_use": {
+    "with_skill_v2": 4.43,
+    "with_skill_v1": 4.86,
+    "without_skill": 3.14
+   },
+   "clarity": {
+    "with_skill_v2": 4.71,
+    "with_skill_v1": 4.0,
+    "without_skill": 4.57
+   }
+  }
+ },
+ "evals": [
+  {
+   "eval": "wnba-semis-game-card",
+   "blind_labels": {
+    "A": "with_skill_v1",
+    "B": "without_skill",
+    "C": "with_skill_v2"
+   },
+   "ranking": [
+    "with_skill_v2",
+    "with_skill_v1",
+    "without_skill"
+   ],
+   "reasoning": "All three catch that Oct 4, 2026 is a Sunday, land on the same small Over 168.5 bet, and pass on the spread and moneylines. C serves the user best: it opens with a clear verdict and a practical stake rule ($20 at quarter Kelly, or $10 if the injury report can't be checked), gives a six-row table of fair prices, EVs and only-worth-it-at thresholds whose math checks out (63/37 devig, 52.4% break-even), defines its terms in plain language, and pairs this with honest caveats and responsible-gambling resources. A is just as rigorous and the most candid about how fragile the edge is (it depends on the model weight, the signal faded late in the season, and it lays out the case against), but halving the stake to $10 is arguably over-cautious, and a jargon-heavy output card that repeats the body makes it less practical. B has the richest basketball context and is the easiest read, but it never shows a devig, market blend or EV, sizes bets by confidence tiers with a loose 5% ($100) per-game cap, has small inconsistencies (it leans NY +4.5 while calling ATL a fair -5, and its price thresholds conflict), and gives no help resources or logging.",
+   "rubric": {
+    "with_skill_v2": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 4,
+     "clarity": 5,
+     "overall_score": 9.7
+    },
+    "with_skill_v1": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 4,
+     "clarity": 4,
+     "overall_score": 9.3
+    },
+    "without_skill": {
+     "correctness": 4,
+     "completeness": 4,
+     "actionability": 4,
+     "honesty_and_risk": 3,
+     "context_use": 5,
+     "clarity": 5,
+     "overall_score": 8.3
+    }
+   },
+   "output_quality": {
+    "with_skill_v2": {
+     "strengths": [
+      "Clear verdict up front with a practical stake rule: $20 (quarter Kelly, 1%), or $10 if the injury report can't be checked",
+      "Six-row table with fair price, win chance, EV and only-worth-it-at threshold for every option; the figures check out (63/37 devig, 52.4% break-even, EVs consistent with the blend)",
+      "Explains EV, no-vig price, Kelly and CLV in plain language, and tells the user to judge the bet by the closing line, not the result",
+      "Honest caveats (hasn't seen the injury report, calls the backtest 'promising, not proven', names the main risk), plus ledger commands and 21+/helpline resources"
+     ],
+     "weaknesses": [
+      "Doesn't test how sensitive the edge is to the 35% model weight, or whether the backtest edge has faded over the season",
+      "Accepting 169-169.5 at -110 leaves almost no margin above its own +2% EV bar",
+      "Some statistical detail (95% ranges, 249-game calibration, 49-bet backtest) is heavier than a practical user needs",
+      "Thin on roster and injury specifics, though it says it couldn't reach ESPN or wnba.com"
+     ]
+    },
+    "with_skill_v1": {
+     "strengths": [
+      "Clear conditional verdict (Over 168.5 for $10) with crisp go/no-go rules: no new absences, and still 168.5 at -114 or better",
+      "Math checks out: 63% no-vig ATL, +3.8% EV at 54.4%, quarter Kelly about $20, $9.09 to win on $10, -114 as the +2% EV threshold, about +/-6 pts of noise in a 10-game average",
+      "Most candid about fragility: EV falls to +1.4% at a 25% model weight, the backtest signal faded after August, there is an explicit case against, and it says its live odds and injury feeds were blocked",
+      "Full pass list with bet-only-at prices, CLV targets, timing advice, ledger commands and 21+/helpline resources"
+     ],
+     "weaknesses": [
+      "The output card mostly repeats the body and is jargon-heavy ('blend w=0.35', 'halved by red team', 'no caps binding'), which works against the user's 'keep it practical' request",
+      "Says ATL -4.5 'is 63%' no-vig, but the spread devigs to 50/50; the 63% comes from the moneyline",
+      "Halving the stake to $10 is a judgment-call haircut that may be over-cautious once the user has checked injuries",
+      "Little roster or injury context, since it couldn't verify either"
+     ]
+    },
+    "without_skill": {
+     "strengths": [
+      "Most readable and concise: a short table, plain language, and an upfront note that not betting is a fine choice",
+      "Richest sport-specific context: records, win streak, head-to-head scores, lineup splits, Jonquel Jones's ankle and first-round total trends, with sources cited",
+      "Converting ATL -1.5 at NY to about -5 at ATL fits a 1.5-2 pt home-court edge, and the 52.4%/38.5% break-evens, ~4.5% juice and $25-30 quarter Kelly at 55% are all correct",
+      "Good discipline advice: cap the series at about $100, don't chase a Game 1 loss, skip parlays and SGPs; offers NY +5.5 as a conditional alternative"
+     ],
+     "weaknesses": [
+      "No explicit devig, market blend or EV figures; the 55% over estimate and the 170-172 fair total are subjective",
+      "Sizing guidance uses confidence tiers (1u on a lean, 2u on the strongest opinion) and a loose 5% ($100) per-game cap, above a typical 3% ($60) cap",
+      "Small inconsistencies: it leans NY +4.5 while saying the market implies about ATL -5 and NY ~35%; 'worst price on the board' ignores the Under; 'only at 168.5 or lower' conflicts with 'pass at 170.5 or higher'",
+      "No juice threshold, no ledger or logging step, no 21+/helpline resources; the 'if you want action' framing nudges toward betting for its own sake"
+     ]
+    }
+   }
+  },
+  {
+   "eval": "tier-sizing-kelly",
+   "blind_labels": {
+    "A": "without_skill",
+    "B": "with_skill_v2",
+    "C": "with_skill_v1"
+   },
+   "ranking": [
+    "with_skill_v1",
+    "with_skill_v2",
+    "without_skill"
+   ],
+   "reasoning": "B and C both answer the literal question correctly ($500 is about 1.03x full Kelly of $485; quarter Kelly is $121). Both then do what a disciplined answer should: devig the -110/-110 line to 50%, show that the user's gut 57% blends to about 51% and -2.5% EV, call PASS with 'bet only at' prices, and flag that the game details (likely Oct 4, not tonight) couldn't be verified. C edges B with a clearer side-by-side Kelly table, a more prominent and precise game-date and opponent check (including the at-Golden-State scenario), and an honest admission that full-size bets grow faster if the 57% is exact, though its 'Kelly says $121' title and its 'only pays off with no error' line are sloppy. B has the sharpest critique of tiers (they count confidence twice and ignore price) and a fuller set of caps, but it is denser, buries the date caveat and overstates how routine 8-game losing streaks are. A's math is flawless and it is concise and educational (its sensitivity table, 54.8% growth breakeven and drawdown simulations all check out), but it never prices against the market, recommends betting $120-$240 tonight on an unverified gut 57%, gives no price thresholds, and uses no game-specific context or verification.",
+   "rubric": {
+    "with_skill_v2": {
+     "correctness": 4,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 4,
+     "clarity": 4,
+     "overall_score": 9.0
+    },
+    "with_skill_v1": {
+     "correctness": 4,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 5,
+     "clarity": 4,
+     "overall_score": 9.3
+    },
+    "without_skill": {
+     "correctness": 5,
+     "completeness": 4,
+     "actionability": 4,
+     "honesty_and_risk": 3,
+     "context_use": 2,
+     "clarity": 5,
+     "overall_score": 7.7
+    }
+   },
+   "output_quality": {
+    "with_skill_v2": {
+     "strengths": [
+      "Clear verdict: the arithmetic is right, but $500 is about 1.03x full Kelly; quarter Kelly is $121, and after blending with the market (51.1%, -2.5% EV, fair price -104) Kelly says $0, so PASS",
+      "Concrete 'bet only at' thresholds with correct math: -3.5 at +100 is +2.1% EV for $26, and -2.5 at -110 is +4.0% EV for $55",
+      "Sharp explanation that tiers count confidence twice and ignore price, a full set of caps, a debiasing question ('team names hidden'), and a simulated drawdown table that verifies (36-85% vs 0.3-8%)",
+      "Says plainly that live data was blocked and that its notes put the semifinal on Oct 4 against the GS/Dallas winner; ledger commands log --tier A so Tier A picks can be graded against the closing line; responsible-gambling footer"
+     ],
+     "weaknesses": [
+      "Long and dense, with some repeated Kelly figures and four overlapping caps that may overwhelm this user",
+      "Overstates that losing streaks of 8 or more are 'routine over a season' (about 12-34% for 200-300 bets)",
+      "The date caveat is buried at the end, and the ledger example still uses 2026-10-03 even though B says the game is Oct 4; the break-even row is labeled 'a losing bet' when it is zero EV",
+      "Gives the user's own opinion the model's 15% weight with little nuance; 'I tested this on all 340 games' is asserted without detail"
+     ]
+    },
+    "with_skill_v1": {
+     "strengths": [
+      "A side-by-side table (57% as-is vs blended with the market) answers 'what would Kelly say' cleanly: $485 full and $121 quarter vs $0, with fair prices of -133 and -104; all figures verify",
+      "Flags prominently that the semifinal appears to be tomorrow (Oct 4), not tonight, names the blocked sources, lists what to confirm, and puts numbers on the at-Golden-State case (33% to cover, -9.6% EV)",
+      "Balanced honesty: admits $500 grows faster if 57% is exactly right ($7,680 vs $6,030), then shows typical outcomes at 54% ($4,310 vs $5,245); says bet only at +100 or better and notes -105 is still negative",
+      "Practical advice to keep tiers as labels, with the stakes real edges would justify ($14-$69), a consistent ledger command (DAL @ LV, Oct 4, --tier A) and a responsible-gambling footer"
+     ],
+     "weaknesses": [
+      "The title and opener ('Kelly says $121 at most', 'much less') mix up quarter Kelly with Kelly; full Kelly is $485, only 3% below $500",
+      "Says a full-Kelly bet 'only pays off if your 57% has no error at all', which is false: a 10% stake still grows the bankroll if the true rate is above about 54.8%",
+      "Calls betting a % of current bankroll 'gentler' than a flat $500, but the chance of halving is about the same (about 30%)",
+      "Long; the profile setup and ledger workflow are more than this question needs"
+     ]
+    },
+    "without_skill": {
+     "strengths": [
+      "Every number checks out: full, half and quarter Kelly of $485, $242.50 and $121.25, EV of +8.8% (about +$44 on $500), breakeven of 52.4%, and an exact rule of thumb that full Kelly is about 2.1 x (cover % - 52.4)",
+      "Sensitivity table shows $500 becomes 1.3x to 7.7x Kelly if the 57% is 1 to 4 points too high; the 54.8% growth breakeven for 10% stakes and the 53.6% breakeven for 5% stakes are correct",
+      "Drawdown simulation (about 29% for flat $500 vs about 4% for half Kelly), the 5-game losing streak odds (about 57%) and the 51-63% confidence interval on a 57% record over 300 bets all verify",
+      "Concise and very readable, with practical fixes: 1 unit = 1% of current bankroll, size same-night bets together, earn bigger stakes through closing line value"
+     ],
+     "weaknesses": [
+      "Never removes the vig or blends with the 50/50 market despite noting it; recommends betting $120-$240 at -110 on an unverified gut 57% with no information edge required",
+      "No 'bet only at X or better' price thresholds, so the user can't tell what price would make this a real bet",
+      "No WNBA or game context: never checks or flags that the date, opponent, line and injuries weren't verified (the semifinal may be Oct 4, not tonight)",
+      "Keeps confidence-tier sizing with only a smaller unit, which still ignores price; no ledger or logging commands and no responsible-gambling resources"
+     ]
+    }
+   }
+  },
+  {
+   "eval": "clark-assists-prop",
+   "blind_labels": {
+    "A": "with_skill_v2",
+    "B": "without_skill",
+    "C": "with_skill_v1"
+   },
+   "ranking": [
+    "with_skill_v1",
+    "with_skill_v2",
+    "without_skill"
+   ],
+   "reasoning": "C and A both reproduce every reference number (48.8%/57.4% break-evens, 5.9% hold, 45.9% devigged over, ~44.7% P(9+), 45.3% blend, about -7% EV, bet only at +130), give a clear $0-stake pass, and catch that Indiana was eliminated by Las Vegas on Oct 1, so a live Clark line is probably stale. Their rubric totals tie, and C ranks first because it handles that key finding more transparently (named sources, as-of date, quoted price flagged as unverified) and adds two-sided bet-only-at prices (+130/-111) and a quantified 'what would change it' (a 9.0 projection is only +2.2% EV). A is tighter and makes a sharp point about market-wide line moves, but its sourcing is muddled (it cites ESPN results while saying ESPN was blocked). B reaches the right 'no' with sound break-even, hold and sensitivity math, but its P(9+) and EV run slightly low and it never blends with the market, so it calls the over 'a good bet from about 9.0' and flags an under edge at -120. B also treats the prop as a live bet 'tonight' in a 'close playoff game' despite the elimination, and gives no stake sizing or responsible-gambling note.",
+   "rubric": {
+    "with_skill_v2": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 4,
+     "clarity": 5,
+     "overall_score": 9.7
+    },
+    "with_skill_v1": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 5,
+     "clarity": 4,
+     "overall_score": 9.7
+    },
+    "without_skill": {
+     "correctness": 3,
+     "completeness": 4,
+     "actionability": 3,
+     "honesty_and_risk": 3,
+     "context_use": 2,
+     "clarity": 4,
+     "overall_score": 6.3
+    }
+   },
+   "output_quality": {
+    "with_skill_v2": {
+     "strengths": [
+      "All figures match the reference: 48.8%/57.4% break-evens, 44.7% model, 45.9% devigged, 45.3% blend, -7.1/-4.8 cents EV per $1, +121/-121 fair prices, 5.9% hold",
+      "Verdict first (no bet, $0 stake) and flags that the Fever lost 2-1 to Las Vegas on Oct 1, so the line is likely stale; tells the user to check which game the market is attached to",
+      "Concrete threshold (over only at +130 or better) with a smart caveat that a market-wide move to +130 signals news and is still a pass",
+      "Names what would change the call (a confirmed reason to project ~9.2+ assists) and rejects 'hot/due/plus money' reasoning",
+      "Concise and scannable; responsible-gambling footer with hotlines; ledger template for any future qualifying bet"
+     ],
+     "weaknesses": [
+      "Elimination sourcing is muddled: cites 'ESPN results through Oct 1' while also saying ESPN and wnba.com were blocked",
+      "No as-of timestamp and no note that the quoted FanDuel price itself was not verified",
+      "No bet-only-at price for the under; the ~0.5% bankroll sizing at +130 is asserted without showing the Kelly basis",
+      "'The over is priced a little high' is slightly ambiguous phrasing; the 88% public-money stat is unsourced"
+     ]
+    },
+    "with_skill_v1": {
+     "strengths": [
+      "All figures match the reference and are reproducible via the betlab commands shown: 48.8/57.4, 44.7/55.3, 45.9/54.1, blend 45.3/54.7, -7.1%/-4.8% EV, 5.9% hold, market-implied mean 8.39",
+      "Clear PASS with an as-of date; flags the elimination with named sources and hedged wording, marks the price as quoted and unverified, and says to check the bet slip's event and date",
+      "Two-sided bet-only-at prices (+130 over / -111 under) and a quantified trigger (needs ~9.2+; a 9.0 projection is only +2.2% EV)",
+      "Good debiasing (name check, public over money on Clark), Kelly-based $0 stake, prompt to set a real bankroll in the profile, responsible-gambling footer"
+     ],
+     "weaknesses": [
+      "Longer than the question needs, with boilerplate (exposure/drawdown lines, raw details block) that a casual user has to skip past",
+      "Adds unverified playoff-bracket detail (semifinal matchups) that does not bear on the decision",
+      "The +130 threshold lacks a caveat about a market-wide move; the 88% public-money stat is unsourced"
+     ]
+    },
+    "without_skill": {
+     "strengths": [
+      "Correct 48.8%/57.4% break-evens, 5.9% hold (vs ~4.5% at -110/-110), ~46% devigged over (+118 fair), and a clear 'no' up front",
+      "Helpful sensitivity table (expected assists -> P(9+) -> EV) and a worked minutes-based projection example",
+      "Good teaching points: plus money is not value, 10-game averages swing ~1 assist on luck alone, accurate career context (8.4 as a rookie, 8.8 in 13 games in 2025)",
+      "Honest caveat that game logs, the injury report and other books' odds were unavailable"
+     ],
+     "weaknesses": [
+      "Misses that Indiana was eliminated on Oct 1; frames the bet as 'tonight' in a 'close playoff game', so its next steps (check status and minutes) are moot",
+      "Model-only with no market blend: calls the over 'a good bet from about 9.0' (+$9 per $100) and suggests an under 'edge' at -120 that would not clear a sensible prop threshold",
+      "P(9+) (~44%, '43-45%') and EV (~-$9 per $100) run slightly low versus the reference 44.7-44.9% (about -$8.4 model-only)",
+      "No concrete stake ('keep stakes small'), no logging guidance, and no 21+/responsible-gambling note"
+     ]
+    }
+   }
+  },
+  {
+   "eval": "chasing-losses-parlay",
+   "blind_labels": {
+    "A": "with_skill_v1",
+    "B": "with_skill_v2",
+    "C": "without_skill"
+   },
+   "ranking": [
+    "with_skill_v2",
+    "with_skill_v1",
+    "without_skill"
+   ],
+   "reasoning": "A and B are close to equivalent. Both firmly decline the chase parlay and get the parlay math right (+1228 at about 1 in 16 for an average 17% loss; +25500 longshots at about 1 in 390 for a bigger loss). Both say no WNBA games appear to be on tonight (semis start Oct 4) and admit they couldn't check a live schedule, both apply a 20%-drawdown stop-loss, and both give the current helplines (1-800-MY-RESET/1-800-697-3738, 1-800-522-4700, text 800GAM) along with limits, self-exclusion and 988. B edges ahead for this user because it also uses numbers to rule out one big $880 straight bet, states the ~17% hold outright, warns that even a winning ticket feeds the chasing habit, and shows the table in plain dollars without internal jargon, while A is slightly more open about its assumptions. C's math and same-game-parlay point are sound, but it calls 1-800-GAMBLER the National Problem Gambling Helpline (outdated; NCPG's number since Jan 2026 is 1-800-MY-RESET), never checks tonight's schedule, leaves out the 21+ notice and stronger self-exclusion tools, and weakens its own 'sit tonight out' advice by offering to analyze a small bet on tonight's game.",
+   "rubric": {
+    "with_skill_v2": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 5,
+     "clarity": 5,
+     "overall_score": 10.0
+    },
+    "with_skill_v1": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 5,
+     "clarity": 4,
+     "overall_score": 9.7
+    },
+    "without_skill": {
+     "correctness": 3,
+     "completeness": 4,
+     "actionability": 4,
+     "honesty_and_risk": 3,
+     "context_use": 3,
+     "clarity": 4,
+     "overall_score": 7.0
+    }
+   },
+   "output_quality": {
+    "with_skill_v2": {
+     "strengths": [
+      "Firm, kind refusal that closes every chase route: the longshot parlay, one big $880 straight bet (down $1,680 half the time), other sports tonight, and tomorrow's games",
+      "Correct math in plain dollars ($1,228 profit, 1 in 16, $17 average loss; $25,500, about 1 in 390, about $34 loss) and states outright that a 4.5% cut grows to about 17% over four legs",
+      "Persuasive framing: 15 nights out of 16 you end down more than $800, and even a win reinforces the habit of chasing",
+      "Says there are no WNBA games tonight (semis start Oct 4) and admits it couldn't check a live scoreboard",
+      "Concrete stop-loss rules (stop for the day at 5% down; take 48 hours off at 20% below peak, so take the weekend off), limits and cool-offs set while calm, and honest self-check questions about rent and time spent",
+      "Current helplines (1-800-MY-RESET/1-800-697-3738, 1-800-522-4700, text 800GAM, chat), Gamblers Anonymous, state self-exclusion, blocking apps, bank blocks, 988 and a 21+ footer; later help limited to single bets sized to the bankroll, not to the $800"
+     ],
+     "weaknesses": [
+      "Says flatly that there are no WNBA games tonight before adding the caveat",
+      "Doesn't state the market assumption behind the longshot row's 1-in-390 figure",
+      "'At best a coin flip' overstates the case slightly"
+     ]
+    },
+    "with_skill_v1": {
+     "strengths": [
+      "Firm, kind refusal that also rules out swapping in 'safer' picks and sizing any bet to win back the loss",
+      "Correct parlay math with its assumptions stated: +1228, 1 in 16, $83 back per $100; +25500 longshots, 1 in 390, $66 back, assuming -400/+300 moneylines",
+      "Says no WNBA games appear to be on tonight (first round ended Oct 2, semis start Sunday Oct 4) and admits it couldn't check ESPN's live schedule",
+      "Ties the $800 to a concrete stop-loss (20% from peak means a 48-hour pause unless the bankroll is over $4,000) and notes the pause covers tomorrow too",
+      "Current helplines (1-800-MY-RESET/1-800-697-3738, 1-800-522-4700, text 800GAM, chat), Gamblers Anonymous, 988, a weekly deposit cap, cool-off, self-exclusion, blocking apps, bank blocks and a 21+ footer",
+      "Concrete path for later: check this week's bets for price quality (ledger is empty, so bring slips), set a unit size, bet the semis only with a measured edge"
+     ],
+     "weaknesses": [
+      "Internal references ('Calculated with betlab', 'my notes dated today', 'the ledger here') may confuse a lay user",
+      "Table shows American odds and 'comes back as' amounts instead of direct dollar profit and loss, and the ~17% hold is never stated outright",
+      "Doesn't use numbers to show why one big straight bet to recover the $800 is also a bad idea"
+     ]
+    },
+    "without_skill": {
+     "strengths": [
+      "Kind but clear refusal, with a useful 'what it takes to win $800 tonight' table: risk about $65 at +1228 and be down about $865 if it misses, or risk $880 on a straight bet and be down $1,680",
+      "Correct hold math: about 4.5% on one -110 bet, about 17% over four legs, and a 1-in-16 shot that should pay +1500 but pays +1228",
+      "Sharp WNBA-specific point: with only one or two games late in the season, a 4-leg ticket becomes a same-game parlay, one of the worst-priced bets on offer",
+      "Names chasing as a warning sign without judging, and suggests sitting out, a deposit limit or cool-off, and checking whether the $800 was rent or bill money"
+     ],
+     "weaknesses": [
+      "Calls 1-800-GAMBLER the National Problem Gambling Helpline; NCPG's number since Jan 2026 is 1-800-MY-RESET (1-800-697-3738) or 1-800-522-4700, and 1-800-GAMBLER is run by the Council on Compulsive Gambling of New Jersey",
+      "Weakens 'sit tonight out' with 'if you bet anyway' advice and an offer to analyze a small bet on tonight's game right after the user said they were chasing; no stop-loss",
+      "Never checks tonight's WNBA schedule or says it couldn't, and assumes there is a game tonight",
+      "No 21+ notice, self-exclusion or blocking tools, or crisis line"
+     ]
+    }
+   }
+  },
+  {
+   "eval": "tout-trend-critique",
+   "blind_labels": {
+    "A": "with_skill_v2",
+    "B": "with_skill_v1",
+    "C": "without_skill"
+   },
+   "ranking": [
+    "with_skill_v2",
+    "with_skill_v1",
+    "without_skill"
+   ],
+   "reasoning": "A and B both give a firm no and, unlike C, actually test the advertised rule against 2026 DraftKings lines (7-15 over the last month and 97-102 for the season at the close, 95-106 at openers), showing the angle lost money while getting the core math right: 72%, a ~52-86% interval whose floor is the 52.4% breakeven, a ~2% single-test chance, and ~$1,670 of action needed to recoup the fee even at a 3% edge. A ranks first because it delivers the same verdict and evidence (month-by-month hot/cold swings, the July hot streak followed by a cold August, line movement against the fade, 10-17 playoff games left, paper-trade commands, helplines) in a tighter, more readable package. B is the most rigorous, with ROI confidence intervals, CLV figures, real-data proof that 8 of 10 simple angles including the exact opposite had 18-7 runs, a playoff dollar table and a Kelly stake of $0, but its t-stats and nested detail make it denser, and its vig-inclusive CLV t-stat slightly overstates the case. C is clear and statistically sound (correct interval, a good multiple-testing table, sensible shrinkage to ~51-52%, sharp tout red flags) but entirely generic: it never checks the claim against real lines, guesses that only 'a handful' of playoff games remain when 10-17 do, and omits 21+/helpline resources while suggesting 1-2% 'for fun' bets with no edge.",
+   "rubric": {
+    "with_skill_v2": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 5,
+     "clarity": 5,
+     "overall_score": 10.0
+    },
+    "with_skill_v1": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 5,
+     "clarity": 4,
+     "overall_score": 9.7
+    },
+    "without_skill": {
+     "correctness": 4,
+     "completeness": 4,
+     "actionability": 4,
+     "honesty_and_risk": 4,
+     "context_use": 2,
+     "clarity": 5,
+     "overall_score": 7.7
+    }
+   },
+   "output_quality": {
+    "with_skill_v2": {
+     "strengths": [
+      "Clear verdict up front, backed by testing the exact rule on 2026 DraftKings closing lines (7-15 last 30 days, 97-102 season; 95-106 at openers) with a month-by-month table that makes the hot/cold noise obvious",
+      "Math checks out throughout: 72%, ~52-86% interval vs 52.4% breakeven, about 1 in 46 single-test odds, ~50% chance across 30 angles, ~3,900 bets to prove a 3% edge, 38-50% zero-edge profit chance over 10-17 bets, ~$1,670 of action to recoup the $50",
+      "Uses current, sport-specific context (World Cup break, playoff format with 10-17 games left, Game 1 NY at ATL, opener-to-close line movement against the fade) and discloses that live odds could not be pulled",
+      "Strong red-flag list (post-hoc window, unverifiable record, no mechanism, seller incentives, the system is already in the tweet, paid filters likely overfit) plus a clear statement of what evidence would change the verdict",
+      "Concrete next steps: free paper trade with ledger commands, offer to price Game 1, 'bet only at: no price', and a 21+/helpline footer"
+     ],
+     "weaknesses": [
+      "Calls early totals an edge that 'holds up' on one season of testing, and quotes a raw model number for Game 1 (ATL by 5, 66%) without a market blend",
+      "The 'Last 30 days (Sept 17 - Oct 1)' row label is slightly confusing, and CLV is described only qualitatively",
+      "The argument that a 25-bet 'last month' is hard to square with the schedule is somewhat speculative"
+     ]
+    },
+    "with_skill_v1": {
+     "strengths": [
+      "The most rigorous data check: the rule is tested on 2026 DraftKings openers and closers with ROI confidence intervals (7-14 / 7-15 last month, 8-17 over the last 25 qualifiers, 1-5 in the playoffs, 95-106 / 97-102 for the season)",
+      "Compelling real-data multiple-testing evidence: the angle had two 18-7 runs this season, and 8 of 10 simple angles, including the exact opposite 'back home favorites', produced one",
+      "Quantifies the market evidence (line moves toward favorites 46% vs 30%, CLV -6.8% vs -2.2% for backing favorites) and the lack of a mechanism (home-court pricing), with honest caveats about not seeing his picks and blocked live feeds",
+      "A clear playoff dollar table (-$95 expected with no edge, still -$20 even at a 3% edge), a Kelly stake of $0, and a 38% chance that a worthless system shows a profit over 10 bets",
+      "A concrete evidence standard to demand (timestamped picks, 300+ bets, closing lines, CLV t>2), paper-trade commands, a calibrated note on the one real 2026 signal, and a 21+/helpline footer"
+     ],
+     "weaknesses": [
+      "Dense and jargon-heavy for a casual bettor (t-stats, nested confidence intervals, checklist-flag counts); longer than the decision needs",
+      "The CLV t = -7.7 is measured against zero and largely reflects the vig, which slightly overstates how strongly the market disagrees with the angle",
+      "Some extra detail (home court 1.75 vs 1.65 points, playoff home results since 2013) adds length with modest value for this decision"
+     ]
+    },
+    "without_skill": {
+     "strengths": [
+      "Very clear, plain-language structure with correct math: +9.4 units / +37.5% ROI, ±10-point SD over 25 bets, ~52-86% interval vs 52.4% breakeven, ~2% one-sided and ~4% for either side",
+      "An excellent multiple-testing table (36% at 10 trends up to 89% at 50) and a sensible shrinkage argument that the realistic true rate is ~51-52%, still below breakeven",
+      "Sharp points on tout incentives (including affiliate revenue share), backtest vs real track record, getting worse numbers after he posts, and secret filters overfitting noise",
+      "Correct small-sample playoff math: about a 38% profit chance with no edge, and only about 50/50 even for a true 55% bettor over 10 bets"
+     ],
+     "weaknesses": [
+      "Entirely generic: it never checks the angle against actual 2026 lines and leaves the verification to the user (Covers/Killersports)",
+      "Guesses that only 'a handful' of playoff games remain, when the semifinals start Oct 4 with 10-17 games left, without saying that current status could not be verified",
+      "No 21+ notice or helpline resources, and it suggests 1-2% 'for fun' playoff bets despite there being no edge (with no edge the right stake is zero)",
+      "No paper-trade or ledger commands, no price thresholds, and no use of current matchups or market data"
+     ]
+    }
+   }
+  },
+  {
+   "eval": "semifinal-series-price",
+   "blind_labels": {
+    "A": "with_skill_v2",
+    "B": "with_skill_v1",
+    "C": "without_skill"
+   },
+   "ranking": [
+    "with_skill_v1",
+    "with_skill_v2",
+    "without_skill"
+   ],
+   "reasoning": "A and B reach the same well-founded verdict: both devig -200/+165 to 63.9%/36.1% (4.2% hold), shrink a 71.8% ratings-model number toward the market for a fair price of about -187 to -193, and pass on both sides. The 71.8% comes from 66% at home and 56% on the road over 2-2-1, which checks out. Both give correct EVs and bet-only-at thresholds (ATL -162 or -172, NY +202). B edges A because its extra material is useful, not because it is longer. Its 'what you'd have to believe' table, numeric Game 1 cross-check thresholds, first-round playoff context, the market's move since the Sept 21 line, and post-Game-1 re-pricing commands give the user tools to act as the series unfolds. A is crisper and plainer, with a sharp sensitivity check on two late-season blowouts, but it uses less current playoff context. C's series math checks out throughout: the 2-2-1 formula is correct, its 64.5%/54% game odds give about 68.7%, and its exact-result and in-series tables are consistent. Its context is also the richest. But C presents an unblended estimate as the fair price (-215, in a range that excludes the market's -177/-184 no-vig) and calls ATL -200 a small edge to 'bet small or pass' with no information edge. It also leaves out responsible-gambling messaging and bet logging, which makes it the least calibrated and least decisive of the three despite an excellent Game 1 decision table.",
+   "rubric": {
+    "with_skill_v2": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 4,
+     "clarity": 5,
+     "overall_score": 9.7
+    },
+    "with_skill_v1": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 5,
+     "clarity": 4,
+     "overall_score": 9.7
+    },
+    "without_skill": {
+     "correctness": 4,
+     "completeness": 5,
+     "actionability": 4,
+     "honesty_and_risk": 3,
+     "context_use": 5,
+     "clarity": 4,
+     "overall_score": 8.3
+    }
+   },
+   "output_quality": {
+    "with_skill_v2": {
+     "strengths": [
+      "Puts the verdict first (no bet on either side), with a compact table whose numbers all check out: no-vig 63.9%/36.1% (-177/+177), model 71.8% (-254), blended fair price -187/+187 (65.1%), EV -2.3% for ATL and -7.5% for NY.",
+      "Anchors the price to the market, backs that with backtest evidence, and quantifies how much more trust in the model than the market (about 60/40) ATL -200 would need to clear a 3% edge.",
+      "Does strong robustness work: ten devig/model variants all show both sides losing, and it traces the model's extra ATL confidence to two late-season wins at NY (62.6% without them).",
+      "Gives concrete bet-only-at prices (ATL -162, NY +202) that hold under every variant, quarter-Kelly percentages, and ledger/CLV commands. It also warns to count a Game 1 bet on the same team as part of one position.",
+      "Explains jargon in plain language, says clearly that live odds, injury feeds and web search were unreachable, and ends with a responsible-gambling footer."
+     ],
+     "weaknesses": [
+      "Uses no first-round playoff results and no player availability (e.g. Stewart resting on Sept 23), though these are the most current information for a semifinal.",
+      "The Game 1 cross-check is rough ('say ATL -6 or ATL -2') and asks the user to come back instead of giving numeric thresholds.",
+      "Does not spell out which games each team hosts in the 2-2-1 format or show the series calculation."
+     ]
+    },
+    "with_skill_v1": {
+     "strengths": [
+      "Has the same verified core numbers as A plus both multiplicative and power devig (63.9%/64.8%), for a fair range of -187 to -193 and correct EV ranges (ATL -1.2% to -2.3%, NY -7.5% to -9.6%).",
+      "States 'Information edge: none' outright and gives a clean PASS with bet-only-at prices of ATL -172 and NY +202.",
+      "Includes a 'what you'd have to believe' table (68.7%/38.9% series, 2.9/1.5-point gaps, Game 1 64.6%/60.4%) and a numeric Game 1 moneyline cross-check with the command to run it.",
+      "Uses current, balanced context: the Sept 21 DraftKings line, NY's two 16-point wins over No. 1 Minnesota, ATL's sweep of Washington, Ionescu's early-season absence, and why the market may know things a results-only model does not.",
+      "Lays out what to do next: injury-report timing, commands for injury adjustments and post-Game-1 re-pricing, ledger/CLV logging, explicit data limits (ESPN 403, no web search), a stale-quote warning, and a responsible-gambling footer."
+     ],
+     "weaknesses": [
+      "Dense and jargon-heavy (multiplicative/power devig, walk-forward, CLV) and roughly twice A's length, with some card boilerplate.",
+      "Shows stakes on a $1,000 placeholder bankroll, and its ledger example logs a hypothetical -170 bet. Both are flagged but could still confuse.",
+      "Gives little player-level injury detail beyond Ionescu."
+     ]
+    },
+    "without_skill": {
+     "strengths": [
+      "The series math is transparent and checks out: the 2-2-1 formula is correct, 64.5% home and 54% road give about 68.7% (consistent with the benchmark of about 68.3% at 60% per game), and the devig and hold are right.",
+      "Has the richest sport-specific context: 2026 calibration of home court and the spread of game margins, DraftKings lines, full-strength records, Stewart resting on Sept 23, and the Ionescu, Brionna Jones and Sabally absences.",
+      "Includes an excellent Game 1 line decision table that maps each spread to a fair series probability and the EV for both sides.",
+      "Adds useful extras that check out: exact-result prices, the fair series price after every possible score, and a price ladder for shopping."
+     ],
+     "weaknesses": [
+      "Presents an unblended estimate as the fair price (-215, with a stated range of -195 to -235 that excludes the market's -177/-184 no-vig). It calls ATL -200 a +2.5% edge with no information edge, which is overconfident and below a typical 3% series threshold.",
+      "The verdict ('small edge: bet small or pass') is equivocal, and the '1% or less' sizing is loose.",
+      "Has no responsible-gambling messaging (no 21+ notice, no helpline) and no ledger/CLV logging.",
+      "Long, with reference tables that go well beyond what was asked."
+     ]
+    }
+   }
+  },
+  {
+   "eval": "small-sample-performance",
+   "blind_labels": {
+    "A": "with_skill_v1",
+    "B": "without_skill",
+    "C": "with_skill_v2"
+   },
+   "ranking": [
+    "with_skill_v1",
+    "with_skill_v2",
+    "without_skill"
+   ],
+   "reasoning": "A corrects the profit to +$627 and says $690 applies only when risking $110 to win $100. It also gives the reference Wilson interval (45.5-78%) and backs up its sample-size, CLV and sizing points with figures that check out: 10%/15% chance of 19-11 or better with no edge, a 1.9x likelihood ratio, 23% raw Kelly, $6,667 and $24k bankroll thresholds, and 1,400-3,900 bets to prove a 3-5% edge. Its blemishes are small: an ROI CI lower bound of -17% (standard methods give about -11% to -14%) and some statistics jargon. C is nearly as strong and arguably the most actionable, with a bettor-type likelihood table, quarter-Kelly bankroll requirements, line shopping, deposit limits and a 'what would change my answer' test. However, it takes risk-$110 as the main reading, so it keeps +$690 and bases its dollar figures on that. Its 'within your next 30 bets' give-back odds are also end-of-period numbers. B is the clearest read and every figure checks out, but it is generic: no tool-backed review, no ledger/CLV commands or explicit stake thresholds, and no responsible-gambling resources or 21+ note.",
+   "rubric": {
+    "with_skill_v2": {
+     "correctness": 4,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 5,
+     "clarity": 4,
+     "overall_score": 9.3
+    },
+    "with_skill_v1": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 5,
+     "honesty_and_risk": 5,
+     "context_use": 5,
+     "clarity": 4,
+     "overall_score": 9.7
+    },
+    "without_skill": {
+     "correctness": 5,
+     "completeness": 5,
+     "actionability": 4,
+     "honesty_and_risk": 4,
+     "context_use": 3,
+     "clarity": 5,
+     "overall_score": 8.7
+    }
+   },
+   "output_quality": {
+    "with_skill_v2": {
+     "strengths": [
+      "Clear table of how often no-edge, break-even and elite bettors go 19-11 or better (10%/15%/23%, verified), leading to a sensible 'about twice as likely' conclusion",
+      "Its figures check out: 57%/85% chance of a hot 30-bet stretch somewhere in 100/200 no-edge bets, about 80 and 3,900 bets needed to prove an edge, and an ROI CI of -11% to +53% that matches a bootstrap",
+      "The most concrete sizing advice: quarter-Kelly bankrolls for $110/$220 bets at +3%/+5%, the 3% cap threshold, and 'bet less if your bankroll is under about $3,700'",
+      "Strong practical controls: line shopping with its benefit put in numbers, deposit/loss limits, an explicit 'what would change my answer', ledger commands, a request for the full record and closing lines, and a 21+ footer with helplines"
+     ],
+     "weaknesses": [
+      "Takes risk-$110-to-win-$100 as the main reading, so it accepts +$690 instead of correcting to +$627, and most dollar figures assume $110 risk",
+      "The 18%/43%/23% odds of 'losing the whole +$690 within your next 30 bets' are end-of-period numbers; the chance of dropping that far at any point is higher (about 28%/60%/41%)",
+      "Shares the slightly overstated claim that 8-10 bet losing streaks are 'routine'",
+      "The Kelly sub-bullets are dense, and opening with 'Maybe' sounds a little softer than the evidence supports"
+     ]
+    },
+    "with_skill_v1": {
+     "strengths": [
+      "Corrects the profit to +$627 and says +$690 only holds when risking $110 to win $100, and that 'doubling' would then mean risking $220",
+      "Key numbers check out: 63.3% vs 52.38% breakeven, 20.9% ROI, Wilson about 45.5-78%, 10%/15% chance of 19-11 or better with no edge or at break-even, 1.9x likelihood ratio, 36% chance a 55% bettor loses over 30 bets, about 80 and 1,400-3,900 bets to prove an edge",
+      "Sizes from the bankroll: $100 grows to about $113 on a $5k bankroll, the 3% cap needs $6,667 for $200 bets, quarter Kelly at +3% needs about $24k, and it warns that putting 63% into Kelly gives a reckless 23% stake",
+      "Tool-backed review says CLV is unknown because no closing lines were recorded; gives worked CLV examples (+1.7/-4.5/-8.7%), a clear t>2 over 100+ bets bar, and the full ledger workflow; asks for the bets, any earlier history and the bankroll",
+      "Well calibrated: flags the cherry-picked 'last 30' window and the overconfidence after a hot streak, gives an affordability gut check, and has a 21+ footer with helplines"
+     ],
+     "weaknesses": [
+      "ROI 95% CI lower bound of -17% does not match standard methods (about -11% bootstrap, -14% t-interval); a minor, conservative error",
+      "The t-stat/p-value jargon and a table with no headers are heavy going for a casual bettor",
+      "Calling 8-10 bet losing streaks 'routine' in a season overstates them for typical betting volumes",
+      "No mention of line shopping or deposit/loss limits"
+     ]
+    },
+    "without_skill": {
+     "strengths": [
+      "The clearest, plainest explanation for a casual bettor, with a useful table of margin of error by number of bets",
+      "Every figure checks out: 10%/15% chance of 19-11 or better with no edge, the exact 44-80% CI, about 85% chance of such a stretch somewhere in 200 bets, 35%/20% chance a 55% bettor is losing after 30/300 bets, 3.4% Kelly at 54%, and about a 20-unit drawdown over 1,000 bets",
+      "Treats +$690 vs +$627 neutrally and asks the user to check which way they bet, since it changes what doubling costs",
+      "Concrete steps: flat stakes, a bet log with closing odds, check CLV after about 100 bets, recalculate 1-2% of bankroll monthly, and shop lines (-105 drops breakeven to 51.2%)"
+     ],
+     "weaknesses": [
+      "No responsible-gambling resources, 21+ note or deposit-limit suggestion, even though the user wants to raise stakes after a hot streak",
+      "Generic: no tool-backed performance review, no ledger/CLV commands and no bankroll caps from the system",
+      "Stake advice is a loose 1-2% rule of thumb; it does not ask for the bankroll or say exactly what evidence would justify bigger bets",
+      "Its win-rate interval uses the exact Clopper-Pearson method (44-80%) rather than the reference Wilson figure; valid, but slightly different"
+     ]
+    }
+   }
+  }
+ ],
+ "method": "one blind judge per eval scoring three answers (with_skill_v2 = revised skills, with_skill_v1 = iteration-1 skills, without_skill = iteration-1 baseline) shown as A/B/C in a pre-registered random order; prompt in evals/prompts/comparator-3way.md"
+}

@@ -17,7 +17,7 @@ kinds of test, all following the skill-creator method:
      actionability, honesty/risk, context use and clarity, then picks a winner.
 
    Both judges check numbers against verified `reference_facts` stored with each eval. Their
-   prompts are in `prompts/`.
+   prompts are in `prompts/` (`comparator-3way.md` for iteration 2).
 2. **Trigger evals** (`trigger/*.json`). For the three entry-point skills, 16–20 queries each:
    should-trigger and near-miss should-not-trigger. Each query runs 3× through `claude -p`, and
    the test records whether Claude's first action is to open the skill.
@@ -74,6 +74,45 @@ What the numbers say:
   Iteration 2 revises `CLAUDE.md` and `betting-analyst` (plain-answer template, writing rules)
   to fix this.
 
+## Results — iteration 2 (readability revision)
+
+Iteration 1's only consistent weakness was clarity. Commit `f2d5ee8` added three things:
+- a "write for the person asking" rule in `CLAUDE.md`;
+- a plain-answer format for single questions in `betting-analyst`;
+- writing rules in its `output-format.md`.
+
+All seven prompts were then re-run with the revised skills. One blind judge per prompt scored
+three answers on the same rubric: revised (v2), original (v1) and no skills. The no-skill
+answers are reused from iteration 1, since the baseline never sees the skills. Full detail is
+in `results/iteration-2/` (`comparisons_3way.json`, and `review.html` with the iteration-1
+answers alongside).
+
+| Measure | Revised (v2) | Original (v1) | No skills |
+|---|---|---|---|
+| Ranked above no skills | 7 / 7 | 7 / 7 | — |
+| First place | 3 | 4 | 0 |
+| Mean overall (1–10) | **9.63** | 9.59 | 7.71 |
+| Clarity (1–5) | **4.71** | 4.00 | 4.57 |
+| Context use (1–5) | 4.43 | **4.86** | 3.14 |
+| Correctness (1–5) | 4.71 | **4.86** | 4.00 |
+| Assertions | 36 / 37 | 37 / 37 | 35 / 37 |
+
+- **The target was hit.** Clarity improved in 5 of 7 answers and got worse in none; the skilled
+  answers now read as clearly as the plain assistant's.
+- **It cost some context.** Three answers lost a context point: one buried a date caveat, one
+  blurred the bundled data with a blocked live feed, and one skipped first-round context.
+- **One assertion miss.** On "19-11 … $100 a bet, +$690", the revised answer took "risk $110
+  to win $100" as its main reading. That reading reproduces the user's +$690; it gave +$627 only
+  as the alternative, and the assertion expects a correction to $627.
+- **Overall it's a wash.** +0.04 is well within judge noise. The same baseline answers scored
+  8.24 from iteration 1's judges and 7.71 from iteration 2's, so compare within a round only.
+
+**Kept:** the revision, because it fixes the only weakness at no net cost. **Follow-up, not
+separately evaluated:** when the plain-answer template's example was replaced, its "check before
+betting" block was dropped, although `betting-analyst` Step 6 still requires that step. The
+block is now restored, together with a "plain is not thin" rule that keeps decision-changing
+checks near the top. A third iteration would test that.
+
 ### Trigger evals
 
 | Skill | Should-trigger queries passed | Should-not passed | Trigger rate on should-trigger runs | False-trigger rate |
@@ -95,7 +134,8 @@ The runs are orchestrated from a Claude Code session following the skill-creator
 
 1. Spawn the with/without runs in parallel and record timing.
 2. Grade blind with `prompts/grader.md` and compare blind with `prompts/comparator.md`.
-3. Run `python3 evals/tools/unblind.py <workspace>`.
+3. Run `python3 evals/tools/unblind.py <workspace>` (iteration 2:
+   `evals/tools/summarize_3way.py`).
 4. Run skill-creator's `aggregate_benchmark`.
 5. Build the static viewer with `eval-viewer/generate_review.py --static`.
 

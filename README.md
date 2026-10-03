@@ -118,8 +118,12 @@ python3 -m betlab report --format md
    the top-8 ratings = the 8 playoff teams, the totals-vs-opener CLV finding).
 3. **Walk-forward backtests** on real 2026 DraftKings lines, with a test that proves no
    look-ahead (`test_backtest_has_no_lookahead`).
-4. **Skill evals** (`evals/`): realistic prompts run with and without the skills, graded on
-   objective assertions — see [`evals/README.md`](evals/README.md).
+4. **Skill evals** (`evals/`): 7 realistic prompts answered with and without the skills.
+   Blind judges preferred the skilled answer **7 of 7** times (mean 9.4 vs 8.2 out of 10), and
+   the skilled answers passed 37/37 objective assertions vs 35/37. The one weakness, clarity,
+   was fixed in a second round (4.0 → 4.7 of 5) at no net cost. The three entry-point skills
+   loaded for 28/28 should-trigger questions and 0/28 near-misses. See
+   [`evals/README.md`](evals/README.md).
 
 CI: `.github/workflows/tests.yml` (Python 3.9–3.13, ruff, pytest, CLI smoke test).
 
