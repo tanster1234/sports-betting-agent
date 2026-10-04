@@ -97,6 +97,9 @@ def test_offers_against_sharp_and_model():
     other_line = lr.live_read(g, offers=[{"market": "spread", "side": "away", "line": 2.5, "price": -110}],
                               sharp={"spread": {"line": -1.5, "first": -110, "second": -110}})
     assert other_line["offers"][0]["sharp_p"] is None and "ev_vs_sharp_pct" not in other_line["offers"][0]
+    assert other_line["offers"][0]["qualifies"] is False
+    gap = lr.live_read(g, sharp={"total": {"line": 185.5, "first": -110, "second": -110}})
+    assert any(n.startswith("Sharp live total 185.5") and "more scoring" in n for n in gap["notes"])
     no_sharp = lr.live_read(g, offers=[{"market": "total", "side": "under", "line": 178.5, "price": -110}])
     assert no_sharp["offers"][0]["qualifies"] is False and no_sharp["offers"][0]["p_win"] > 0.6
 

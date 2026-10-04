@@ -467,6 +467,7 @@ def live_read(game: dict, pre_home_spread: Optional[float] = None, pre_total: Op
             same_line = o["market"] == "ml" or (sharp or {}).get(o["market"], {}).get("line") == want
             dec = american_to_decimal(o["price"])
             r["sharp_p"] = round(fair, 4) if same_line else None
+            r["qualifies"] = False            # a sharp price on a different line can't vouch for this one
             if same_line:
                 r["ev_vs_sharp_pct"] = round(100 * (fair * dec - 1), 2)
                 r["model_minus_sharp"] = round(r["p_win"] - fair, 4)
@@ -477,6 +478,23 @@ def live_read(game: dict, pre_home_spread: Optional[float] = None, pre_total: Op
     if checked:
         out["offers"] = checked
     out["notes"] = notes(game, facts, lp, checked, max_disagreement)
+    if lp and sharp:
+        out["notes"].extend(line_gaps(lp, sharp, home))
+    return out
+
+
+def line_gaps(lp: dict, sharp: dict, home: str, spread_gap: float = 3.0, total_gap: float = 4.0) -> List[str]:
+    """Flag a sharp live spread/total far from the model's fair line (even when no offer shares its line)."""
+    out = []
+    t = sharp.get("total")
+    if t and lp.get("fair_total") is not None and abs(t["line"] - lp["fair_total"]) >= total_gap:
+        side = "more" if t["line"] > lp["fair_total"] else "less"
+        out.append(f"Sharp live total {t['line']:g} vs fair {lp['fair_total']:g}: the market expects {side} scoring "
+                   f"than the model — treat totals as a pass unless they converge.")
+    s = sharp.get("spread")
+    if s and abs(s["line"] - lp["fair_home_spread"]) >= spread_gap:
+        out.append(f"Sharp live spread {home} {s['line']:+g} vs fair {lp['fair_home_spread']:+g}: big gap — "
+                   f"the market likely knows something; pass on sides.")
     return out
 
 
