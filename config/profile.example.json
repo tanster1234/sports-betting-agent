@@ -18,9 +18,10 @@
   "_min_ev_note": "EV thresholds apply AFTER blending the model with the devigged market price.",
   "model_weight": {
     "default": {"spread": 0.15, "total": 0.2, "moneyline": 0.15, "prop": 0.5},
-    "WNBA": {"spread": 0.15, "total": 0.35, "moneyline": 0.15, "prop": 0.5}
+    "WNBA": {"spread": 0.15, "total": 0.35, "moneyline": 0.15, "prop": 0.5},
+    "NFL": {"spread": 0.0, "total": 0.0, "moneyline": 0.0, "prop": 0.5}
   },
-  "_model_weight_note": "Weight on YOUR model vs the market in logit space. Raise only after your CLV proves the model adds information.",
+  "_model_weight_note": "Weight on YOUR model vs the market in logit space. Raise only after your CLV proves the model adds information. NFL is 0: the NFL ratings lose to closing lines in walk-forward tests (2021-25).",
   "devig_method": "multiplicative",
   "stop_loss_drawdown_pct": 0.20,
   "daily_stop_loss_pct": 0.05,

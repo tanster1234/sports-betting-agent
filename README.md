@@ -109,6 +109,7 @@ python3 -m betlab report --format md
 python3 -m betlab live --bets tracker-bets/ --out patches/          # grade tracker legs from live ESPN scores
 python3 -m betlab nfl price --spread -3 --total 44.5 --alt -2.5 -7 --teaser 6 \
     --offer spread:home:-2.5:-135 total:over:41.5:-150               # NFL alt lines/teasers off the main line
+python3 -m betlab nfl predict --date 2026-10-04                     # NFL ratings lines (QB-adjusted; loses to closes)
 ```
 
 ## Testing — four layers

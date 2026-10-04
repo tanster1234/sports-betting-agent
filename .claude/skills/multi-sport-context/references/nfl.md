@@ -49,6 +49,22 @@ legs through 3 and 7 predicted 75.9% vs 73.6% actual (174 legs — within noise,
 prices *from* the market; it does not predict games. Refit yearly with
 `python3 scripts/refresh_nfl_data.py` (golden numbers in `tests/test_nfl.py`).
 
+## Team ratings (`betlab nfl ratings / predict / backtest`)
+
+Power ratings from results (home edge 1.75, season-to-season regression 0.6) with a **3-point
+handicap when someone other than a team's usual starter is listed at QB** (usual = most starts in
+the team's last 4 games); the ratings learn from those games net of the handicap.
+`python3 -m betlab nfl predict --date 2026-10-04` lists the model line next to the market's, with
+QB notes. The schedule's projected starters can be stale — verify on game day.
+
+Honest result, walk-forward 2021–25 against closing lines (1,424 games,
+`python3 -m betlab nfl backtest`): margin RMSE **13.10 vs 12.66** for the closing spread; the
+best blend weight on the model is **0**; when it disagreed with the close by 1/2/3+ points its side
+covered **48.5% / 46.8% / 46.5%** (52.4% needed at -110). The QB handicap does help the model
+(13.03–13.10 with it vs 13.12 without), but the market prices QBs better still. So the profile's
+NFL model weight is 0: use the ratings for early-week numbers, news reactions and as a sanity
+check — never as a reason to bet a closing line.
+
 ## Teasers
 Six-point teasers that move a line through both 3 and 7 (roughly +1.5 to +2.5 → +7.5 to +8.5, and
 -7.5 to -8.5 → -1.5 to -2.5) were historically +EV at standard prices. Books now price 2-team

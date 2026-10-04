@@ -485,3 +485,142 @@ def validate(games: Sequence[dict], fit_last: int, test_first: int, test_last: O
     if legs:
         out["wong_teaser_legs"] = {"n": legs, "predicted": round(pred / legs, 4), "actual": round(won / legs, 4)}
     return out
+
+
+# ---------------------------------------------------------------------------
+# Team ratings (power ratings with a QB-change adjustment)
+# ---------------------------------------------------------------------------
+
+# Relocations: nflverse keeps historical codes.
+NFL_ALIASES = {"OAK": "LV", "SD": "LAC", "STL": "LA"}
+
+# Tuned on 2012-2019 (margin log-likelihood; home edge checked on 2016-19), tested
+# walk-forward on 2021-2025 against closing lines: RMSE 13.10 vs 12.66 for the
+# closing spread, best blend weight on the model 0 — see ``ratings_backtest``.
+NFL_RATING_PARAMS = dict(hca=1.75, sigma=13.0, q=0.02, v0=20.0, rho=0.6, mu_new=0.0, v_new=40.0, cap=2.5,
+                         sigma_t=13.0, q_t=0.02, v0_t=12.0, rho_t=0.6, vL_init=400.0, vL0=4.0, qL=0.02,
+                         b2b_penalty=0.0)
+NFL_QB_ADJ = 3.0          # points a team loses when someone other than its usual starter starts
+
+
+def rating_params(**overrides):
+    from .ratings import RatingParams
+    return RatingParams(**{**NFL_RATING_PARAMS, **overrides})
+
+
+def rating_rows(games: Sequence[dict], qb_adj: float = NFL_QB_ADJ, lookback: int = 4,
+                min_history: int = 3) -> List[dict]:
+    """Games -> ratings-engine rows, flagging starts by someone other than the usual QB.
+
+    A team's usual starter is the QB with the most starts in its previous
+    ``lookback`` games (across seasons).  When the listed starter differs —
+    an injury, a benching — that team is handicapped by ``qb_adj`` points in
+    the prediction and the ratings learn from the result net of it.  nflverse
+    lists projected starters for upcoming games, so this applies before
+    kickoff too (check the real starter on game day).
+    """
+    from collections import defaultdict, deque
+    hist: Dict[str, deque] = defaultdict(lambda: deque(maxlen=lookback))
+    rows = []
+    for g in sorted(games, key=lambda g: (g["date"] or "", g["game_id"] or "")):
+        home, away = NFL_ALIASES.get(g["home"], g["home"]), NFL_ALIASES.get(g["away"], g["away"])
+        flags = {}
+        for team, qb in ((home, g.get("home_qb")), (away, g.get("away_qb"))):
+            h = hist[team]
+            usual = Counter(h).most_common(1)[0][0] if len(h) >= min_history else None
+            flags[team] = {"usual": usual, "starter": qb, "change": bool(usual and qb and qb != usual)}
+        adj = (-qb_adj if flags[home]["change"] else 0.0) + (qb_adj if flags[away]["change"] else 0.0)
+        rows.append({
+            "game_id": g["game_id"], "date": g["date"], "season": g["season"], "home": home, "away": away,
+            "home_pts": g["home_score"], "away_pts": g["away_score"], "neutral": int(bool(g.get("neutral"))),
+            "season_type": "regular" if g.get("game_type") in (None, "", "REG") else "playoff",
+            "extra_home_adj": adj, "home_qb": flags[home], "away_qb": flags[away],
+            "home_spread": g.get("home_spread"), "total_line": g.get("total_line"),
+        })
+        if g.get("home_score") is not None:          # only played games teach "usual starter"
+            if g.get("home_qb"):
+                hist[home].append(g["home_qb"])
+            if g.get("away_qb"):
+                hist[away].append(g["away_qb"])
+    return rows
+
+
+def fit_ratings(games: Sequence[dict], until: Optional[str] = None, qb_adj: float = NFL_QB_ADJ, **overrides):
+    """Fit the ratings on completed games before ``until`` (YYYY-MM-DD).  Returns (model, rows)."""
+    from .ratings import KalmanRatings
+    rows = rating_rows(games, qb_adj)
+    played = [r for r in rows if r["home_pts"] is not None and (until is None or r["date"] < until)]
+    model = KalmanRatings(rating_params(**overrides)).fit(played)
+    return model, rows
+
+
+def predict_game(model, row: dict) -> dict:
+    """Model line for one game row (from ``rating_rows``), including its QB adjustment."""
+    pr = model.predict(row["home"], row["away"], row["date"], season=row["season"],
+                       neutral=bool(row["neutral"]), extra_home_adj=row["extra_home_adj"])
+    out = {"home": row["home"], "away": row["away"], "date": row["date"],
+           "model_home_spread": round(-pr.mu, 1), "model_total": round(pr.total_mu, 1),
+           "p_home_win": round(pr.p_home, 3), "qb_adjustment": row["extra_home_adj"],
+           "market_home_spread": row.get("home_spread"), "market_total": row.get("total_line")}
+    for side in ("home", "away"):
+        q = row[f"{side}_qb"]
+        if q["change"]:
+            out.setdefault("notes", []).append(
+                f"{row[side]}: listed starter {q['starter']}, usual {q['usual']} (-{abs(row['extra_home_adj']) if row['extra_home_adj'] else 0:g} applied; verify the starter on game day)")
+    if row.get("home_spread") is not None:
+        out["model_minus_market"] = round(out["model_home_spread"] - row["home_spread"], 1)
+    return out
+
+
+def ratings_backtest(games: Sequence[dict], test_seasons: Sequence[int], qb_adj: float = NFL_QB_ADJ,
+                     edges: Sequence[float] = (1.0, 2.0, 3.0), **overrides) -> dict:
+    """Walk-forward check of the ratings against closing lines (no look-ahead).
+
+    Every prediction is made before the game from earlier results only.
+    Reports margin RMSE for the model and for the closing spread, the
+    log-likelihood-optimal weight on the model when blended with the market,
+    and how often the model's side covered the closing spread when it
+    disagreed by at least each ``edge`` (pushes excluded).
+    """
+    from .ratings import KalmanRatings
+    rows = [r for r in rating_rows(games, qb_adj) if r["home_pts"] is not None]
+    model = KalmanRatings(rating_params(**overrides)).fit(rows)
+    test = [(h, r) for h, r in zip(model.history, rows) if r["season"] in set(test_seasons)
+            and r.get("home_spread") is not None]
+    n = len(test)
+    if not n:
+        return {"n": 0}
+    se_model = sum((h["margin"] - h["pred_margin"]) ** 2 for h, _ in test) / n
+    se_mkt = sum((h["margin"] + r["home_spread"]) ** 2 for h, r in test) / n
+    sd = 13.0
+
+    def ll(w: float) -> float:
+        tot = 0.0
+        for h, r in test:
+            mu = w * h["pred_margin"] + (1 - w) * (-r["home_spread"])
+            tot += -0.5 * ((h["margin"] - mu) / sd) ** 2
+        return tot / n
+
+    weights = [i / 20 for i in range(0, 21)]
+    best_w = max(weights, key=ll)
+    ats = {}
+    for edge in edges:
+        won = lost = 0
+        for h, r in test:
+            diff = h["pred_margin"] - (-r["home_spread"])     # + => model likes home vs the line
+            if abs(diff) < edge:
+                continue
+            res = h["margin"] + r["home_spread"]              # home cover margin
+            if res == 0:
+                continue
+            if (diff > 0) == (res > 0):
+                won += 1
+            else:
+                lost += 1
+        tot = won + lost
+        ats[f">={edge:g}"] = {"bets": tot, "win_rate": round(won / tot, 4) if tot else None,
+                              "breakeven_at_-110": 0.5238}
+    return {"n": n, "seasons": sorted(set(test_seasons)),
+            "margin_rmse_model": round(math.sqrt(se_model), 3), "margin_rmse_closing_spread": round(math.sqrt(se_mkt), 3),
+            "best_blend_weight_on_model": best_w, "ats_when_disagreeing": ats,
+            "qb_adj": qb_adj, "params": {**NFL_RATING_PARAMS, **overrides}}

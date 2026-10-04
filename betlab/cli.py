@@ -417,6 +417,24 @@ def cmd_live(a):
 def cmd_nfl(a):
     """NFL pricing off a market line: key-number margins, alt lines, teasers, offers."""
     from . import nfl
+    if a.action in ("ratings", "predict", "backtest"):
+        games = nfl.load_games(a.games, completed_only=False)
+        qb = nfl.NFL_QB_ADJ if a.qb_adj is None else a.qb_adj
+        if a.action == "backtest":
+            first, last = a.test_seasons
+            played = [g for g in games if g["home_score"] is not None]
+            return nfl.ratings_backtest(played, range(first, last + 1), qb_adj=qb)
+        import datetime as _dt
+        day = a.date or _dt.date.today().isoformat()
+        model, rows = nfl.fit_ratings(games, until=day, qb_adj=qb)
+        if a.action == "ratings":
+            return {"as_of": day, "ratings": model.ratings_table(a.season)}
+        team = a.home if a.home not in (None, "HOME") else None
+        todays = [r for r in rows if r["date"] == day and (team is None or team in (r["home"], r["away"]))]
+        if not todays:
+            raise ValueError(f"no NFL games on {day} in the schedule file (use --date YYYY-MM-DD)")
+        return {"as_of": day, "note": "model lines lose to closing lines in backtests; use for news and early numbers",
+                "games": [nfl.predict_game(model, r) for r in todays]}
     if a.action in ("validate", "fit"):
         games = nfl.load_games(a.games)
         if a.action == "fit":
@@ -638,7 +656,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.set_defaults(fn=cmd_fetch)
 
     s = sub.add_parser("nfl", help="NFL prices from the market line: key numbers, alt lines, teasers")
-    s.add_argument("action", choices=["price", "validate", "fit"])
+    s.add_argument("action", choices=["price", "validate", "fit", "ratings", "predict", "backtest"])
     s.add_argument("--spread", type=float, help="home spread (negative = home favoured), e.g. -3")
     s.add_argument("--total", type=float, help="main total")
     s.add_argument("--home", default="HOME")
@@ -654,6 +672,10 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--fit-last", type=int, default=2023)
     s.add_argument("--test-first", type=int, default=2024)
     s.add_argument("--test-last", type=int)
+    s.add_argument("--date", help="ratings/predict: as of this date, YYYY-MM-DD (default today)")
+    s.add_argument("--season", type=int, help="ratings: only teams' current-season rows")
+    s.add_argument("--qb-adj", type=float, help="points for a start by someone other than the usual QB (default 3)")
+    s.add_argument("--test-seasons", type=int, nargs=2, default=[2021, 2025], metavar=("FIRST", "LAST"))
     s.set_defaults(fn=cmd_nfl)
 
     s = sub.add_parser("live", help="grade bet-tracker legs from live ESPN scores")

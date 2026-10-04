@@ -35,6 +35,8 @@ DEFAULTS: dict = {
     "model_weight": {
         "default": {"spread": 0.15, "total": 0.2, "moneyline": 0.15, "prop": 0.5},
         "WNBA": {"spread": 0.15, "total": 0.35, "moneyline": 0.15, "prop": 0.5},
+        # NFL ratings vs closing lines, 2021-25 walk-forward: best blend weight 0 (see betlab/nfl.py)
+        "NFL": {"spread": 0.0, "total": 0.0, "moneyline": 0.0, "prop": 0.5},
     },
     "devig_method": "multiplicative",
     "stop_loss_drawdown_pct": 0.20,

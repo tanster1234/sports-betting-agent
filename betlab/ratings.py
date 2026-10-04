@@ -247,7 +247,10 @@ class KalmanRatings:
             self.L, self.vL = hp + ap, p.vL_init
             self.L_season, self.L_last = season, d
         L, vL = self._league(season, d, mutate=True)
-        pred = self._predict_from(h, a, sh, sa, L, vL, d, neutral, playoff, None, None)
+        # optional known-at-kickoff adjustments (e.g. an NFL backup QB starting): the ratings then
+        # learn from the result net of that effect instead of absorbing it
+        pred = self._predict_from(h, a, sh, sa, L, vL, d, neutral, playoff, None, None,
+                                  float(game.get("extra_home_adj") or 0.0), float(game.get("extra_total_adj") or 0.0))
         margin, total = hp - ap, hp + ap
         rec = {"game_id": game.get("game_id"), "date": d.isoformat(), "season": season, "home": h, "away": a,
                "pred_margin": pred.mu, "pred_sd": pred.sd, "pred_total": pred.total_mu, "pred_total_sd": pred.total_sd,

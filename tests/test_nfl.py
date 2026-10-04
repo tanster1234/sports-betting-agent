@@ -150,3 +150,67 @@ def test_nfl_cli_price_and_offers(capsys):
     out = json.loads(capsys.readouterr().out)
     assert out["spread"][0]["selection"] == "NYG -3" and len(out["offers"]) == 2
     assert main(["nfl", "price", "--spread", "-3", "--offer", "bad"]) == 1
+
+
+# ---------------- ratings ----------------
+def _season_rows():
+    """Two teams, AAA's usual QB 'Ace' hurt in game 5 ('Backup' starts)."""
+    rows = []
+    for i in range(6):
+        d = f"2025-09-{7 + 7 * i:02d}" if 7 + 7 * i <= 30 else f"2025-10-{7 + 7 * i - 30:02d}"
+        qb = "Ace" if i != 4 else "Backup"
+        rows.append({"game_id": f"g{i}", "date": d, "season": 2025, "game_type": "REG", "home": "AAA", "away": "BBB",
+                     "home_score": 24 if i != 4 else 10, "away_score": 17, "home_spread": -3.0, "total_line": 44.5,
+                     "home_qb": qb, "away_qb": "Bee", "neutral": False})
+    rows.append({**rows[0], "game_id": "next", "date": "2025-10-19", "home_score": None, "away_score": None,
+                 "home_qb": "Backup"})
+    return rows
+
+
+def test_rating_rows_flag_a_backup_qb_and_handicap_him():
+    rows = nfl.rating_rows(_season_rows(), qb_adj=3.0, lookback=4)
+    by_id = {r["game_id"]: r for r in rows}
+    assert by_id["g3"]["home_qb"]["change"] is False and by_id["g3"]["extra_home_adj"] == 0.0
+    assert by_id["g4"]["home_qb"] == {"usual": "Ace", "starter": "Backup", "change": True}
+    assert by_id["g4"]["extra_home_adj"] == -3.0                  # home side handicapped
+    assert by_id["next"]["extra_home_adj"] == -3.0                 # projected backup for an unplayed game
+    assert by_id["g0"]["home_qb"]["usual"] is None                 # not enough history yet
+
+
+def test_backup_loss_is_not_fully_charged_to_the_team():
+    games = _season_rows()[:-1]
+    with_adj, _ = nfl.fit_ratings(games, qb_adj=3.0)
+    without, _ = nfl.fit_ratings(games, qb_adj=0.0)
+    r_with = {t["team"]: t["rating"] for t in with_adj.ratings_table()}
+    r_without = {t["team"]: t["rating"] for t in without.ratings_table()}
+    assert r_with["AAA"] > r_without["AAA"]                        # the backup's loss counted less
+
+
+def test_predict_and_backtest_outputs():
+    games = _season_rows()
+    model, rows = nfl.fit_ratings(games, until="2025-10-19")
+    pred = nfl.predict_game(model, [r for r in rows if r["game_id"] == "next"][0])
+    assert pred["qb_adjustment"] == -3.0 and "Backup" in pred["notes"][0]
+    assert pred["model_minus_market"] == pytest.approx(pred["model_home_spread"] + 3.0, abs=0.06)
+    bt = nfl.ratings_backtest([g for g in games if g["home_score"] is not None], test_seasons=[2025])
+    assert bt["n"] == 6 and 0.0 <= bt["best_blend_weight_on_model"] <= 1.0
+    assert set(bt["ats_when_disagreeing"]) == {">=1", ">=2", ">=3"}
+
+
+def test_nfl_cli_predict_and_ratings(tmp_path, capsys):
+    p = tmp_path / "games.csv"
+    rows = []
+    for g in _season_rows():
+        rows.append({"game_id": g["game_id"], "season": g["season"], "game_type": "REG", "week": 1,
+                     "gameday": g["date"], "home_team": g["home"], "away_team": g["away"],
+                     "home_score": "" if g["home_score"] is None else g["home_score"],
+                     "away_score": "" if g["away_score"] is None else g["away_score"],
+                     "spread_line": 3.0, "total_line": 44.5, "home_qb_name": g["home_qb"],
+                     "away_qb_name": g["away_qb"], "location": "Home"})
+    _write_games(p, rows)
+    assert main(["nfl", "predict", "--games", str(p), "--date", "2025-10-19"]) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["games"][0]["home"] == "AAA" and out["games"][0]["qb_adjustment"] == -3.0
+    assert main(["nfl", "ratings", "--games", str(p), "--date", "2025-10-19"]) == 0
+    assert {r["team"] for r in json.loads(capsys.readouterr().out)["ratings"]} == {"AAA", "BBB"}
+    assert main(["nfl", "predict", "--games", str(p), "--date", "2025-12-25"]) == 1
