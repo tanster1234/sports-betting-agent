@@ -49,6 +49,14 @@ legs through 3 and 7 predicted 75.9% vs 73.6% actual (174 legs — within noise,
 prices *from* the market; it does not predict games. Refit yearly with
 `python3 scripts/refresh_nfl_data.py` (golden numbers in `tests/test_nfl.py`).
 
+Tail calibration (fit 2015–21, test 2022–25): alt totals are within ~1 point of probability
+on average, but in games with a total of 48+ the model runs ~1–2 points *high* on overs 5–10
+points above the line; big favourites' blowout tails run ~1 point high; underdog alts deep past
+the line ran ~2–3 points high in 2024–25. So for alt lines more than ~5 points from the main
+line, require **≥4% EV** (not 2%) before calling it an edge. First live scan (Oct 4, 2026, 2,168
+DK/FD alt prices): 24 offers showed ≥2% and 8 ≥4%, all in those tails — after the corrections
+above, none clearly cleared the bar.
+
 ## Team ratings (`betlab nfl ratings / predict / backtest`)
 
 Power ratings from results (home edge 1.75, season-to-season regression 0.6) with a **3-point
