@@ -107,6 +107,8 @@ python3 -m betlab ledger add --sport WNBA --event "NY @ ATL" --market total --se
     --line 168.5 --price -110 --stake 10 --model-prob 0.544
 python3 -m betlab report --format md
 python3 -m betlab live --bets tracker-bets/ --out patches/          # grade tracker legs from live ESPN scores
+python3 -m betlab nfl price --spread -3 --total 44.5 --alt -2.5 -7 --teaser 6 \
+    --offer spread:home:-2.5:-135 total:over:41.5:-150               # NFL alt lines/teasers off the main line
 ```
 
 ## Testing — four layers
@@ -135,14 +137,15 @@ CI: `.github/workflows/tests.yml` (Python 3.9–3.13, ruff, pytest, CLI smoke te
 .claude/settings.json  allow-list for betlab / pytest commands
 CLAUDE.md              project rules for Claude
 betlab/                odds, kelly, distributions, markets, props, parlay, clv, series,
-                       ratings, wnba, lowscoring, ledger, report, backtest, profile, live, cli,
+                       ratings, wnba, nfl, lowscoring, ledger, report, backtest, profile, live, cli,
                        fetch/{espn, odds_api}
 config/                profile.example.json  (copy to profile.json — gitignored)
 data/wnba/             games.csv, lines_2026_draftkings.csv (+ README with provenance)
+data/nfl/              calibration.json (NFL key-number model; raw games downloaded, not committed)
 docs/                  reference-repo-review.md
 evals/                 evals.json, README, results
 examples/              real outputs: game analysis, series, props, backtest, performance review
-scripts/               refresh_wnba_data.py
+scripts/               refresh_wnba_data.py, refresh_nfl_data.py
 tests/                 pytest suite + real/structured fixtures
 tracker/               bet-slip tracker page (claude.ai artifact source; data stays out of git)
 ```

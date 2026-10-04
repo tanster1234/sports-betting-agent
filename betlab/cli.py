@@ -414,6 +414,31 @@ def cmd_live(a):
     return out
 
 
+def cmd_nfl(a):
+    """NFL pricing off a market line: key-number margins, alt lines, teasers, offers."""
+    from . import nfl
+    if a.action in ("validate", "fit"):
+        games = nfl.load_games(a.games)
+        if a.action == "fit":
+            cal = nfl.fit_calibration(games, a.first, a.fit_last)
+            return {**{k: v for k, v in cal.items() if k not in ("margin", "total")},
+                    "margin_sigma": cal["margin"]["sigma"], "total_sigma": cal["total"]["sigma"]}
+        return nfl.validate(games, a.fit_last, a.test_first, a.test_last, a.first)
+    if a.spread is None:
+        raise ValueError("nfl price needs --spread (home spread, e.g. -3 when home is favoured)")
+    out = nfl.price(a.spread, a.total, a.alt, a.alt_totals, a.teaser, a.home, a.away)
+    offers = []
+    for o in a.offer:
+        try:
+            market, side, line, price = o.split(":")
+        except ValueError:
+            raise ValueError(f"bad --offer {o!r}; use market:side:line:price, e.g. spread:home:-2.5:-130") from None
+        offers.append(nfl.evaluate_offer(a.spread, market, side, float(line), float(price), a.total))
+    if offers:
+        out["offers"] = offers
+    return out
+
+
 # ---------------------------------------------------------------------------
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="betlab", description="Deterministic betting math. All output is JSON.")
@@ -611,6 +636,25 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--best", action="store_true")
     s.add_argument("--min-ev", type=float, default=0.02)
     s.set_defaults(fn=cmd_fetch)
+
+    s = sub.add_parser("nfl", help="NFL prices from the market line: key numbers, alt lines, teasers")
+    s.add_argument("action", choices=["price", "validate", "fit"])
+    s.add_argument("--spread", type=float, help="home spread (negative = home favoured), e.g. -3")
+    s.add_argument("--total", type=float, help="main total")
+    s.add_argument("--home", default="HOME")
+    s.add_argument("--away", default="AWAY")
+    s.add_argument("--alt", type=float, nargs="+", default=[], help="alternate HOME spreads to price")
+    s.add_argument("--alt-totals", type=float, nargs="+", default=[])
+    s.add_argument("--teaser", type=float, help="teaser points, e.g. 6")
+    s.add_argument("--offer", nargs="+", default=[],
+                   help="offered prices to check, market:side:line:price, e.g. spread:home:-2.5:-130 "
+                        "spread:away:8.5:-300 total:over:41.5:-120 ml:away:0:150")
+    s.add_argument("--games", help="nflverse games.csv (validate/fit); default data/nfl/games.csv")
+    s.add_argument("--first", type=int, default=2015)
+    s.add_argument("--fit-last", type=int, default=2023)
+    s.add_argument("--test-first", type=int, default=2024)
+    s.add_argument("--test-last", type=int)
+    s.set_defaults(fn=cmd_nfl)
 
     s = sub.add_parser("live", help="grade bet-tracker legs from live ESPN scores")
     s.add_argument("--bets", required=True, help="directory of <doc_id>.json bets, or a JSON list/dict of bets")

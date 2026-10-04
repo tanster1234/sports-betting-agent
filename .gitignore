@@ -21,3 +21,6 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+
+# NFL raw games (nflverse, unlicensed: downloaded by scripts/refresh_nfl_data.py, not redistributed)
+data/nfl/games.csv

@@ -67,4 +67,7 @@ python3 -m betlab -h          # CLI help
   guard them — update the doc and tests together if the model changes.
 - Bundled data (`data/wnba/`) is refreshed with `scripts/refresh_wnba_data.py` (needs pandas +
   pyarrow and GitHub access).
+- NFL pricing (`betlab nfl`) uses `data/nfl/calibration.json`, rebuilt by
+  `scripts/refresh_nfl_data.py` (stdlib; downloads nflverse games to the gitignored
+  `data/nfl/games.csv`). Golden numbers in `tests/test_nfl.py` — refit, docs and tests together.
 - Skill evals live in `evals/` (see `evals/README.md`).

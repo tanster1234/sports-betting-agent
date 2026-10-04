@@ -5,6 +5,23 @@
 | `wnba/games.csv` | WNBA results 2013 → 2026 first round (through Oct 1, 2026): date, teams, scores, neutral flag, periods (OT), first-half points (2023+), possessions | 3,318 |
 | `wnba/lines_2026_draftkings.csv` | DraftKings **opening and closing** spread / total / moneyline (with prices) for every 2026 game through Oct 1, 2026, plus final scores | 340 |
 
+| `nfl/calibration.json` | NFL margin/total model fitted on 2015–2025 closing lines and results: σ plus a weight per final margin (3, 7, 6, 10, 14 …) and per total — aggregate statistics only, with an out-of-sample check on 2024–25 | 3,028 games |
+
+## NFL data
+
+`nfl/games.csv` is **not** in the repo. It is nflverse's game file
+([nflverse/nfldata](https://github.com/nflverse/nfldata) `data/games.csv`, compiled by Lee Sharpe:
+every game since 1999 with final score, closing spread/total/moneylines, starting QBs, rest, roof
+and weather). That repository states no licence, so it is downloaded locally and gitignored;
+only the derived calibration is committed.
+
+```bash
+python3 scripts/refresh_nfl_data.py                          # download + refit (stdlib only)
+python3 scripts/refresh_nfl_data.py --last 2025 --validate-split 2023   # also store a 2024-25 holdout check
+```
+nflverse `spread_line` is positive when the home team is favoured; betlab flips it so that, as
+everywhere else here, a negative home spread means the home team is favoured.
+
 ## Provenance and license
 
 Both files are derived from ESPN's public game data as collected and published by the
