@@ -45,6 +45,7 @@ adult user to act on — Claude never places bets.
 | `bankroll-management` | stakes, caps, drawdowns, stop-loss |
 | `bet-tracking` | ledger, closing lines, performance reviews |
 | `backtesting` | testing strategies honestly; bundled 2026 WNBA backtest |
+| `live-betting` | games in progress — play-by-play read, comebacks, halftime/live prices vs sharp |
 | `responsible-gambling` | warning signs, limits, help resources |
 
 ## Configuration
@@ -57,7 +58,7 @@ adult user to act on — Claude never places bets.
 ## Development
 
 ```bash
-python3 -m pytest -q          # ~240 tests, a few seconds, stdlib + pytest only
+python3 -m pytest -q          # ~270 tests, a few seconds, stdlib + pytest only
 ruff check betlab tests       # lint (config in pyproject.toml)
 python3 -m betlab -h          # CLI help
 ```
@@ -65,6 +66,9 @@ python3 -m betlab -h          # CLI help
 - WNBA numbers in skills come from `.claude/skills/wnba-betting/references/calibration.md`;
   golden-number tests in `tests/test_ratings_wnba.py` and `tests/test_backtest_fetch_cli.py`
   guard them — update the doc and tests together if the model changes.
+- Live reads (`betlab liveread`) use `LIVE_PARAMS` in `betlab/liveread.py`, fitted by
+  `python3 -m betlab liveread validate` on WNBA halftime scores; golden numbers in
+  `tests/test_liveread.py` — refit, the `live-betting` skill table and tests together.
 - Bundled data (`data/wnba/`) is refreshed with `scripts/refresh_wnba_data.py` (needs pandas +
   pyarrow and GitHub access).
 - NFL pricing (`betlab nfl`) uses `data/nfl/calibration.json`, rebuilt by

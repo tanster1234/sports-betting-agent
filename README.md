@@ -2,14 +2,14 @@
 
 A disciplined sports-betting analysis system for [Claude Code](https://claude.com/claude-code):
 
-- **11 Claude Code skills** (`.claude/skills/`) covering the whole workflow — slate analysis,
+- **12 Claude Code skills** (`.claude/skills/`) covering the whole workflow — slate analysis,
   WNBA, NBA/NFL/MLB/NHL/college context, odds math, props and SGPs, data ingestion, adversarial
-  bet review, bankroll sizing, bet tracking, backtesting and responsible gambling.
+  bet review, bankroll sizing, bet tracking, backtesting, live (in-game) reads and responsible gambling.
 - **`betlab`**, a standard-library-only Python package with a JSON CLI that does every number the
   skills need — devig (5 methods), EV, push-aware and simultaneous Kelly, CLV, spread/total/
   moneyline/alt/1H pricing, props, correlated parlays, playoff series, a Kalman rating model,
   MLB/NHL scoring models, a tamper-evident bet ledger, performance reports and a no-look-ahead
-  backtester. **242 tests**, lint-clean, runs on Python 3.9+.
+  backtester. **272 tests**, lint-clean, runs on Python 3.9+.
 - **Real WNBA data**: 3,318 games (2013 → Oct 1, 2026) and DraftKings **opening and closing**
   lines for all 340 games of 2026, used to calibrate the model and to backtest it honestly.
 
@@ -38,13 +38,15 @@ Full tables: [`.claude/skills/wnba-betting/references/calibration.md`](.claude/s
 | Model vs DK **openers** on totals | disagreement predicts the line move (corr **0.53**, CI 0.42–0.61) |
 | Walk-forward backtest, totals at open, blended | 49 bets, 32-17, **CLV +6.0% (t = 2.9)** — the one durable signal; spreads/ML show none |
 | Raw (unblended) model EV claims | 10–26% per bet — fiction; blending with the market fixes it |
+| Halftime leads (2023–26, 1,175 games) | leaders by 6–10 won **77.8%**, not the 82% simple time-scaling says; each point of lead gives back ~0.15 |
+| First-half pace → second-half total | carries only ~0.1 per point; projecting the pace is far worse (RMSE 16.6 vs 13.6) |
 
 ## Quick start
 
 ```bash
 git clone https://github.com/tanster1234/sports-betting-agent && cd sports-betting-agent
 cp config/profile.example.json config/profile.json      # set your bankroll, books, state
-python3 -m pip install pytest && python3 -m pytest      # 242 tests, a few seconds
+python3 -m pip install pytest && python3 -m pytest      # 272 tests, a few seconds
 python3 -m betlab wnba predict --home ATL --away NY --date 2026-10-04 --playoff
 claude                                                  # open Claude Code in the repo
 ```
@@ -75,6 +77,7 @@ resolves everywhere) and copy or symlink `.claude/skills/*` into `~/.claude/skil
 | [`bankroll-management`](.claude/skills/bankroll-management/SKILL.md) | stakes, units, drawdowns | fractional Kelly + caps, stop-loss, simulated drawdowns |
 | [`bet-tracking`](.claude/skills/bet-tracking/SKILL.md) | logging, "how am I doing" | hash-chained ledger, CLV capture, significance-aware reviews |
 | [`backtesting`](.claude/skills/backtesting/SKILL.md) | "would this have worked" | no-look-ahead engine, bundled 2026 WNBA test, how to judge any backtest |
+| [`live-betting`](.claude/skills/live-betting/SKILL.md) | a game in progress, runs, "can they come back", halftime lines | play-by-play facts (runs, fouls, on-floor, shooting luck), a halftime-validated fair live price, book vs sharp live price |
 | [`responsible-gambling`](.claude/skills/responsible-gambling/SKILL.md) | chasing, distress, limits | pause, support, current US resources |
 
 Project-wide rules for Claude live in [`CLAUDE.md`](CLAUDE.md).
@@ -107,6 +110,8 @@ python3 -m betlab ledger add --sport WNBA --event "NY @ ATL" --market total --se
     --line 168.5 --price -110 --stake 10 --model-prob 0.544
 python3 -m betlab report --format md
 python3 -m betlab live --bets tracker-bets/ --out patches/          # grade tracker legs from live ESPN scores
+python3 -m betlab liveread --event 401918295 --offer ml:home:0:-120:dk --sharp ml:-120:-101   # in-game read
+python3 -m betlab liveread validate                                 # WNBA halftime fit + out-of-sample check
 python3 -m betlab nfl price --spread -3 --total 44.5 --alt -2.5 -7 --teaser 6 \
     --offer spread:home:-2.5:-135 total:over:41.5:-150               # NFL alt lines/teasers off the main line
 python3 -m betlab nfl predict --date 2026-10-04                     # NFL ratings lines (QB-adjusted; loses to closes)
@@ -114,7 +119,7 @@ python3 -m betlab nfl predict --date 2026-10-04                     # NFL rating
 
 ## Testing — four layers
 
-1. **Unit + property tests** (`tests/`, 242): golden values for every formula, invariants
+1. **Unit + property tests** (`tests/`, 272): golden values for every formula, invariants
    (devig sums to 1, push-aware Kelly maximises log growth, series probabilities sum to 1,
    simulations hit their target moments), ledger integrity (double settlement refused,
    hash chain catches edits/deletions), parsers tested on real ESPN payloads.
@@ -134,11 +139,11 @@ CI: `.github/workflows/tests.yml` (Python 3.9–3.13, ruff, pytest, CLI smoke te
 ## Repository layout
 
 ```
-.claude/skills/        11 skills (SKILL.md + references/)
+.claude/skills/        12 skills (SKILL.md + references/)
 .claude/settings.json  allow-list for betlab / pytest commands
 CLAUDE.md              project rules for Claude
 betlab/                odds, kelly, distributions, markets, props, parlay, clv, series,
-                       ratings, wnba, nfl, lowscoring, ledger, report, backtest, profile, live, cli,
+                       ratings, wnba, nfl, lowscoring, ledger, report, backtest, profile, live, liveread, cli,
                        fetch/{espn, odds_api}
 config/                profile.example.json  (copy to profile.json — gitignored)
 data/wnba/             games.csv, lines_2026_draftkings.csv (+ README with provenance)

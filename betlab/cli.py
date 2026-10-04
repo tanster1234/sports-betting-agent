@@ -457,6 +457,48 @@ def cmd_nfl(a):
     return out
 
 
+def cmd_liveread(a):
+    """In-game read for WNBA/NBA: play-by-play facts, a fair live price, and live offers checked."""
+    from . import liveread as lr
+    if a.action == "validate":
+        from . import wnba
+        from .ratings import KalmanRatings
+        rows = lr.halftime_rows(wnba.load_games(), wnba.load_lines(),
+                                lambda: KalmanRatings(wnba.WNBA_PARAMS, aliases=wnba.ALIASES))
+        return lr.validate_halftime([r for r in rows if r["season"] >= a.since])
+    if a.summary:
+        with open(a.summary) as f:
+            js = json.load(f)
+    else:
+        if not a.event:
+            raise ValueError("liveread needs --event ESPN_EVENT_ID (or --summary FILE)")
+        from .fetch import espn
+        js, _ = espn.fetch_json(espn.summary_url(a.league, a.event))
+    game = lr.parse_game(js, a.league.upper())
+    offers = []
+    for o in a.offer:
+        parts = o.split(":")
+        if len(parts) not in (4, 5):
+            raise ValueError(f"bad --offer {o!r}; use market:side:line:price[:book], e.g. ml:home:0:-120:dk")
+        market, side, line, price = parts[:4]
+        offers.append({"market": market, "side": side, "line": None if market == "ml" else float(line),
+                       "price": float(price), "book": parts[4] if len(parts) == 5 else None})
+    sharp = {}
+    for s in a.sharp:
+        parts = s.split(":")
+        try:
+            if parts[0] == "ml" and len(parts) == 3:
+                sharp["ml"] = {"first": float(parts[1]), "second": float(parts[2])}
+            elif parts[0] in ("spread", "total") and len(parts) == 4:
+                sharp[parts[0]] = {"line": float(parts[1]), "first": float(parts[2]), "second": float(parts[3])}
+            else:
+                raise ValueError
+        except ValueError:
+            raise ValueError(f"bad --sharp {s!r}; use ml:HOME:AWAY, spread:HOME_LINE:HOME:AWAY or "
+                             "total:LINE:OVER:UNDER") from None
+    return lr.live_read(game, a.pre_spread, a.pre_total, offers, sharp or None, a.min_ev)
+
+
 # ---------------------------------------------------------------------------
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="betlab", description="Deterministic betting math. All output is JSON.")
@@ -683,6 +725,22 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--out", help="write one patch file per bet here (for the tracker database)")
     s.add_argument("--now", help="timestamp to stamp updates with (ISO, UTC); default now")
     s.set_defaults(fn=cmd_live)
+
+    s = sub.add_parser("liveread", help="in-game read (WNBA/NBA): play-by-play facts, fair live price, offers")
+    s.add_argument("action", nargs="?", default="read", choices=["read", "validate"])
+    s.add_argument("--league", default="wnba", choices=["wnba", "nba"])
+    s.add_argument("--event", help="ESPN event id (from fetch espn-scoreboard)")
+    s.add_argument("--summary", help="saved ESPN summary JSON instead of fetching")
+    s.add_argument("--pre-spread", type=float, help="pregame home spread (default: closing line in the ESPN summary)")
+    s.add_argument("--pre-total", type=float, help="pregame total (default: closing total in the ESPN summary)")
+    s.add_argument("--offer", nargs="+", default=[],
+                   help="live book prices, market:side:line:price[:book], e.g. ml:home:0:-120:dk "
+                        "spread:away:1.5:-120:fd total:over:178.5:-115:dk")
+    s.add_argument("--sharp", nargs="+", default=[],
+                   help="sharp live two-way prices to devig: ml:HOME:AWAY spread:HOME_LINE:HOME:AWAY total:LINE:OVER:UNDER")
+    s.add_argument("--min-ev", type=float, default=0.03, help="EV vs the sharp price needed to qualify (live: 3%%)")
+    s.add_argument("--since", type=int, default=2023, help="validate: first season with halftime scores")
+    s.set_defaults(fn=cmd_liveread)
     return p
 
 
