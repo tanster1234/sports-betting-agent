@@ -18,6 +18,7 @@ outside claude.ai the page renders but cannot load or save bets.
 | Path | Contents |
 |---|---|
 | `meta/settings` | `startingBankroll: {DraftKings, FanDuel}` |
+| `meta/legTally` | saved leg results `legs: {"<betId>#<leg>": {r, s, d, p}}` plus `won`/`lost`/`push`/`pending` counts; the page merges every leg into it, so deleting a ticket keeps its legs in the count |
 | `bets/<id>` | one document per wager (fields below) |
 
 Bet fields: `placedAt`, `eventDate` (YYYY-MM-DD), `sport`, `tier` (free label: Safe, Medium,
@@ -25,11 +26,15 @@ Reach…), `book`, `type` (Parlay / Single / Same-game parlay), `stake`, `odds` 
 placed), `toReturn` (total return shown on the slip), `boosted`, `quotedOdds` (price before a
 boost or line move), `fairProb` (devigged chance from the analysis, 0–1), `status` (`open`, `won`,
 `lost`, `push`, `void`, `cashout`), `returned`, `settledAt`, `order`, `notes`, and `legs[]` with
-`pick`, `price`, `kickoff` (ISO UTC), `fairProb`, `result` (`pending`, `won`, `lost`, `push`),
+`pick`, `price`, `kickoff` (ISO UTC), `fairProb`, `result` (`pending`, `won`, `lost`, `push`, `void`),
 and for live tracking `spec` and `live` (see below). Bets also get `liveUpdatedAt` and `needsReturn`.
 
 A parlay settles itself from its legs: any lost leg → lost; every leg won → won at `toReturn`;
 a push among otherwise-won legs asks for the amount the book actually paid.
+
+The **Legs** card counts every leg on every ticket (won, lost, push/void, still to play), shows them
+as one circle per leg grouped by ticket, the hit rate of decided legs, and how many parlays lost on a
+single leg. Each slip also shows its own "2 of 5 legs won" line.
 
 ## Live tracking
 
@@ -42,7 +47,17 @@ winning right now). Each tracked leg carries a `spec` naming its ESPN game and m
 ```
 
 `market` is `ml`, `spread` or `total` (`side`: `over`/`under`); `period` is `game` (overtime
-included) or `1h`; `team` is the ESPN abbreviation. Then, during games:
+included) or `1h`; `team` is the ESPN abbreviation. Player props and touchdowns use `market: "player"`:
+
+```json
+{"league": "nfl", "event": "401872979", "market": "player", "player": "Bijan Robinson", "stat": "rushYards", "side": "over", "line": 59.5}
+```
+
+`stat` is `passYards`, `passTDs`, `rushYards`, `recYards`, `receptions`, `anytimeTD` (line 0.5), or for
+basketball `points`, `rebounds`, `assists`, `threes`; they are graded from the ESPN game summary (box
+score and scoring plays). A basketball player listed as not playing grades `void`; an NFL player with no
+stats at the final grades `lost` with a note, because ESPN doesn't list inactives in the box score.
+Legs keep being graded after their ticket has lost, so every leg ends with a result. Then, during games:
 
 1. Read the bets with ArtifactData `list` (`collection: "bets"`, `out_dir: <dir>`).
 2. `python3 -m betlab live --bets <dir>/bets --out <patches>` grades every leg from the ESPN
@@ -50,8 +65,8 @@ included) or `1h`; `team` is the ESPN abbreviation. Then, during games:
    `status`/`returned`/`settledAt`, `needsReturn`, `liveUpdatedAt`).
 3. Write the patches with ArtifactData `batch` (`op: "update"`, `file_path`, `if_version` from step 1).
 
-Repeat every few minutes while games are on. Totals settle as soon as the line is passed; other
-legs settle when their period ends; a parlay with a pushed leg asks for the amount actually paid.
+Repeat every few minutes while games are on. Totals and player overs settle as soon as the line is
+passed; other legs settle when their period ends; a parlay with a pushed leg asks for the amount actually paid.
 Grading logic lives in `betlab/live.py` (tests: `tests/test_live.py`).
 
 ## Publishing and updating

@@ -72,6 +72,18 @@ button { cursor: pointer; }
 .stat .s { font-size: 0.8rem; color: var(--muted); }
 .foot-note { font-size: 0.8rem; color: var(--muted); max-width: 65ch; }
 
+/* Legs: one circle per leg, grouped by ticket (same marks as the slip's leg buttons) */
+.leg-strip { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.leg-group { display: flex; gap: 3px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); }
+.dot[data-r="won"] { background: var(--win); border-color: var(--win); }
+.dot[data-r="lost"] { background: var(--loss-wash); border-color: var(--loss); }
+.dot[data-r="push"], .dot[data-r="void"] { background: var(--push-wash); border-color: var(--push); }
+.dot[data-r="pending"] { border-color: var(--pend); border-style: dashed; }
+.legend-row { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.78rem; color: var(--muted); align-items: center; }
+.legend-row span { display: inline-flex; align-items: center; gap: 5px; }
+.legend-row .dot { width: 10px; height: 10px; }
+
 /* Books */
 .books { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .book { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; min-width: 0; }
@@ -128,7 +140,7 @@ td.r, th.r { text-align: right; }
 .leg-btn { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); display: grid; place-items: center; font-size: 0.95rem; font-weight: 700; line-height: 1; padding: 0; }
 .leg-btn[data-r="won"] { background: var(--win-wash); border-color: var(--win); color: var(--win); }
 .leg-btn[data-r="lost"] { background: var(--loss-wash); border-color: var(--loss); color: var(--loss); }
-.leg-btn[data-r="push"] { background: var(--push-wash); border-color: var(--push); color: var(--push); }
+.leg-btn[data-r="push"], .leg-btn[data-r="void"] { background: var(--push-wash); border-color: var(--push); color: var(--push); }
 .leg-btn:disabled { cursor: default; opacity: 0.7; }
 .leg-pick { min-width: 0; display: grid; }
 .leg-pick .p { font-weight: 500; overflow-wrap: anywhere; }
@@ -222,6 +234,28 @@ textarea { min-height: 3.2em; resize: vertical; }
     <p class="foot-note">Expected profit is what a bet earns on average at fair odds (the bookmaker's cut removed). Compare it with your actual results: over a few dozen bets the gap is mostly luck.</p>
   </section>
 
+  <section class="board" aria-labelledby="legs-title">
+    <div class="hero">
+      <div>
+        <p class="eyebrow" id="legs-title">Legs won · every ticket</p>
+        <p class="big" id="l-won">0</p>
+      </div>
+      <p class="muted" id="l-won-sub">No legs decided yet</p>
+    </div>
+    <div class="leg-strip" id="l-strip" role="img" aria-label="No legs yet"></div>
+    <div class="legend-row" aria-hidden="true">
+      <span><i class="dot" data-r="won"></i>won</span><span><i class="dot" data-r="lost"></i>lost</span>
+      <span><i class="dot" data-r="push"></i>push or void</span><span><i class="dot" data-r="pending"></i>still to play</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="eyebrow">Hit rate</span><span class="v" id="l-rate">—</span><span class="s">won of decided legs</span></div>
+      <div class="stat"><span class="eyebrow">Legs lost</span><span class="v" id="l-lost">0</span><span class="s" id="l-lost-sub">no pushes</span></div>
+      <div class="stat"><span class="eyebrow">Still to play</span><span class="v" id="l-pend">0</span><span class="s">legs not decided</span></div>
+      <div class="stat"><span class="eyebrow">Missed by one</span><span class="v" id="l-miss">0</span><span class="s">parlays lost on one leg</span></div>
+    </div>
+    <p class="foot-note" id="l-sports">Every leg counts, including the rest of a parlay after it has already lost. The count is saved with your bets, so deleting a ticket keeps its legs in the tally.</p>
+  </section>
+
   <section class="section" aria-labelledby="books-title">
     <h2 id="books-title" class="eyebrow" style="font-size:0.75rem;font-family:var(--font-body)">Estimated balance by book</h2>
     <div class="books" id="books"></div>
@@ -293,11 +327,11 @@ textarea { min-height: 3.2em; resize: vertical; }
   var DEFAULT_START = { DraftKings: 100, FanDuel: 100 };
   var SETTLED = { won: 1, lost: 1, push: 1, void: 1, cashout: 1 };
   var STATUS_LABEL = { open: "● Open", won: "✓ Won", lost: "✕ Lost", push: "= Push", void: "= Void", cashout: "$ Cashed out" };
-  var LEG_NEXT = { pending: "won", won: "lost", lost: "push", push: "pending" };
-  var LEG_ICON = { pending: "", won: "✓", lost: "✕", push: "=" };
-  var LEG_WORD = { pending: "pending", won: "won", lost: "lost", push: "push" };
+  var LEG_NEXT = { pending: "won", won: "lost", lost: "push", push: "pending", void: "pending" };
+  var LEG_ICON = { pending: "", won: "✓", lost: "✕", push: "=", void: "=" };
+  var LEG_WORD = { pending: "pending", won: "won", lost: "lost", push: "push", void: "void" };
 
-  var state = { db: null, bets: [], settings: null, loaded: false, writable: true, confirmDelete: null, cashOpen: {} };
+  var state = { db: null, bets: [], settings: null, legTally: null, tallyLoaded: false, loaded: false, writable: true, confirmDelete: null, cashOpen: {} };
 
   // ---------- helpers ----------
   function $(id) { return document.getElementById(id); }
@@ -464,6 +498,77 @@ textarea { min-height: 3.2em; resize: vertical; }
       expEl.textContent = signed(expOpen); expEl.className = "v " + signClass(expOpen);
       $("s-exp-sub").textContent = "on open bets, at fair odds";
     }
+  }
+
+  // ---------- legs: count every leg, keep a saved tally ----------
+  function legResult(l) { return LEG_WORD[l.result] ? l.result : "pending"; }
+  function currentLegs() {
+    var m = {};
+    state.bets.forEach(function (b) {
+      (b.legs || []).forEach(function (l, i) {
+        m[b.id + "#" + i] = { r: legResult(l), s: b.sport || "", d: b.eventDate || "", p: l.pick || "" };
+      });
+    });
+    return m;
+  }
+  function allLegs() {   // saved tally (keeps deleted tickets) overlaid with what's on the page now
+    return Object.assign({}, (state.legTally && state.legTally.legs) || {}, currentLegs());
+  }
+  function countLegs(map) {
+    var c = { won: 0, lost: 0, push: 0, void: 0, pending: 0, sports: {} };
+    Object.keys(map).forEach(function (k) {
+      var e = map[k];
+      c[e.r] = (c[e.r] || 0) + 1;
+      var sp = e.s || "Other";
+      c.sports[sp] = c.sports[sp] || { won: 0, lost: 0 };
+      if (e.r === "won" || e.r === "lost") c.sports[sp][e.r]++;
+    });
+    return c;
+  }
+  function syncTally() {
+    if (!state.db || !state.writable || !state.loaded || !state.tallyLoaded) return;
+    var stored = (state.legTally && state.legTally.legs) || {};
+    var cur = currentLegs(), next = Object.assign({}, stored), changed = false;
+    Object.keys(cur).forEach(function (k) {
+      var a = stored[k], b = cur[k];
+      if (!a || a.r !== b.r || a.s !== b.s || a.d !== b.d || a.p !== b.p) { next[k] = b; changed = true; }
+    });
+    if (!changed) return;
+    var c = countLegs(next);
+    state.db.doc("meta/legTally").set({ legs: next, won: c.won, lost: c.lost, push: c.push + c.void, pending: c.pending,
+      updatedAt: new Date().toISOString() }).catch(function () {});
+  }
+  function renderLegs() {
+    var c = countLegs(allLegs());
+    var decided = c.won + c.lost;
+    $("l-won").textContent = c.won;
+    $("l-won-sub").textContent = decided ? "of " + decided + " decided legs" : "No legs decided yet";
+    $("l-rate").textContent = decided ? pct(c.won / decided, 0) : "—";
+    $("l-lost").textContent = c.lost;
+    var pv = c.push + c.void;
+    $("l-lost-sub").textContent = pv ? pv + " pushed or void" : "no pushes";
+    $("l-pend").textContent = c.pending;
+    var missed = state.bets.filter(function (b) {
+      var legs = b.legs || [];
+      if (legs.length < 2) return false;
+      var r = legs.map(legResult);
+      return r.indexOf("pending") < 0 && r.filter(function (x) { return x === "lost"; }).length === 1;
+    }).length;
+    $("l-miss").textContent = missed;
+    var sports = Object.keys(c.sports).filter(function (k) { return c.sports[k].won + c.sports[k].lost; }).sort();
+    $("l-sports").textContent = (sports.length ? "By sport: " + sports.map(function (k) { return k + " " + c.sports[k].won + "–" + c.sports[k].lost; }).join(" · ") + ". " : "") +
+      "Every leg counts, including the rest of a parlay after it has already lost. The count is saved with your bets, so deleting a ticket keeps its legs in the tally.";
+    var strip = $("l-strip");
+    strip.textContent = "";
+    var tickets = state.bets.filter(function (b) { return (b.legs || []).length; })
+      .sort(function (a, b) { return (a.eventDate || "") < (b.eventDate || "") ? -1 : (a.eventDate || "") > (b.eventDate || "") ? 1 : (a.order || 0) - (b.order || 0); });
+    tickets.forEach(function (b) {
+      var g = h("span", { class: "leg-group", title: (b.tier || b.type || "Bet") + " · " + (b.book || "") + " · " + fmtDate(b.eventDate) });
+      b.legs.forEach(function (l) { g.appendChild(h("i", { class: "dot", "data-r": legResult(l), title: (l.pick || "Leg") + " — " + LEG_WORD[legResult(l)] })); });
+      strip.appendChild(g);
+    });
+    strip.setAttribute("aria-label", c.won + " legs won, " + c.lost + " lost, " + pv + " pushed or void, " + c.pending + " still to play");
+    if (!tickets.length) strip.appendChild(h("span", { class: "muted", style: "font-size:0.85rem", text: "Legs from your tickets will show here." }));
   }
 
   // ---------- render: books ----------
@@ -676,7 +781,15 @@ textarea { min-height: 3.2em; resize: vertical; }
     }
 
     var exp = expectedOf(bet);
+    var tally = null;
+    if (legs.length > 1) {
+      var tc = { won: 0, lost: 0, push: 0, pending: 0 };
+      legs.forEach(function (l) { var r = legResult(l); tc[r === "void" ? "push" : r]++; });
+      tally = [tc.won + " of " + legs.length + " legs won", tc.lost ? tc.lost + " lost" : "", tc.push ? tc.push + " push" : "",
+        tc.pending ? tc.pending + " to play" : ""].filter(Boolean).join(" · ");
+    }
     var meta = h("div", { class: "meta-line" },
+      tally ? h("span", { text: tally }) : null,
       bet.fairProb ? h("span", { text: "Fair chance " + pct(Number(bet.fairProb)) }) : null,
       exp !== null ? h("span", { text: "Expected profit " + signed(exp) }) : null);
 
@@ -758,6 +871,7 @@ textarea { min-height: 3.2em; resize: vertical; }
   function render() {
     renderLiveNote();
     renderSummary();
+    renderLegs();
     renderBooks();
     renderChart();
     renderLists();
@@ -844,10 +958,17 @@ textarea { min-height: 3.2em; resize: vertical; }
       state.settings = snap.exists ? snap.data() : null;
       render();
     }, function () {});
+    db.doc("meta/legTally").onSnapshot(function (snap) {
+      state.legTally = snap.exists ? snap.data() : null;
+      state.tallyLoaded = true;
+      render();
+      syncTally();
+    }, function () { state.tallyLoaded = false; });
     db.collection("bets").onSnapshot(function (snap) {
       state.bets = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
       state.loaded = true;
       render();
+      syncTally();
     }, function (e) {
       showNote(e && e.code === "revoked" ? "This tracker is no longer available in this view." : "Lost the connection to your saved bets. Reload the page to reconnect.");
     });

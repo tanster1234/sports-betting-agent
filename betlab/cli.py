@@ -394,10 +394,27 @@ def cmd_live(a):
             continue
         for g in espn.parse_scoreboard(js):
             games[str(g["event_id"])] = g
+    # player-prop legs are graded from each game's summary (box score + scoring plays); fetch only
+    # games that still have an undecided player leg and have started
+    boxes = {}
+    want = sorted({(lg["spec"].get("league", "ncaaf"), str(lg["spec"]["event"]))
+                   for b in bets.values() for lg in b.get("legs") or []
+                   if (lg.get("spec") or {}).get("market") == "player" and (lg.get("result") or "pending") == "pending"})
+    for league, ev in want:
+        g = games.get(ev)
+        if g is not None and g.get("state") == "pre":
+            boxes[ev] = {"state": "pre", "status": g.get("status") or "", "players": {}, "dnp": set(), "td_scorers": {}}
+            continue
+        try:
+            js, _ = espn.fetch_json(espn.summary_url(league, ev))
+        except Exception as exc:  # keep grading everything else
+            errors.append(f"{league} summary {ev}: {exc}")
+            continue
+        boxes[ev] = live.parse_box(js)
     now = a.now or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     out = {"fetched_at": now, "games": len(games), "errors": errors, "bets": []}
     for doc_id, bet in bets.items():
-        patch = live.apply_live(bet, games, now)
+        patch = live.apply_live(bet, games, now, boxes)
         if patch is None:
             continue
         changed = patch.pop("changed")

@@ -112,3 +112,115 @@ def test_live_cli_with_stubbed_scoreboard(tmp_path, monkeypatch, capsys):
     patch = json.loads((tmp_path / "patch" / "b1.json").read_text())
     assert patch["status"] == "won" and patch["returned"] == 20.9 and patch["settledAt"] == "2026-10-04T03:00:00Z"
     assert "changed" not in patch
+
+
+# ---------------------------------------------------------------------------
+# player props (graded from the ESPN game summary)
+# ---------------------------------------------------------------------------
+from pathlib import Path  # noqa: E402
+
+from betlab.live import grade_player_leg, parse_box, player_name_key  # noqa: E402
+
+FIX = Path(__file__).parent / "fixtures"
+
+
+def nfl_box():
+    return parse_box(json.loads((FIX / "espn_nfl_summary_final.json").read_text()))
+
+
+def prop(player, stat, line, side="over"):
+    return {"league": "nfl", "event": "401872965", "market": "player", "player": player, "stat": stat,
+            "side": side, "line": line}
+
+
+def test_player_names_normalise():
+    assert player_name_key("Kenneth Walker III") == "kenneth walker"
+    assert player_name_key("R.J. Harvey") == player_name_key("RJ Harvey") == "rj harvey"
+    assert player_name_key("Amon-Ra St. Brown") == "amon ra st brown"
+
+
+def test_nfl_final_box_grades_yards_catches_and_touchdowns():
+    box = nfl_box()
+    assert box["state"] == "post" and box["td_scorers"] == {"jonathan taylor": 2, "treylon burks": 1, "daniel jones": 1}
+    td = grade_player_leg(prop("Jonathan Taylor", "anytimeTD", 0.5), box)
+    assert td["result"] == "won" and td["score"] == "Jonathan Taylor 2 TD" and td["state"] == "final"
+    assert grade_player_leg(prop("Jonathan Taylor", "rushYards", 89.5), box)["result"] == "won"          # 95
+    assert grade_player_leg(prop("Jonathan Taylor", "rushYards", 89.5, "under"), box)["result"] == "lost"
+    short = grade_player_leg(prop("Jonathan Taylor", "rushYards", 99.5), box)
+    assert short["result"] == "lost" and short["detail"] == "finished with 95 rush yds"
+    assert grade_player_leg(prop("Tyler Warren", "anytimeTD", 0.5), box)["detail"] == "no touchdown"
+    assert grade_player_leg(prop("Daniel Jones", "passYards", 174.5), box)["result"] == "lost"            # 143
+    assert grade_player_leg(prop("Laquon Treadwell", "receptions", 4.5), box)["result"] == "won"          # 5
+    assert grade_player_leg(prop("Laquon Treadwell", "receptions", 5), box)["result"] == "push"
+    assert grade_player_leg(prop("Laquon Treadwell", "anytimeTD", 0.5), box)["result"] == "lost"
+    ghost = grade_player_leg(prop("Nobody Here", "recYards", 24.5), box)
+    assert ghost["result"] == "lost" and "inactive" in ghost["detail"]
+
+
+def test_player_leg_before_and_during_a_game():
+    pre = grade_player_leg(prop("Bijan Robinson", "rushYards", 59.5), {"state": "pre", "status": "8:15 PM", "players": {},
+                                                                     "dnp": set(), "td_scorers": {}})
+    assert pre["state"] == "pre" and pre["result"] is None
+    js = json.loads((FIX / "espn_wnba_live_summary.json").read_text())
+    box = parse_box(js)
+    assert box["state"] == "in"
+    leg = {"market": "player", "player": "Breanna Stewart", "stat": "points", "side": "over", "line": 15.5}
+    live = grade_player_leg(leg, box)
+    assert live["state"] == "live" and live["result"] is None and live["now"] == "behind"
+    assert live["detail"] == "6 pts, needs 10 more" and live["score"] == "Breanna Stewart 6 pts"
+    under = grade_player_leg({**leg, "side": "under"}, box)
+    assert under["now"] == "ahead" and under["detail"] == "6 pts, 9.5 to spare" and under["result"] is None
+    cleared = grade_player_leg({**leg, "line": 4.5}, box)                     # an over settles once it's cleared
+    assert cleared["result"] == "won" and cleared["state"] == "live"
+    assert grade_player_leg({**leg, "stat": "threes", "line": 0.5}, box)["detail"] == "0 3PM, needs 1 more"
+    js["header"]["competitions"][0]["status"]["type"]["state"] = "post"       # a player who never got in
+    dnp = grade_player_leg({**leg, "player": "Anneli Maley", "line": 1.5}, parse_box(js))
+    assert dnp["result"] == "void"
+
+
+def test_settled_ticket_keeps_grading_its_other_legs():
+    bet = {"stake": 10, "toReturn": 48.1, "status": "lost", "returned": 0, "settledAt": "2026-10-04T20:13:36Z",
+           "legs": [{"pick": "Texans ML", "result": "lost"},
+                    {"pick": "Taylor 90+ rush yds", "result": "pending", "spec": prop("Jonathan Taylor", "rushYards", 89.5)},
+                    {"pick": "Taylor anytime TD", "result": "pending", "spec": prop("Jonathan Taylor", "anytimeTD", 0.5)}]}
+    patch = apply_live(bet, {}, "2026-10-05T22:00:00Z", {"401872965": nfl_box()})
+    assert [lg["result"] for lg in patch["legs"]] == ["lost", "won", "won"]
+    assert patch["status"] == "lost" and patch["settledAt"] == "2026-10-04T20:13:36Z" and patch["changed"]
+    void = {**bet, "status": "open", "legs": [{"pick": "a", "result": "won"}, {"pick": "b", "result": "void"}]}
+    assert derive_status(void, void["legs"])["needsReturn"] is True
+
+
+def test_live_cli_fetches_summaries_only_for_open_player_legs(tmp_path, monkeypatch, capsys):
+    from betlab.fetch import espn
+    summary = json.loads((FIX / "espn_nfl_summary_final.json").read_text())
+    board = {"events": [
+        {"id": "401872965", "shortName": "IND VS WSH", "status": {"period": 4, "displayClock": "0:00",
+         "type": {"state": "post", "completed": True, "shortDetail": "Final", "name": "STATUS_FINAL"}},
+         "competitions": [{"competitors": [
+             {"homeAway": "home", "score": "13", "team": {"abbreviation": "WSH"}, "linescores": []},
+             {"homeAway": "away", "score": "30", "team": {"abbreviation": "IND"}, "linescores": []}]}]},
+        {"id": "401872979", "shortName": "ATL @ NO", "status": {"period": 0, "displayClock": "0:00",
+         "type": {"state": "pre", "completed": False, "shortDetail": "10/5 - 8:15 PM EDT", "name": "STATUS_SCHEDULED"}},
+         "competitions": [{"competitors": [
+             {"homeAway": "home", "score": "0", "team": {"abbreviation": "NO"}},
+             {"homeAway": "away", "score": "0", "team": {"abbreviation": "ATL"}}]}]}]}
+    calls = []
+
+    def fake(url):
+        calls.append(url)
+        return (summary if "summary" in url else board), {}
+    monkeypatch.setattr(espn, "fetch_json", fake)
+    bets = tmp_path / "bets"
+    bets.mkdir()
+    (bets / "old.json").write_text(json.dumps({"eventDate": "2026-10-04", "stake": 2.5, "toReturn": 42.67, "status": "lost",
+        "legs": [{"pick": "Taylor TD", "result": "pending", "spec": prop("Jonathan Taylor", "anytimeTD", 0.5)},
+                 {"pick": "Burks TD", "result": "won", "spec": prop("Treylon Burks", "anytimeTD", 0.5)},
+                 {"pick": "Allen TD", "result": "lost"}]}))
+    (bets / "tonight.json").write_text(json.dumps({"eventDate": "2026-10-05", "stake": 5, "toReturn": 37.65, "status": "open",
+        "legs": [{"pick": "Bijan 60+", "result": "pending",
+                  "spec": {**prop("Bijan Robinson", "rushYards", 59.5), "event": "401872979"}}]}))
+    assert main(["live", "--bets", str(bets), "--now", "2026-10-05T22:00:00Z"]) == 0
+    out = {b["doc_id"]: b for b in json.loads(capsys.readouterr().out)["bets"]}
+    assert out["old"]["status"] == "lost" and out["old"]["decided"] == 3 and "[won]" in out["old"]["legs"][0]
+    assert out["tonight"]["status"] == "open" and out["tonight"]["decided"] == 0
+    assert sum("summary" in c for c in calls) == 1                     # the game that hasn't started isn't fetched

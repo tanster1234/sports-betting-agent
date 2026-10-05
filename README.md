@@ -9,7 +9,7 @@ A disciplined sports-betting analysis system for [Claude Code](https://claude.co
   skills need — devig (5 methods), EV, push-aware and simultaneous Kelly, CLV, spread/total/
   moneyline/alt/1H pricing, props, correlated parlays, playoff series, a Kalman rating model,
   MLB/NHL scoring models, a tamper-evident bet ledger, performance reports and a no-look-ahead
-  backtester. **272 tests**, lint-clean, runs on Python 3.9+.
+  backtester. **277 tests**, lint-clean, runs on Python 3.9+.
 - **Real WNBA data**: 3,318 games (2013 → Oct 1, 2026) and DraftKings **opening and closing**
   lines for all 340 games of 2026, used to calibrate the model and to backtest it honestly.
 
@@ -46,7 +46,7 @@ Full tables: [`.claude/skills/wnba-betting/references/calibration.md`](.claude/s
 ```bash
 git clone https://github.com/tanster1234/sports-betting-agent && cd sports-betting-agent
 cp config/profile.example.json config/profile.json      # set your bankroll, books, state
-python3 -m pip install pytest && python3 -m pytest      # 272 tests, a few seconds
+python3 -m pip install pytest && python3 -m pytest      # 277 tests, a few seconds
 python3 -m betlab wnba predict --home ATL --away NY --date 2026-10-04 --playoff
 claude                                                  # open Claude Code in the repo
 ```
@@ -109,7 +109,7 @@ python3 -m betlab fetch value --league wnba --min-ev 0.02           # needs ODDS
 python3 -m betlab ledger add --sport WNBA --event "NY @ ATL" --market total --selection "Over 168.5" \
     --line 168.5 --price -110 --stake 10 --model-prob 0.544
 python3 -m betlab report --format md
-python3 -m betlab live --bets tracker-bets/ --out patches/          # grade tracker legs from live ESPN scores
+python3 -m betlab live --bets tracker-bets/ --out patches/          # grade tracker legs (sides, totals, player props, TDs) live
 python3 -m betlab liveread --event 401918295 --offer ml:home:0:-120:dk --sharp ml:-120:-101   # in-game read
 python3 -m betlab liveread validate                                 # WNBA halftime fit + out-of-sample check
 python3 -m betlab nfl price --spread -3 --total 44.5 --alt -2.5 -7 --teaser 6 \
@@ -119,7 +119,7 @@ python3 -m betlab nfl predict --date 2026-10-04                     # NFL rating
 
 ## Testing — four layers
 
-1. **Unit + property tests** (`tests/`, 272): golden values for every formula, invariants
+1. **Unit + property tests** (`tests/`, 277): golden values for every formula, invariants
    (devig sums to 1, push-aware Kelly maximises log growth, series probabilities sum to 1,
    simulations hit their target moments), ledger integrity (double settlement refused,
    hash chain catches edits/deletions), parsers tested on real ESPN payloads.
