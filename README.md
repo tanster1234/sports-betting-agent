@@ -10,8 +10,9 @@ A disciplined sports-betting analysis system for [Claude Code](https://claude.co
   moneyline/alt/1H pricing, props, correlated parlays, playoff series, a Kalman rating model,
   MLB/NHL scoring models, a tamper-evident bet ledger, performance reports and a no-look-ahead
   backtester. **242 tests**, lint-clean, runs on Python 3.9+.
-- **Real WNBA data**: 3,318 games (2013 → Oct 1, 2026) and DraftKings **opening and closing**
-  lines for all 340 games of 2026, used to calibrate the model and to backtest it honestly.
+- **Real WNBA data**: 3,321 games (2013 → Oct 4, 2026) and DraftKings **opening and closing**
+  lines for every 2026 game (343 through semifinal Game 1; calibration uses the 340 through
+  Oct 1), plus a no-hindsight playoff tracker of what the system would have bet.
 
 It was built after reviewing three public projects
 ([magicjordan33/sports-betting-claude](https://github.com/magicjordan33/sports-betting-claude),
@@ -141,7 +142,8 @@ data/wnba/             games.csv, lines_2026_draftkings.csv (+ README with prove
 docs/                  reference-repo-review.md
 evals/                 evals.json, README, results
 examples/              real outputs: game analysis, series, props, backtest, performance review
-scripts/               refresh_wnba_data.py
+scripts/               refresh_wnba_data.py, playoff_tracker.py, build_lab_page.py
+site/                  results page source (tracker data injected by build_lab_page.py)
 tests/                 pytest suite + real/structured fixtures
 ```
 

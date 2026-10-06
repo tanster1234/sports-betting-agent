@@ -85,9 +85,9 @@ def test_manual_adjustments():
 
 
 # ---------------- bundled WNBA data ----------------
-def test_bundled_data_shapes(wnba_games, wnba_lines):
-    assert len(wnba_games) == 3318
-    assert len(wnba_lines) == 340
+def test_bundled_data_shapes(wnba_games, wnba_lines, calib_games, calib_lines):
+    assert len(calib_games) == 3318 and len(calib_lines) == 340    # the documented snapshot
+    assert len(wnba_games) >= 3318 and len(wnba_lines) >= 340      # refreshes only append
     assert {g["season"] for g in wnba_games} == set(range(2013, 2027))
     teams_2026 = {g["home"] for g in wnba_games if g["season"] == 2026}
     assert teams_2026 == set(wnba.TEAMS)
@@ -127,8 +127,8 @@ def test_2026_playoff_teams_rate_highest(wnba_model):
     assert set(table[:8]) == playoff
 
 
-def test_season_summary_matches_calibration_doc(wnba_games):
-    rows = {r["season"]: r for r in wnba.season_summary(wnba_games)}
+def test_season_summary_matches_calibration_doc(calib_games):
+    rows = {r["season"]: r for r in wnba.season_summary(calib_games)}
     assert rows[2026]["avg_total"] == pytest.approx(174.1, abs=0.05)
     assert rows[2026]["hca_ols"] == pytest.approx(1.80, abs=0.01)
     assert rows[2025]["avg_total"] == pytest.approx(163.3, abs=0.05)

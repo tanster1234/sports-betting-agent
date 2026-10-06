@@ -74,11 +74,11 @@ def test_backtest_accounting_is_consistent(wnba_games, wnba_lines):
     assert [b["pnl"] for b in r.bets] == [b["pnl"] for b in r2.bets]
 
 
-def test_documented_totals_clv_finding_still_holds(wnba_games, wnba_lines):
+def test_documented_totals_clv_finding_still_holds(calib_games, calib_lines):
     """Regression guard for .claude/skills/wnba-betting/references/calibration.md: 2026 totals vs DK openers had positive CLV."""
     fac = lambda: KalmanRatings(wnba.WNBA_PARAMS, aliases=wnba.ALIASES)  # noqa: E731
     cfg = BacktestConfig(markets=("total",), price_at="open", min_ev=0.02, model_weight=0.35, start="2026-05-01")
-    o = run_backtest(wnba_games, wnba_lines, fac, cfg).summary["overall"]
+    o = run_backtest(calib_games, calib_lines, fac, cfg).summary["overall"]
     assert o["bets"] >= 40
     assert o["avg_clv_pct"] > 2.0 and o["clv_t"] > 2.0
 

@@ -1,0 +1,651 @@
+<title>WNBA Betting Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=Libre+Franklin:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a scouting report — one reading column, findings as annotated charts, a working price check at the end. */
+:root {
+  --bg: #f7f7f5;
+  --surface: #fcfcfb;
+  --ink: #141413;
+  --ink-2: #52514e;
+  --muted: #7d7b75;
+  --rule: #e1e0d9;
+  --axis: #c3c2b7;
+  --accent: #b9480f;
+  --accent-wash: rgba(235, 104, 52, 0.10);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --mark-gray: #aeaca5;
+  --good: #006300;
+  --bad: #b8322f;
+  --ring: rgba(20, 20, 19, 0.10);
+  --font-display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --font-body: "Libre Franklin", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.75rem;
+  --step-3: clamp(2.4rem, 6vw, 3.6rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111110; --surface: #1a1a19; --ink: #f4f3ef; --ink-2: #c3c2b7; --muted: #94928b;
+    --rule: #2c2c2a; --axis: #3d3d3a; --accent: #f08a50; --accent-wash: rgba(217, 89, 38, 0.16);
+    --series-1: #3987e5; --series-2: #d95926; --mark-gray: #6b6a64; --good: #2fb52f; --bad: #e66767;
+    --ring: rgba(255, 255, 255, 0.10); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111110; --surface: #1a1a19; --ink: #f4f3ef; --ink-2: #c3c2b7; --muted: #94928b;
+  --rule: #2c2c2a; --axis: #3d3d3a; --accent: #f08a50; --accent-wash: rgba(217, 89, 38, 0.16);
+  --series-1: #3987e5; --series-2: #d95926; --mark-gray: #6b6a64; --good: #2fb52f; --bad: #e66767;
+  --ring: rgba(255, 255, 255, 0.10); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: var(--step-0); line-height: 1.55; }
+.page { max-width: 62rem; margin: 0 auto; padding-inline: max(16px, 4vw); padding-block: 2.5rem 4rem; display: grid; gap: 3.5rem; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.01em; text-wrap: balance; margin: 0; line-height: 1.05; }
+h1 { font-size: var(--step-3); text-transform: uppercase; }
+h2 { font-size: var(--step-2); text-transform: uppercase; }
+h3 { font-size: var(--step-1); font-family: var(--font-body); font-weight: 600; letter-spacing: 0; line-height: 1.3; }
+p { margin: 0; max-width: 65ch; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+.eyebrow { font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent); font-weight: 600; }
+.lede { font-size: 1.12rem; color: var(--ink-2); }
+header { display: grid; gap: 1rem; border-top: 6px solid var(--accent); padding-top: 1.25rem; }
+.meta { font-size: var(--step--1); color: var(--muted); display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem; }
+section { display: grid; gap: 1.25rem; }
+.section-head { display: grid; gap: 0.5rem; }
+
+/* findings row */
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.finding { background: var(--surface); padding: 1rem 1.1rem 1.1rem; display: grid; gap: 0.25rem; align-content: start; min-width: 0; }
+.finding .label { font-size: var(--step--1); color: var(--ink-2); }
+.finding .value { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+.finding .note { font-size: var(--step--1); color: var(--muted); }
+
+/* charts */
+.chart-card { background: var(--surface); border: 1px solid var(--rule); padding: 1.1rem 1.1rem 0.9rem; display: grid; gap: 0.6rem; min-width: 0; }
+.chart-card figcaption { display: grid; gap: 0.3rem; }
+.chart-card .sub { font-size: var(--step--1); color: var(--ink-2); max-width: 70ch; }
+.chart { width: 100%; position: relative; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; font-size: var(--step--1); color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+.key-line { width: 18px; height: 2px; border-radius: 2px; display: inline-block; }
+.key-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.grid-line { stroke: var(--rule); stroke-width: 1; }
+.axis-line { stroke: var(--axis); stroke-width: 1; }
+.tick { fill: var(--muted); font-size: 11px; font-family: var(--font-body); font-variant-numeric: tabular-nums; }
+.ref-label { fill: var(--ink-2); font-size: 11px; font-family: var(--font-body); }
+.end-label { fill: var(--ink); font-size: 12px; font-weight: 600; font-family: var(--font-body); }
+.s1-stroke { stroke: var(--series-1); } .s1-fill { fill: var(--series-1); }
+.s2-stroke { stroke: var(--series-2); } .s2-fill { fill: var(--series-2); }
+.g-stroke { stroke: var(--mark-gray); } .g-fill { fill: var(--mark-gray); }
+.ring { stroke: var(--surface); stroke-width: 2; }
+.ref { stroke: var(--ink-2); stroke-width: 1; }
+.zero { stroke: var(--axis); stroke-width: 1.5; }
+.hit { fill: transparent; cursor: pointer; }
+.hit:focus { outline: none; }
+.hit:focus-visible { stroke: var(--accent); stroke-width: 2; }
+.tooltip { position: absolute; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); box-shadow: 0 6px 18px rgba(0,0,0,0.12); padding: 0.45rem 0.6rem; font-size: var(--step--1); line-height: 1.35; min-width: 9rem; z-index: 5; }
+.tooltip strong { font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.tooltip .tt-row { display: flex; align-items: center; gap: 0.45rem; }
+.tooltip .tt-sub { color: var(--ink-2); }
+details.data { font-size: var(--step--1); }
+details.data summary { cursor: pointer; color: var(--ink-2); width: fit-content; }
+.table-wrap { overflow-x: auto; margin-top: 0.5rem; }
+table { border-collapse: collapse; font-size: var(--step--1); font-variant-numeric: tabular-nums; min-width: 22rem; }
+th, td { text-align: right; padding: 0.3rem 0.7rem; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--ink-2); font-weight: 600; }
+.two-up { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 27rem), 1fr)); gap: 1.25rem; }
+
+/* calculator */
+.calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1.25rem; }
+.calc form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem 1rem; background: var(--surface); border: 1px solid var(--rule); padding: 1.1rem; align-content: start; }
+.field { display: grid; gap: 0.25rem; min-width: 0; }
+.field label { font-size: var(--step--1); color: var(--ink-2); font-weight: 500; }
+.field input { font: 500 1rem var(--font-mono); padding: 0.45rem 0.55rem; border: 1px solid var(--axis); background: var(--bg); color: var(--ink); width: 100%; border-radius: 3px; }
+.field .hint { font-size: 0.72rem; color: var(--muted); }
+.slip { border: 1px solid var(--rule); background: var(--surface); padding: 1.1rem; display: grid; gap: 0.75rem; align-content: start; min-width: 0; }
+.slip .verdict { font-family: var(--font-display); font-size: 1.6rem; text-transform: uppercase; letter-spacing: 0.02em; }
+.verdict.yes { color: var(--good); } .verdict.no { color: var(--bad); }
+.slip dl { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 1rem; margin: 0; font-size: 0.9rem; }
+.slip dt { color: var(--ink-2); }
+.slip dd { margin: 0; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.slip .why { font-size: var(--step--1); color: var(--ink-2); }
+
+/* skills */
+.skills { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 0; border-top: 1px solid var(--rule); }
+.skill { padding: 0.8rem 0.2rem 0.85rem; border-bottom: 1px solid var(--rule); display: grid; gap: 0.2rem; min-width: 0; }
+.skill .name { font-family: var(--font-mono); font-size: 0.88rem; color: var(--accent); font-weight: 500; }
+.skill p { font-size: 0.9rem; color: var(--ink-2); }
+pre.cmds { margin: 0; background: var(--surface); border: 1px solid var(--rule); padding: 1rem; overflow-x: auto; font: 0.82rem/1.6 var(--font-mono); color: var(--ink); }
+pre.cmds .c { color: var(--muted); }
+/* playoff tracker */
+.next { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1rem; }
+.game { background: var(--surface); border: 1px solid var(--rule); padding: 1rem 1.1rem; display: grid; gap: 0.55rem; min-width: 0; }
+.game .when { font-size: var(--step--1); color: var(--muted); }
+.game .teams { font-family: var(--font-display); font-size: 1.45rem; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; }
+.game .series { font-size: var(--step--1); color: var(--ink-2); }
+.game dl { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.9rem; margin: 0; font-size: 0.88rem; }
+.game dt { color: var(--ink-2); }
+.game dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.game .call { font-weight: 600; }
+.call.yes { color: var(--good); } .call.no { color: var(--ink-2); }
+.tag { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.05rem 0.4rem; border-radius: 3px; border: 1px solid currentColor; }
+.tag.win { color: var(--good); } .tag.loss { color: var(--bad); } .tag.push, .tag.pass { color: var(--muted); }
+table.log th, table.log td { text-align: left; }
+table.log td.call-cell { white-space: normal; min-width: 10rem; }
+table.log td.res { white-space: nowrap; }
+table.log .clv { font-size: 0.75rem; color: var(--ink-2); margin-left: 0.35rem; }
+.tracker-note { font-size: var(--step--1); color: var(--ink-2); max-width: 70ch; }
+footer { border-top: 1px solid var(--rule); padding-top: 1.25rem; display: grid; gap: 0.6rem; font-size: var(--step--1); color: var(--ink-2); }
+.helpline { color: var(--ink); font-weight: 600; user-select: all; }
+@media (max-width: 30rem) { .calc form { grid-template-columns: 1fr; } .finding .value { font-size: 1.7rem; } }
+@media (prefers-reduced-motion: no-preference) { .verdict { transition: color 0.2s ease; } }
+</style>
+
+<div class="page">
+  <header>
+    <div class="eyebrow">WNBA · 3,318 games 2013–2026 · every 2026 DraftKings open and close</div>
+    <h1>WNBA Betting Lab</h1>
+    <p class="lede">Eleven Claude Code skills and a tested Python toolkit for disciplined betting analysis, with the WNBA calibrated on real results and real lines. These are the findings the skills rely on, a check of whether the skills change Claude's answers, and a price calculator that uses the same math.</p>
+    <div class="meta"><span id="meta-updated">Model calibrated on games through Oct 1, 2026</span><span>Repo: <span class="mono">tanster1234/sports-betting-agent</span>, branch <span class="mono">claude/trusting-franklin-vi2v7c</span></span><span>242 automated tests</span></div>
+  </header>
+
+  <section aria-labelledby="h-tracker" id="tracker">
+    <div class="section-head">
+      <div class="eyebrow" id="tracker-eyebrow">Playoff tracker</div>
+      <h2 id="h-tracker">2026 playoffs, game by game</h2>
+      <p class="sub" style="color:var(--ink-2)">Before each game the model is refitted on earlier games only, priced at DraftKings' opening line, blended with the market and held to the same minimum edge as every recommendation. Most games are a pass; that is the system working.</p>
+    </div>
+    <div class="findings" id="tracker-kpis"></div>
+    <div>
+      <h3 style="margin-bottom:0.75rem">Next up</h3>
+      <div class="next" id="tracker-next"></div>
+    </div>
+    <figure class="chart-card" style="margin:0">
+      <figcaption><h3>Every playoff game so far</h3><p class="sub">Model line vs DraftKings, the call at the opening price, and how it went. Closing-line value (CLV) compares the price taken with DraftKings' final price before tip-off; it is the better test of a bet than one result.</p></figcaption>
+      <div class="table-wrap"><table id="tracker-log" class="log"></table></div>
+    </figure>
+    <p class="tracker-note" id="tracker-note"></p>
+  </section>
+
+  <section aria-labelledby="h-findings">
+    <div class="section-head">
+      <div class="eyebrow">Calibrated, not folklore</div>
+      <h2 id="h-findings">What the data says</h2>
+    </div>
+    <div class="findings">
+      <div class="finding"><span class="label">Home-court edge</span><span class="value">1.75 pts</span><span class="note">2021–26 pooled 1.36 ± 0.31; it was 2.92 in 2013–19. NBA lore says 3–4.</span></div>
+      <div class="finding"><span class="label">Margin noise vs the closing spread</span><span class="value">σ 12.7</span><span class="note">Totals σ 18.7. DraftKings' own spread↔ML pricing implies 12.7.</span></div>
+      <div class="finding"><span class="label">2026 average game total</span><span class="value">174.1</span><span class="note">A league record, up 10.8 on 2025, after the freedom-of-movement emphasis raised fouls and free throws.</span></div>
+      <div class="finding"><span class="label">Totals bet at the opener, CLV</span><span class="value">+6.0%</span><span class="note">t = 2.9 over 49 bets at model weight 0.35. The one signal that held up.</span></div>
+    </div>
+
+    <figure class="chart-card" style="margin:0">
+      <figcaption>
+        <h3>Home-court advantage has roughly halved</h3>
+        <p class="sub">Per-season estimate in points with 95% intervals, from a ratings regression of every regular-season game. 2020 was the single-site bubble, so there is no home court to estimate.</p>
+      </figcaption>
+      <div class="legend" aria-hidden="true"><span><i class="key-dot" style="background:var(--series-1)"></i>Season estimate, 95% interval</span><span><i class="key-line" style="background:var(--ink-2);height:1px"></i>Pooled era average (2013–19, 2021–26)</span></div>
+      <div class="chart" id="chart-hca" role="img" aria-label="Home-court advantage by season, 2013 to 2026"></div>
+      <details class="data"><summary>Show data</summary><div class="table-wrap"><table id="table-hca"></table></div></details>
+    </figure>
+
+    <div class="two-up">
+      <figure class="chart-card" style="margin:0">
+        <figcaption>
+          <h3>The 2026 totals market lagged the scoring jump</h3>
+          <p class="sub">Monthly average DraftKings closing total vs average actual total. The market sat 5 points low in June, then overshot in August.</p>
+        </figcaption>
+        <div class="legend" aria-hidden="true"><span><i class="key-line" style="background:var(--series-1)"></i>Closing total</span><span><i class="key-line" style="background:var(--series-2)"></i>Actual total</span></div>
+        <div class="chart" id="chart-monthly" role="img" aria-label="2026 monthly closing total versus actual scoring"></div>
+        <details class="data"><summary>Show data</summary><div class="table-wrap"><table id="table-monthly"></table></div></details>
+      </figure>
+
+      <figure class="chart-card" style="margin:0">
+        <figcaption>
+          <h3>Only totals beat the close reliably</h3>
+          <p class="sub">Walk-forward 2026 backtest at DraftKings openers. Average closing-line value per bet with 95% interval, by market and by how much weight the model gets against the market. Totals are highlighted.</p>
+        </figcaption>
+        <div class="legend" aria-hidden="true"><span><i class="key-dot" style="background:var(--series-1)"></i>Totals</span><span><i class="key-dot" style="background:var(--mark-gray)"></i>Spreads, moneyline</span></div>
+        <div class="chart" id="chart-clv" role="img" aria-label="Closing-line value by market and model weight"></div>
+        <details class="data"><summary>Show data</summary><div class="table-wrap"><table id="table-clv"></table></div></details>
+      </figure>
+    </div>
+    <p class="sub" style="color:var(--ink-2);font-size:var(--step--1)">Read the backtest carefully: one season, one book, and 15 configurations tried, so the best rows are optimistic. Unblended, the model claimed 10–26% edge per bet and realised almost none. Spreads at the open made +5% ROI with negative CLV, which was luck. Against closing lines nothing worked.</p>
+  </section>
+
+  <section aria-labelledby="h-evals" id="evals">
+    <div class="section-head">
+      <div class="eyebrow">Blind-judged, with vs without the skills</div>
+      <h2 id="h-evals">Do the skills change the answer?</h2>
+      <p class="sub" style="color:var(--ink-2)">Seven realistic requests, each answered by two independent agents: one with this repo's skills and toolkit, one as a plain assistant with web search. Judges saw the two answers unlabeled, in random order, and checked every number against verified reference facts.</p>
+    </div>
+    <div class="findings" id="eval-kpis"></div>
+    <div class="two-up">
+      <figure class="chart-card" style="margin:0">
+        <figcaption><h3>Judge score per request</h3><p class="sub">Overall score out of 10 from a blind pairwise judge. The skills won all seven.</p></figcaption>
+        <div class="legend" aria-hidden="true"><span><i class="key-dot" style="background:var(--series-1)"></i>With skills</span><span><i class="key-dot" style="background:var(--mark-gray)"></i>Without</span></div>
+        <div class="chart" id="chart-evals" role="img" aria-label="Blind judge score per request, with and without skills"></div>
+        <details class="data"><summary>Show data</summary><div class="table-wrap"><table id="table-evals"></table></div></details>
+      </figure>
+      <figure class="chart-card" style="margin:0">
+        <figcaption><h3>Where the difference comes from</h3><p class="sub">Mean score per criterion, 1 to 5. Big gains in context and risk handling; one loss, on clarity.</p></figcaption>
+        <div class="legend" aria-hidden="true"><span><i class="key-dot" style="background:var(--series-1)"></i>With skills</span><span><i class="key-dot" style="background:var(--mark-gray)"></i>Without</span></div>
+        <div class="chart" id="chart-criteria" role="img" aria-label="Mean judge score by criterion, with and without skills"></div>
+        <details class="data"><summary>Show data</summary><div class="table-wrap"><table id="table-criteria"></table></div></details>
+      </figure>
+    </div>
+    <figure class="chart-card" style="margin:0" id="round2-card">
+      <figcaption><h3 id="round2-title">Round 2: fixing clarity</h3><p class="sub" id="round2-sub"></p></figcaption>
+      <div class="legend" aria-hidden="true"><span><i class="key-dot" style="background:var(--series-1)"></i>Revised skills</span><span><i class="key-dot" style="background:var(--series-2)"></i>Original skills</span><span><i class="key-dot" style="background:var(--mark-gray)"></i>Without</span></div>
+      <div class="chart" id="chart-round2" role="img" aria-label="Three-way blind judge scores by criterion: revised skills, original skills, no skills"></div>
+      <details class="data"><summary>Show data</summary><div class="table-wrap"><table id="table-round2"></table></div></details>
+    </figure>
+  </section>
+
+  <section aria-labelledby="h-calc" id="calculator">
+    <div class="section-head">
+      <div class="eyebrow">Same math as <span class="mono">python3 -m betlab ev</span></div>
+      <h2 id="h-calc">Price check</h2>
+      <p class="sub" style="color:var(--ink-2)">Enter your probability and both sides of the market. The calculator removes the vig, shrinks your number toward the market, and sizes with fractional Kelly. It opens on the example total from the semifinal analysis: model 62.3% on Over 168.5 at -110.</p>
+    </div>
+    <div class="calc">
+      <form id="calc-form" novalidate>
+        <div class="field"><label for="f-prob">Your win probability (%)</label><input id="f-prob" inputmode="decimal" value="62.3"><span class="hint">From your model or projection</span></div>
+        <div class="field"><label for="f-price">Your side's price</label><input id="f-price" inputmode="text" value="-110"><span class="hint">American (-110, +145) or decimal</span></div>
+        <div class="field"><label for="f-other">Other side's price</label><input id="f-other" inputmode="text" value="-110"><span class="hint">Used to remove the vig</span></div>
+        <div class="field"><label for="f-weight">Weight on your model (0–1)</label><input id="f-weight" inputmode="decimal" value="0.35"><span class="hint">WNBA totals 0.35, sides 0.15</span></div>
+        <div class="field"><label for="f-bankroll">Bankroll ($)</label><input id="f-bankroll" inputmode="decimal" value="1000"><span class="hint">Stake capped at 3%</span></div>
+        <div class="field"><label for="f-kelly">Kelly fraction</label><input id="f-kelly" inputmode="decimal" value="0.25"><span class="hint">Quarter Kelly is the default</span></div>
+        <div class="field"><label for="f-minev">Minimum EV (%)</label><input id="f-minev" inputmode="decimal" value="2"><span class="hint">Props use 4</span></div>
+      </form>
+      <div class="slip" aria-live="polite">
+        <div class="verdict" id="out-verdict">—</div>
+        <dl>
+          <dt>Breakeven at your price</dt><dd id="out-breakeven">—</dd>
+          <dt>Market fair probability</dt><dd id="out-fair">—</dd>
+          <dt>Blended probability</dt><dd id="out-blend">—</dd>
+          <dt>EV with your raw number</dt><dd id="out-rawev">—</dd>
+          <dt>EV after blending</dt><dd id="out-ev">—</dd>
+          <dt>Full Kelly</dt><dd id="out-fullk">—</dd>
+          <dt>Stake</dt><dd id="out-stake">—</dd>
+          <dt>Don't bet below</dt><dd id="out-floor">—</dd>
+        </dl>
+        <p class="why" id="out-why"></p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-skills">
+    <div class="section-head">
+      <div class="eyebrow">.claude/skills</div>
+      <h2 id="h-skills">The eleven skills</h2>
+    </div>
+    <div class="skills" id="skills"></div>
+    <pre class="cmds"><span class="c"># in the repo, after cloning</span>
+python3 -m pytest                                   <span class="c"># 242 tests</span>
+python3 -m betlab wnba predict --home ATL --away NY --date 2026-10-04 --playoff
+python3 -m betlab wnba series --high ATL --low NY --round semifinals --date 2026-10-04
+python3 -m betlab backtest --markets total --price-at open --model-weight 0.35
+claude                                              <span class="c"># then: "What WNBA bets should I make today?"</span></pre>
+  </section>
+
+  <footer>
+    <p>Analysis only; nothing here places bets or guarantees profit. 21+, legal sportsbooks only. Gambling problem? Call <span class="helpline">1-800-MY-RESET (1-800-697-3738)</span> or <span class="helpline">1-800-522-4700</span>, or text <span class="helpline">800GAM</span>.</p>
+    <p>Game results and DraftKings lines derived from ESPN data via the MIT-licensed sportsdataverse/wehoop projects. League snapshot dated Oct 3, 2026.</p>
+  </footer>
+</div>
+<div class="tooltip" id="tt" hidden></div>
+
+<script>
+const TRACKER = /*TRACKER_JSON*/null;
+const DATA = {
+  hca: [{"season":2013,"hca":3.45,"se":0.86},{"season":2014,"hca":2.46,"se":0.76},{"season":2015,"hca":3.42,"se":0.85},{"season":2016,"hca":2.42,"se":0.83},{"season":2017,"hca":3.26,"se":0.86},{"season":2018,"hca":1.56,"se":0.85},{"season":2019,"hca":3.97,"se":0.84},{"season":2020,"hca":null,"se":null},{"season":2021,"hca":0.45,"se":0.86},{"season":2022,"hca":0.85,"se":0.78},{"season":2023,"hca":1.52,"se":0.77},{"season":2024,"hca":0.81,"se":0.69},{"season":2025,"hca":2.58,"se":0.78},{"season":2026,"hca":1.8,"se":0.69}],
+  eras: [{"from":2013,"to":2019,"value":2.92,"label":"2013–19 pooled 2.92"},{"from":2021,"to":2026,"value":1.36,"label":"2021–26 pooled 1.36"}],
+  monthly: [{"month":"May","line":169.9,"actual":170.8,"n":63},{"month":"Jun","line":170.0,"actual":175.3,"n":82},{"month":"Jul","line":173.5,"actual":176.9,"n":71},{"month":"Aug","line":176.5,"actual":173.6,"n":85},{"month":"Sep","line":172.4,"actual":174.1,"n":38}],
+  clv: [{"market":"Totals","weight":"raw","bets":207,"clv":0.95,"t":1.15,"lo":-0.67,"hi":2.57},{"market":"Totals","weight":"0.50","bets":100,"clv":3.86,"t":2.94,"lo":1.29,"hi":6.43},{"market":"Totals","weight":"0.35","bets":49,"clv":6.01,"t":2.86,"lo":1.89,"hi":10.13},{"market":"Spreads","weight":"raw","bets":226,"clv":-1.5,"t":-1.77,"lo":-3.16,"hi":0.16},{"market":"Spreads","weight":"0.50","bets":132,"clv":-1.02,"t":-0.89,"lo":-3.27,"hi":1.23},{"market":"Spreads","weight":"0.35","bets":87,"clv":0.52,"t":0.35,"lo":-2.39,"hi":3.43},{"market":"Spreads","weight":"0.20","bets":24,"clv":3.98,"t":1.22,"lo":-2.41,"hi":10.37},{"market":"Moneyline","weight":"raw","bets":228,"clv":-0.71,"t":-0.54,"lo":-3.29,"hi":1.87},{"market":"Moneyline","weight":"0.50","bets":164,"clv":-0.2,"t":-0.12,"lo":-3.47,"hi":3.07},{"market":"Moneyline","weight":"0.35","bets":118,"clv":2.77,"t":1.32,"lo":-1.34,"hi":6.88},{"market":"Moneyline","weight":"0.20","bets":63,"clv":6.39,"t":2.07,"lo":0.34,"hi":12.44}],
+  evals: [{"label": "Semis game card", "short": "Game card", "with": 9.0, "without": 8.67, "passedWith": 7, "passedWithout": 5, "total": 7}, {"label": "Tier sizing vs Kelly", "short": "Tier vs Kelly", "with": 9.33, "without": 8.33, "passedWith": 5, "passedWithout": 5, "total": 5}, {"label": "Clark assists prop", "short": "Clark prop", "with": 9.67, "without": 7.67, "passedWith": 5, "passedWithout": 5, "total": 5}, {"label": "Chasing-losses parlay", "short": "Chasing", "with": 9.7, "without": 7.3, "passedWith": 5, "passedWithout": 5, "total": 5}, {"label": "Tout's 18-7 system", "short": "Tout system", "with": 9.67, "without": 8.0, "passedWith": 5, "passedWithout": 5, "total": 5}, {"label": "Series price", "short": "Series", "with": 9.3, "without": 9.0, "passedWith": 5, "passedWithout": 5, "total": 5}, {"label": "19-11, am I sharp?", "short": "19-11 run", "with": 9.3, "without": 8.7, "passedWith": 5, "passedWithout": 5, "total": 5}],
+  criteria: [{"label": "Context use", "with": 4.57, "without": 3.0}, {"label": "Honesty & risk", "with": 5.0, "without": 3.86}, {"label": "Actionability", "with": 5.0, "without": 4.0}, {"label": "Completeness", "with": 5.0, "without": 4.43}, {"label": "Correctness", "with": 4.71, "without": 4.43}, {"label": "Clarity", "with": 4.0, "without": 5.0}],
+  kpis: [{"label": "Blind head-to-head", "value": "7–0", "note": "judges preferred the skilled answer every time"}, {"label": "Mean judge score", "value": "9.4 vs 8.2", "note": "out of 10, with vs without skills"}, {"label": "Objective checks", "value": "37/37", "note": "vs 35/37 without; most checks don't separate them"}, {"label": "Right skill loads", "value": "28/28", "note": "test questions, 3 runs each; 0 of 28 false triggers"}],
+  round2: {"caption": "Same seven requests, answered again with the skills revised for readability. One blind judge scored all three answers per request. Clarity rose from 4.0 to 4.7, level with the plain assistant, at a small cost in context use; overall 9.63 vs 9.59, and both skill versions beat no skills on all seven. Where only one colored dot shows, the revised and original skills scored the same.", "criteria": [{"label": "Context use", "v2": 4.43, "v1": 4.86, "base": 3.14}, {"label": "Honesty & risk", "v2": 5.0, "v1": 5.0, "base": 3.29}, {"label": "Actionability", "v2": 5.0, "v1": 5.0, "base": 3.86}, {"label": "Completeness", "v2": 5.0, "v1": 5.0, "base": 4.29}, {"label": "Correctness", "v2": 4.71, "v1": 4.86, "base": 4.0}, {"label": "Clarity", "v2": 4.71, "v1": 4.0, "base": 4.57}]},
+  skills: [
+    ["betting-analyst", "The pipeline for “what should I bet”: data, fair price, blended EV, red team, Kelly, card, ledger. Says PASS when there is no edge."],
+    ["wnba-betting", "Calibrated WNBA numbers, the rating model, injury adjustments, playoffs and series, props notes, a dated 2026 league snapshot."],
+    ["multi-sport-context", "NBA, NFL, MLB, NHL and college context with corrected numbers and the right pricing model per sport."],
+    ["odds-math", "Conversions, five devig methods, EV, hold, CLV, alt lines, parlays. Every number computed, never estimated."],
+    ["player-props", "Minutes-times-rate projections, WNBA-calibrated dispersion, the market's implied mean, correlated SGPs."],
+    ["sports-data-ingestion", "ESPN and Odds API fetchers, line shopping, a leave-one-out value scan, WebSearch fallbacks."],
+    ["bet-red-team", "The market-knows test, a bias checklist and a devil's-advocate subagent before money goes down."],
+    ["bankroll-management", "Fractional Kelly with hard caps, stop-losses, and simulated drawdowns so expectations stay honest."],
+    ["bet-tracking", "A hash-chained ledger, closing-line capture, and reviews that lead with CLV and confidence intervals."],
+    ["backtesting", "Walk-forward tests with no look-ahead, real prices and vig, and a checklist for judging anyone's backtest."],
+    ["responsible-gambling", "Spots chasing and distress, pauses the picks, and gives current US help lines and limit tools."]
+  ]
+};
+
+const SVGNS = "http://www.w3.org/2000/svg";
+const tt = document.getElementById("tt");
+function el(tag, attrs, parent) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+function txt(tag, attrs, text, parent) { const n = el(tag, attrs, parent); n.textContent = text; return n; }
+function fmt(v, d = 1) { return (v > 0 ? "+" : "") + v.toFixed(d); }
+function showTip(host, x, y, rows) {
+  tt.replaceChildren();
+  for (const r of rows) {
+    const row = document.createElement("div"); row.className = "tt-row";
+    if (r.key) { const k = document.createElement("i"); k.className = "key-line"; k.style.background = r.key; row.appendChild(k); }
+    const strong = document.createElement("strong"); strong.textContent = r.value; row.appendChild(strong);
+    if (r.label) { const s = document.createElement("span"); s.className = "tt-sub"; s.textContent = r.label; row.appendChild(s); }
+    tt.appendChild(row);
+  }
+  tt.hidden = false;
+  const box = host.getBoundingClientRect();
+  const pageX = box.left + window.scrollX + x, pageY = box.top + window.scrollY + y;
+  const w = tt.offsetWidth;
+  const left = Math.min(Math.max(8, pageX + 12), window.scrollX + document.documentElement.clientWidth - w - 8);
+  tt.style.left = left + "px"; tt.style.top = (pageY - tt.offsetHeight - 10) + "px";
+}
+function hideTip() { tt.hidden = true; }
+function bindHit(node, host, cx, cy, rows) {
+  node.setAttribute("tabindex", "0");
+  node.addEventListener("pointerenter", () => showTip(host, cx, cy, rows));
+  node.addEventListener("pointerleave", hideTip);
+  node.addEventListener("focus", () => showTip(host, cx, cy, rows));
+  node.addEventListener("blur", hideTip);
+}
+function ticks(min, max, step) { const out = []; for (let v = Math.ceil(min / step) * step; v <= max + 1e-9; v += step) out.push(+v.toFixed(6)); return out; }
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function drawHCA() {
+  const host = document.getElementById("chart-hca"); host.replaceChildren();
+  const W = Math.max(300, host.clientWidth), H = 250, m = { l: 40, r: 40, t: 14, b: 28 };
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H }, host);
+  const yMin = -1.5, yMax = 6, n = DATA.hca.length;
+  const seasons = DATA.hca.map(d => d.season);
+  const x = s => m.l + (s - seasons[0] + 0.5) / n * (W - m.l - m.r);
+  const y = v => m.t + (yMax - v) / (yMax - yMin) * (H - m.t - m.b);
+  for (const v of ticks(yMin, yMax, 1.5)) {
+    el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), class: v === 0 ? "zero" : "grid-line" }, svg);
+    txt("text", { x: m.l - 8, y: y(v) + 4, "text-anchor": "end", class: "tick" }, v.toFixed(1), svg);
+  }
+  const [e1, e2] = DATA.eras;
+  el("line", { x1: x(e1.from) - 8, x2: x(e1.to) + 8, y1: y(e1.value), y2: y(e1.value), class: "ref" }, svg);
+  el("line", { x1: x(e2.from) - 8, x2: x(e2.to) + 8, y1: y(e2.value), y2: y(e2.value), class: "ref" }, svg);
+  txt("text", { x: x(e1.to) + 12, y: y(e1.value) + 4, class: "ref-label" }, e1.value.toFixed(2), svg);
+  txt("text", { x: x(e2.to) + 12, y: y(e2.value) + 4, class: "ref-label" }, e2.value.toFixed(2), svg);
+  const step = W < 560 ? 2 : 1;
+  DATA.hca.forEach((d, i) => {
+    if ((n - 1 - i) % step === 0) txt("text", { x: x(d.season), y: H - 8, "text-anchor": "middle", class: "tick" }, step === 2 ? "\u2019" + String(d.season).slice(2) : String(d.season), svg);
+    if (d.hca == null) { txt("text", { x: x(d.season), y: y(0) - 8, "text-anchor": "middle", class: "tick" }, "n/a", svg); return; }
+    const lo = d.hca - 1.96 * d.se, hi = d.hca + 1.96 * d.se;
+    el("line", { x1: x(d.season), x2: x(d.season), y1: y(lo), y2: y(hi), class: "s1-stroke", "stroke-width": 2, "stroke-linecap": "round", opacity: 0.45 }, svg);
+    el("circle", { cx: x(d.season), cy: y(d.hca), r: 5, class: "s1-fill ring" }, svg);
+    const hit = el("rect", { x: x(d.season) - 12, y: m.t, width: 24, height: H - m.t - m.b, class: "hit", role: "img", "aria-label": `${d.season}: ${d.hca.toFixed(2)} points` }, svg);
+    bindHit(hit, host, x(d.season), y(hi), [{ value: `${d.hca.toFixed(2)} pts`, label: `${d.season} home edge` }, { value: `${lo.toFixed(2)} to ${hi.toFixed(2)}`, label: "95% interval" }]);
+  });
+}
+
+function drawMonthly() {
+  const host = document.getElementById("chart-monthly"); host.replaceChildren();
+  const W = Math.max(280, host.clientWidth), H = 230, m = { l: 40, r: 64, t: 14, b: 28 };
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H }, host);
+  const yMin = 166, yMax = 180, n = DATA.monthly.length;
+  const x = i => m.l + i / (n - 1) * (W - m.l - m.r);
+  const y = v => m.t + (yMax - v) / (yMax - yMin) * (H - m.t - m.b);
+  for (const v of ticks(yMin, yMax, 2)) {
+    el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), class: "grid-line" }, svg);
+    txt("text", { x: m.l - 8, y: y(v) + 4, "text-anchor": "end", class: "tick" }, String(v), svg);
+  }
+  DATA.monthly.forEach((d, i) => txt("text", { x: x(i), y: H - 8, "text-anchor": "middle", class: "tick" }, d.month, svg));
+  const area = DATA.monthly.map((d, i) => `${x(i)},${y(d.actual)}`).concat(DATA.monthly.slice().reverse().map((d, j) => `${x(n - 1 - j)},${y(d.line)}`));
+  el("polygon", { points: area.join(" "), class: "s2-fill", opacity: 0.1 }, svg);
+  for (const [key, cls] of [["line", "s1"], ["actual", "s2"]]) {
+    el("polyline", { points: DATA.monthly.map((d, i) => `${x(i)},${y(d[key])}`).join(" "), class: `${cls}-stroke`, fill: "none", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+    DATA.monthly.forEach((d, i) => el("circle", { cx: x(i), cy: y(d[key]), r: 4, class: `${cls}-fill ring` }, svg));
+  }
+  const last = DATA.monthly[n - 1];
+  txt("text", { x: x(n - 1) + 8, y: y(last.actual) - 3, class: "end-label" }, last.actual.toFixed(1), svg);
+  txt("text", { x: x(n - 1) + 8, y: y(last.line) + 12, class: "end-label" }, last.line.toFixed(1), svg);
+  const cross = el("line", { x1: 0, x2: 0, y1: m.t, y2: H - m.b, class: "axis-line", visibility: "hidden" }, svg);
+  DATA.monthly.forEach((d, i) => {
+    const half = (W - m.l - m.r) / (n - 1) / 2;
+    const hit = el("rect", { x: x(i) - half, y: m.t, width: half * 2, height: H - m.t - m.b, class: "hit", role: "img", "aria-label": `${d.month}: closing ${d.line}, actual ${d.actual}` }, svg);
+    const rows = [{ key: cssVar("--series-2"), value: d.actual.toFixed(1), label: "actual" }, { key: cssVar("--series-1"), value: d.line.toFixed(1), label: "closing total" }, { value: fmt(d.actual - d.line), label: `${d.month} gap, ${d.n} games` }];
+    hit.addEventListener("pointerenter", () => { cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible"); });
+    hit.addEventListener("pointerleave", () => cross.setAttribute("visibility", "hidden"));
+    bindHit(hit, host, x(i), y(Math.max(d.actual, d.line)), rows);
+  });
+}
+
+function drawCLV() {
+  const host = document.getElementById("chart-clv"); host.replaceChildren();
+  const W = Math.max(280, host.clientWidth), rowH = 22, headH = 22, m = { l: 74, r: 14, t: 4, b: 28 };
+  const rows = DATA.clv;
+  const groups = [...new Set(rows.map(r => r.market))];
+  const H = m.t + m.b + rows.length * rowH + groups.length * headH;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H }, host);
+  const xMin = -4, xMax = 13;
+  const x = v => m.l + (v - xMin) / (xMax - xMin) * (W - m.l - m.r);
+  let yy = m.t; const pos = []; const heads = [];
+  rows.forEach((r, i) => {
+    if (i === 0 || rows[i - 1].market !== r.market) { heads.push([r.market, yy + headH - 6]); yy += headH; }
+    pos.push(yy + rowH / 2); yy += rowH;
+  });
+  for (const v of ticks(xMin, xMax, W < 420 ? 4 : 2)) {
+    el("line", { x1: x(v), x2: x(v), y1: m.t, y2: H - m.b, class: v === 0 ? "zero" : "grid-line" }, svg);
+    txt("text", { x: x(v), y: H - 8, "text-anchor": "middle", class: "tick" }, (v > 0 ? "+" : "") + v + "%", svg);
+  }
+  heads.forEach(([name, hy]) => txt("text", { x: 0, y: hy, class: "ref-label", "font-weight": 600 }, name, svg));
+  rows.forEach((r, i) => {
+    const cy = pos[i], hot = r.market === "Totals";
+    txt("text", { x: m.l - 10, y: cy + 4, "text-anchor": "end", class: "tick" }, r.weight === "raw" ? "raw model" : "w " + r.weight, svg);
+    el("line", { x1: x(Math.max(xMin, r.lo)), x2: x(Math.min(xMax, r.hi)), y1: cy, y2: cy, class: hot ? "s1-stroke" : "g-stroke", "stroke-width": 2, "stroke-linecap": "round", opacity: hot ? 0.55 : 0.7 }, svg);
+    el("circle", { cx: x(r.clv), cy, r: 5, class: (hot ? "s1-fill" : "g-fill") + " ring" }, svg);
+    const hit = el("rect", { x: m.l, y: cy - rowH / 2, width: W - m.l - m.r, height: rowH, class: "hit", role: "img", "aria-label": `${r.market} weight ${r.weight}: CLV ${fmt(r.clv, 2)}%` }, svg);
+    bindHit(hit, host, x(r.clv), cy - 6, [{ value: `${fmt(r.clv, 2)}% CLV`, label: `${r.market}, ${r.weight === "raw" ? "raw model" : "weight " + r.weight}` }, { value: `t = ${r.t.toFixed(2)}`, label: `${r.bets} bets, 95% ${r.lo.toFixed(1)} to ${r.hi.toFixed(1)}` }]);
+  });
+}
+
+/* dot rows: one row per item, one dot per series on a shared horizontal scale */
+function dotRows(hostId, rows, o) {
+  const host = document.getElementById(hostId); host.replaceChildren();
+  if (!rows || !rows.length) { const p = document.createElement("p"); p.className = "sub"; p.textContent = o.empty || "No data yet."; host.appendChild(p); return; }
+  const W = Math.max(280, host.clientWidth), narrow = W < 480, rowH = o.rowH || 30;
+  const m = { l: narrow ? (o.labelNarrow || 104) : (o.labelWide || 168), r: 40, t: 6, b: 26 };
+  const H = m.t + m.b + rows.length * rowH;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H }, host);
+  const x = v => m.l + (v - o.min) / (o.max - o.min) * (W - m.l - m.r);
+  o.ticks.forEach(v => {
+    el("line", { x1: x(v), x2: x(v), y1: m.t, y2: H - m.b, class: "grid-line" }, svg);
+    txt("text", { x: x(v), y: H - 8, "text-anchor": "middle", class: "tick" }, String(v), svg);
+  });
+  rows.forEach((r, i) => {
+    const cy = m.t + i * rowH + rowH / 2;
+    txt("text", { x: m.l - 10, y: cy + 4, "text-anchor": "end", class: "tick" }, narrow ? (r.short || r.label) : r.label, svg);
+    const vals = o.series.map(sr => r[sr.key]).filter(v => v != null);
+    el("line", { x1: x(Math.min(...vals)), x2: x(Math.max(...vals)), y1: cy, y2: cy, class: "axis-line", "stroke-width": 2 }, svg);
+    o.series.slice().reverse().forEach(sr => { if (r[sr.key] != null) el("circle", { cx: x(r[sr.key]), cy, r: sr.r || 5, class: `${sr.cls}-fill ring` }, svg); });
+    const lead = o.series[0], lv = r[lead.key], onRight = lv >= Math.max(...vals);
+    txt("text", { x: onRight ? x(lv) + 9 : x(lv) - 9, y: cy + 4, "text-anchor": onRight ? "start" : "end", class: "end-label" }, o.fmt(lv), svg);
+    const hit = el("rect", { x: m.l, y: cy - rowH / 2, width: W - m.l - m.r, height: rowH, class: "hit", tabindex: 0, role: "img",
+      "aria-label": `${r.label}: ` + o.series.map(sr => `${sr.label} ${o.fmt(r[sr.key])}`).join(", ") }, svg);
+    bindHit(hit, host, x(r[lead.key]), cy - 6, o.series.map(sr => ({ key: cssVar(sr.color), value: o.fmt(r[sr.key]), label: sr.label }))
+      .concat(o.extra ? o.extra(r) : []));
+  });
+}
+const S_WITH = { key: "with", cls: "s1", color: "--series-1", label: "with skills", r: 5.5 };
+const S_WITHOUT = { key: "without", cls: "g", color: "--mark-gray", label: "without" };
+function drawEvals() {
+  dotRows("chart-evals", DATA.evals, { min: 6, max: 10, ticks: [6, 7, 8, 9, 10], series: [S_WITH, S_WITHOUT], fmt: v => v.toFixed(1),
+    extra: r => [{ value: `${r.passedWith}/${r.total} vs ${r.passedWithout}/${r.total}`, label: "objective checks passed" }] });
+}
+function drawCriteria() {
+  dotRows("chart-criteria", DATA.criteria, { min: 2, max: 5, ticks: [2, 3, 4, 5], series: [S_WITH, S_WITHOUT], fmt: v => v.toFixed(2), labelWide: 128, labelNarrow: 104 });
+}
+function drawRound2() {
+  const r2 = DATA.round2;
+  document.getElementById("round2-sub").textContent = r2 ? r2.caption : "Re-running the seven requests with the skills revised for readability; results load here when the judges finish.";
+  dotRows("chart-round2", r2 ? r2.criteria : [], { min: 2, max: 5, ticks: [2, 3, 4, 5], fmt: v => v.toFixed(2), labelWide: 128, labelNarrow: 104,
+    empty: "Judging in progress.",
+    series: [{ key: "v2", cls: "s1", color: "--series-1", label: "revised skills", r: 5.5 }, { key: "v1", cls: "s2", color: "--series-2", label: "original skills" }, { key: "base", cls: "g", color: "--mark-gray", label: "without" }] });
+}
+/* ---- playoff tracker ---- */
+const fmtSpread = (team, homeLine, isHome) => { const v = isHome ? homeLine : -homeLine; return `${team} ${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v)}`; };
+const fmtPrice = p => (p > 0 ? "+" : "−") + Math.abs(Math.round(p));
+const fmtDay = iso => new Date(iso + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+function favLine(home, away, homeLine) { if (homeLine == null) return "—"; if (homeLine === 0) return "pick'em"; return homeLine < 0 ? `${home} −${Math.abs(homeLine)}` : `${away} −${Math.abs(homeLine)}`; }
+function modelLine(home, away, m) { const v = m.home_margin; return v >= 0 ? `${home} by ${v.toFixed(1)}` : `${away} by ${(-v).toFixed(1)}`; }
+function bestCall(calls) { const bet = calls.filter(c => c.bet); if (bet.length) return bet; return [calls.reduce((a, b) => (b.ev_pct > a.ev_pct ? b : a))]; }
+function el2(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+function fillTracker() {
+  const sec = document.getElementById("tracker");
+  if (!TRACKER) { sec.hidden = true; return; }
+  const T = TRACKER, S = T.summary;
+  document.getElementById("tracker-eyebrow").textContent = `Playoff tracker · updated ${fmtDay(T.generated_utc.slice(0, 10))} · results through ${fmtDay(T.data_through)}`;
+  document.getElementById("meta-updated").textContent = `Model calibrated through Oct 1, 2026 · tracker updated ${fmtDay(T.generated_utc.slice(0, 10))}`;
+  const kp = document.getElementById("tracker-kpis"); kp.replaceChildren();
+  [["Playoff games tracked", String(S.games), "every game, priced before tip-off"],
+   ["Bets the system made", `${S.bets} (${S.record})`, `${T.settled.filter(g => !g.calls.some(c => c.bet)).length} of ${S.games} games were passes`],
+   ["Profit, % of bankroll", (S.profit_pct_bankroll >= 0 ? "+" : "−") + Math.abs(S.profit_pct_bankroll).toFixed(2) + "%", "quarter-Kelly stakes, capped at 3%"],
+   ["Average CLV", S.avg_clv_pct == null ? "—" : (S.avg_clv_pct >= 0 ? "+" : "−") + Math.abs(S.avg_clv_pct).toFixed(1) + "%", "vs DraftKings' closing price"]]
+    .forEach(([l, v, n]) => { const d = el2("div", "finding"); d.append(el2("span", "label", l), el2("span", "value", v), el2("span", "note", n)); kp.appendChild(d); });
+  const nx = document.getElementById("tracker-next"); nx.replaceChildren();
+  if (!T.upcoming.length) nx.appendChild(el2("p", "sub", T.upcoming_note || "No games with posted lines in the next few days."));
+  T.upcoming.forEach(g => {
+    const c = el2("article", "game");
+    const ser = Object.entries(g.series).sort((a, b) => b[1] - a[1]);
+    const serTxt = ser[0][1] === ser[1][1] ? `Series tied ${ser[0][1]}-${ser[1][1]}` : `${ser[0][0]} leads ${ser[0][1]}-${ser[1][1]}`;
+    c.append(el2("div", "when", `${fmtDay(g.date)} · ${g.round}`), el2("div", "teams", `${g.away} at ${g.home}`), el2("div", "series", serTxt));
+    const dl = document.createElement("dl"); const o = g.dk_open || {}, n = g.dk_now || {};
+    const rows = [["Spread", `${favLine(g.home, g.away, n.spread_home)}  (opened ${favLine(g.home, g.away, o.spread_home)})`],
+                  ["Total", `${n.total}  (opened ${o.total})`],
+                  ["Moneyline", `${g.home} ${fmtPrice(n.ml_home)} / ${g.away} ${fmtPrice(n.ml_away)}  (opened ${fmtPrice(o.ml_home)})`],
+                  ["Model", `${modelLine(g.home, g.away, g.model)} · total ${g.model.total}`]];
+    rows.forEach(([k, v]) => { dl.append(el2("dt", null, k), el2("dd", null, v)); });
+    c.appendChild(dl);
+    const bets = g.calls.filter(x => x.bet);
+    if (bets.length) bets.forEach(b => c.appendChild(el2("div", "call yes", `Bet: ${b.selection} ${fmtPrice(b.price)} · ${b.stake_pct}% of bankroll · EV +${b.ev_pct.toFixed(1)}%`)));
+    else { const best = bestCall(g.calls)[0]; c.appendChild(el2("div", "call no", `Pass · closest: ${best.selection} ${fmtPrice(best.price)} at ${best.ev_pct >= 0 ? "+" : "−"}${Math.abs(best.ev_pct).toFixed(1)}% (needs +${best.threshold_pct}%)`)); }
+    const mlMove = (o.ml_home != null && n.ml_home != null) ? Math.abs(1 / (1 + (o.ml_home < 0 ? -100 / o.ml_home : o.ml_home / 100)) - 1 / (1 + (n.ml_home < 0 ? -100 / n.ml_home : n.ml_home / 100))) : 0;
+    if (mlMove >= 0.04) c.appendChild(el2("div", "series", "The moneyline has moved a lot since it opened. That usually means news (injuries, lineups): check before betting."));
+    nx.appendChild(c);
+  });
+  const t = document.getElementById("tracker-log"); t.replaceChildren();
+  const head = t.createTHead().insertRow();
+  ["Date", "Game", "Final", "DK close", "Model", "Call at open", "Result · CLV"].forEach(h => { const th = document.createElement("th"); th.textContent = h; head.appendChild(th); });
+  const tb = t.createTBody();
+  T.settled.slice().reverse().forEach(g => {
+    const tr = tb.insertRow();
+    const sc = g.score, win = sc.home > sc.away ? g.home : g.away;
+    const bets = g.calls.filter(c => c.bet);
+    const callTxt = bets.length ? bets.map(b => `${b.selection} ${fmtPrice(b.price)} (${b.stake_pct}%)`).join("; ") : "Pass";
+    const cells = [fmtDay(g.date), `${g.away} at ${g.home}`, `${win} ${Math.max(sc.home, sc.away)}-${Math.min(sc.home, sc.away)}`,
+                   `${favLine(g.home, g.away, g.dk_close.spread_home)} · ${g.dk_close.total}`, `${modelLine(g.home, g.away, g.model)} · ${g.model.total}`];
+    cells.forEach(v => { tr.insertCell().textContent = v; });
+    const cc = tr.insertCell(); cc.className = "call-cell"; cc.textContent = callTxt;
+    const rc = tr.insertCell(); rc.className = "res";
+    if (bets.length) bets.forEach(b => {
+      rc.appendChild(el2("span", `tag ${b.result}`, b.result));
+      if (b.clv_pct != null) rc.appendChild(el2("span", "clv", `${b.clv_pct >= 0 ? "+" : "−"}${Math.abs(b.clv_pct).toFixed(1)}%`));
+    }); else rc.textContent = "—";
+  });
+  document.getElementById("tracker-note").textContent = `Method: ${T.method}. Upcoming lines are DraftKings' current prices via ESPN. A refresh pulls new results and lines; the page does not update on its own.`;
+}
+function fillKpis() {
+  const host = document.getElementById("eval-kpis"); host.replaceChildren();
+  DATA.kpis.forEach(k => {
+    const d = document.createElement("div"); d.className = "finding";
+    [["label", k.label], ["value", k.value], ["note", k.note]].forEach(([c, t]) => { const sp = document.createElement("span"); sp.className = c; sp.textContent = t; d.appendChild(sp); });
+    host.appendChild(d);
+  });
+}
+
+function table(id, head, rows) {
+  const t = document.getElementById(id); t.replaceChildren();
+  const thead = t.createTHead().insertRow();
+  head.forEach(h => { const th = document.createElement("th"); th.textContent = h; thead.appendChild(th); });
+  const tb = t.createTBody();
+  rows.forEach(r => { const tr = tb.insertRow(); r.forEach(c => { tr.insertCell().textContent = c; }); });
+}
+function fillTables() {
+  table("table-hca", ["Season", "Home edge (pts)", "95% interval"], DATA.hca.map(d => [d.season, d.hca == null ? "n/a (bubble)" : d.hca.toFixed(2), d.hca == null ? "" : `${(d.hca - 1.96 * d.se).toFixed(2)} to ${(d.hca + 1.96 * d.se).toFixed(2)}`]));
+  table("table-monthly", ["Month", "Games", "Closing total", "Actual", "Gap"], DATA.monthly.map(d => [d.month, d.n, d.line.toFixed(1), d.actual.toFixed(1), fmt(d.actual - d.line)]));
+  table("table-clv", ["Market", "Model weight", "Bets", "Avg CLV", "t", "95% interval"], DATA.clv.map(r => [r.market, r.weight, r.bets, fmt(r.clv, 2) + "%", r.t.toFixed(2), `${r.lo.toFixed(1)} to ${r.hi.toFixed(1)}`]));
+  table("table-evals", ["Request", "Score with", "Score without", "Checks with", "Checks without"], DATA.evals.map(r => [r.label, r.with.toFixed(2), r.without.toFixed(2), `${r.passedWith}/${r.total}`, `${r.passedWithout}/${r.total}`]));
+  table("table-criteria", ["Criterion", "With skills", "Without"], DATA.criteria.map(r => [r.label, r.with.toFixed(2), r.without.toFixed(2)]));
+  if (DATA.round2) table("table-round2", ["Criterion", "Revised skills", "Original skills", "Without"], DATA.round2.criteria.map(r => [r.label, r.v2.toFixed(2), r.v1.toFixed(2), r.base.toFixed(2)]));
+}
+function fillSkills() {
+  const host = document.getElementById("skills");
+  DATA.skills.forEach(([n, d]) => {
+    const div = document.createElement("div"); div.className = "skill";
+    const a = document.createElement("span"); a.className = "name"; a.textContent = n;
+    const p = document.createElement("p"); p.textContent = d;
+    div.append(a, p); host.appendChild(div);
+  });
+}
+
+/* ---- calculator: mirrors betlab.odds / betlab.kelly ---- */
+function toDecimal(s) {
+  const x = parseFloat(String(s).replace("−", "-"));
+  if (!isFinite(x)) return NaN;
+  if (Math.abs(x) >= 100) return x > 0 ? 1 + x / 100 : 1 + 100 / -x;
+  if (x > 1 && x < 100 && !/^[+-]/.test(String(s).trim())) return x;
+  return NaN;
+}
+function toAmerican(d) { return d >= 2 ? "+" + Math.round((d - 1) * 100) : String(Math.round(-100 / (d - 1))); }
+const logit = p => Math.log(p / (1 - p)), inv = z => 1 / (1 + Math.exp(-z));
+function calc() {
+  const g = id => document.getElementById(id).value;
+  const p = parseFloat(g("f-prob")) / 100, d = toDecimal(g("f-price")), o = toDecimal(g("f-other"));
+  const w = parseFloat(g("f-weight")), bank = parseFloat(g("f-bankroll")), kf = parseFloat(g("f-kelly")), minEv = parseFloat(g("f-minev")) / 100;
+  const set = (id, v) => { document.getElementById(id).textContent = v; };
+  const verdict = document.getElementById("out-verdict");
+  if (!(p > 0 && p < 1) || !(d > 1) || !(o > 1) || !(w >= 0 && w <= 1) || !(bank > 0) || !(kf > 0 && kf <= 1) || !isFinite(minEv)) {
+    verdict.textContent = "Check inputs"; verdict.className = "verdict";
+    set("out-why", "Probability must be between 0 and 100, prices like -110, +145 or 2.45, weight between 0 and 1, Kelly fraction between 0 and 1.");
+    return;
+  }
+  const pi1 = 1 / d, pi2 = 1 / o, fair = pi1 / (pi1 + pi2);
+  const blend = inv(w * logit(p) + (1 - w) * logit(fair));
+  const ev = blend * d - 1, rawEv = p * d - 1;
+  const b = d - 1, fullK = Math.max(0, (b * blend - (1 - blend)) / b);
+  const stakePct = Math.min(fullK * kf, 0.03), stake = Math.floor(bank * stakePct);
+  const floor = (1 + minEv) / blend;
+  set("out-breakeven", (pi1 * 100).toFixed(1) + "%");
+  set("out-fair", (fair * 100).toFixed(1) + "%");
+  set("out-blend", (blend * 100).toFixed(1) + "%");
+  set("out-rawev", fmt(rawEv * 100, 1) + "%");
+  set("out-ev", fmt(ev * 100, 1) + "%");
+  set("out-fullk", (fullK * 100).toFixed(2) + "%");
+  set("out-stake", ev >= minEv && stake > 0 ? "$" + stake + (fullK * kf > 0.03 ? " (3% cap)" : "") : "$0");
+  set("out-floor", floor > 1 ? toAmerican(floor) + "  (" + floor.toFixed(3) + ")" : "—");
+  if (ev >= minEv && stake > 0) {
+    verdict.textContent = "Bet"; verdict.className = "verdict yes";
+    set("out-why", `After shrinking toward the market your edge is ${fmt(ev * 100, 1)}%, above the ${(minEv * 100).toFixed(1)}% minimum. Log it and record the closing price.`);
+  } else {
+    verdict.textContent = "Pass"; verdict.className = "verdict no";
+    set("out-why", rawEv > minEv ? `Your raw number shows ${fmt(rawEv * 100, 1)}%, but after blending with the market it is ${fmt(ev * 100, 1)}%. The market is usually right when a model disagrees with it.` : `EV after blending is ${fmt(ev * 100, 1)}%, below the ${(minEv * 100).toFixed(1)}% minimum.`);
+  }
+}
+document.getElementById("calc-form").addEventListener("input", calc);
+document.getElementById("calc-form").addEventListener("submit", e => e.preventDefault());
+
+function drawAll() { drawHCA(); drawMonthly(); drawCLV(); drawEvals(); drawCriteria(); drawRound2(); }
+fillTracker(); fillKpis(); fillTables(); fillSkills(); calc(); drawAll();
+let rto; window.addEventListener("resize", () => { clearTimeout(rto); rto = setTimeout(drawAll, 120); });
+if (window.matchMedia) window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", drawAll);
+</script>

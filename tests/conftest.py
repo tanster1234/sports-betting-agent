@@ -31,7 +31,22 @@ def wnba_lines():
     return wnba.load_lines()
 
 
+# calibration.md and the golden-number tests describe the snapshot of games before this date;
+# refreshed data only appends newer games, so those tests keep using this window.
+CALIBRATION_CUTOFF = "2026-10-02"
+
+
 @pytest.fixture(scope="session")
-def wnba_model(wnba_games):
+def calib_games(wnba_games):
+    return [g for g in wnba_games if g["date"] < CALIBRATION_CUTOFF]
+
+
+@pytest.fixture(scope="session")
+def calib_lines(wnba_lines):
+    return [r for r in wnba_lines if r["date"] < CALIBRATION_CUTOFF]
+
+
+@pytest.fixture(scope="session")
+def wnba_model(calib_games):
     from betlab import wnba
-    return wnba.fit_model(wnba_games)
+    return wnba.fit_model(calib_games)

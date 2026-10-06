@@ -65,6 +65,8 @@ python3 -m betlab -h          # CLI help
 - WNBA numbers in skills come from `.claude/skills/wnba-betting/references/calibration.md`;
   golden-number tests in `tests/test_ratings_wnba.py` and `tests/test_backtest_fetch_cli.py`
   guard them — update the doc and tests together if the model changes.
+- Playoff tracker / results page: `python3 scripts/build_lab_page.py` (runs `playoff_tracker.py`;
+  publish `site/dist/wnba-betting-lab.html`). The page is a snapshot — rebuild it after a refresh.
 - Bundled data (`data/wnba/`) is refreshed with `scripts/refresh_wnba_data.py` (needs pandas +
   pyarrow and GitHub access).
 - Skill evals live in `evals/` (see `evals/README.md`).

@@ -2,8 +2,8 @@
 
 | File | What | Rows |
 |---|---|---|
-| `wnba/games.csv` | WNBA results 2013 → 2026 first round (through Oct 1, 2026): date, teams, scores, neutral flag, periods (OT), first-half points (2023+), possessions | 3,318 |
-| `wnba/lines_2026_draftkings.csv` | DraftKings **opening and closing** spread / total / moneyline (with prices) for every 2026 game through Oct 1, 2026, plus final scores | 340 |
+| `wnba/games.csv` | WNBA results 2013 → 2026 playoffs (through Oct 4, 2026): date, teams, scores, neutral flag, periods (OT), first-half points (2023+), possessions | 3,321 |
+| `wnba/lines_2026_draftkings.csv` | DraftKings **opening and closing** spread / total / moneyline (with prices) for every 2026 game through Oct 4, 2026, plus final scores | 343 |
 
 ## Provenance and license
 
@@ -34,6 +34,17 @@ home team's perspective).
 pip install pandas pyarrow
 python3 scripts/refresh_wnba_data.py            # rebuild games.csv for 2013..current season
 python3 scripts/refresh_wnba_data.py --lines    # also re-download current-season DK lines
+```
+
+A refresh rewrites both files in a fixed row and column order, so new games show up as appended
+rows only. The calibration in `calibration.md` and the golden-number tests use games before
+2026-10-02 (`CALIBRATION_CUTOFF` in `tests/conftest.py`), so a refresh never changes them.
+
+Then rebuild the playoff tracker and the results page:
+
+```bash
+python3 scripts/playoff_tracker.py                # JSON: every 2026 playoff game + upcoming calls
+python3 scripts/build_lab_page.py                 # site/dist/wnba-betting-lab.html, ready to publish
 ```
 
 ## Personal data

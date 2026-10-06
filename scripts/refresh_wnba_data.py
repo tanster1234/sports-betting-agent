@@ -148,6 +148,12 @@ def _line_row(gid: str):
     return row
 
 
+LINE_COLUMNS = ["game_id", "date", "season_type", "home", "away", "home_pts", "away_pts", "book"] + [
+    f"{m}_{oc}" for oc in ("open", "close") for m in ("spread_home", "spread_price_home", "spread_price_away")
+] + [f"{m}_{oc}" for oc in ("open", "close") for m in ("total", "over_price", "under_price")] + [
+    f"ml_{side}_{oc}" for oc in ("open", "close") for side in ("home", "away")]
+
+
 def build_lines(games_df, season: int):
     import pandas as pd
     gs = games_df[games_df.season == season]
@@ -161,6 +167,7 @@ def build_lines(games_df, season: int):
     out = out.dropna(subset=["spread_home_close", "total_close", "ml_home_close"])
     for c in [c for c in out.columns if "price" in c or c.startswith("ml_")]:
         out[c] = out[c].astype(int)
+    out = out[LINE_COLUMNS]   # fixed order, so a refresh only appends rows to the bundled file
     out.sort_values(["date", "game_id"]).to_csv(OUT / f"lines_{season}_draftkings.csv", index=False)
     print(f"wrote {len(out)} lines -> {OUT / f'lines_{season}_draftkings.csv'}", file=sys.stderr)
 
