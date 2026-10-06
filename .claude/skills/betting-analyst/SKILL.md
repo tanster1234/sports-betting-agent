@@ -23,8 +23,8 @@ Five beliefs drive every step:
    of skill; win/loss over dozens of bets is mostly noise.
 5. **PASS is a result.** Most days, most games have no edge. Saying so protects the bankroll.
 
-Companion skills: `sports-data-ingestion` (data), `wnba-betting` / `multi-sport-context`
-(sport knowledge), `odds-math`, `player-props`, `bet-red-team`, `bankroll-management`,
+Companion skills: `sports-data-ingestion` (data), `wnba-betting` / `multi-sport-context` /
+`tennis-betting` (sport knowledge), `odds-math`, `player-props`, `bet-red-team`, `bankroll-management`,
 `bet-tracking`, `live-betting` (games already in progress), `responsible-gambling`.
 
 ## Step 0 — Setup (once per session)

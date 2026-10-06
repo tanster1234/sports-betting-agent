@@ -5,7 +5,8 @@ description: >
   college basketball: what actually moves lines, modern home-field values, rest/travel, weather,
   starting pitchers and goalies, key numbers, injury reporting, market quirks and red flags — with
   numbers corrected against modern data (e.g. NBA home court ~2 pts, NFL ~1.5-2, not the old 3+).
-  Use when analyzing or comparing any non-WNBA game or market; for WNBA use wnba-betting.
+  Use when analyzing or comparing any non-WNBA game or market; for WNBA use wnba-betting, for tennis
+  use tennis-betting.
 ---
 
 # Multi-sport context

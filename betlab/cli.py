@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from . import clv as clv_mod
 from . import odds as O
@@ -474,6 +474,148 @@ def cmd_nfl(a):
     return out
 
 
+def _tennis_offers(md, offers):
+    from . import tennis
+    out = []
+    for o in offers or []:
+        parts = o.split(":")
+        if len(parts) != 4:
+            raise ValueError(f"bad --offer {o!r}; use market:side:line:price, e.g. games:over:22.5:-110, "
+                             "handicap:a:-3.5:-120, sets:a:2-0:+150, ml:b:0:+130")
+        market, side, line, price = parts
+        ln = None if market == "ml" else (line if market == "sets" else float(line))
+        out.append(tennis.evaluate_offer(md, market, side.lower(), ln, float(price)))
+    return out
+
+
+def _tennis_p(a):
+    """A's win probability from --p, or the devigged --ml pair (sharp book preferred)."""
+    if a.p is not None:
+        return a.p, "given"
+    if a.ml:
+        return O.devig_american(a.ml)[0], "devigged --ml"
+    raise ValueError("give A's win probability with --p 0.62 or the moneyline pair with --ml -165 +140")
+
+
+def cmd_tennis(a):
+    """Tennis: prices from the market (totals, handicaps, sets), live prices, ratings, scan, validation."""
+    from . import tennis
+    if a.action == "price":
+        p, src = _tennis_p(a)
+        out = tennis.price(p, a.tour, a.surface, a.best_of, a.final_tb, games_lines=a.games, handicaps_a=a.handicap)
+        md = out.pop("_dist")
+        out["p_source"] = src
+        offers = _tennis_offers(md, a.offer)
+        if offers:
+            out["offers"] = offers
+        return out
+    if a.action == "live":
+        p, src = _tennis_p(a)
+        out = tennis.live_price(p, a.tour, a.surface, a.best_of, a.final_tb, a.score, a.points, a.server)
+        td = out.pop("_total")
+        out["totals"] = []
+        for ln in a.games:
+            o, u, pu = td.over_under_push(ln)
+            out["totals"].append({"line": ln, "p_over": round(o, 4), "p_under": round(u, 4)})
+        for o in a.offer or []:
+            market, side, line, price = o.split(":")
+            if market == "ml":
+                pw = out["p_a"] if side.lower() == "a" else 1 - out["p_a"]
+            elif market == "games":
+                ov, un, _ = td.over_under_push(float(line))
+                pw = ov if side == "over" else un
+            else:
+                raise ValueError("live offers support ml and games")
+            dec = O.american_to_decimal(float(price))
+            out.setdefault("offers", []).append({"market": market, "side": side, "line": line, "price": float(price),
+                                                 "p_win": round(pw, 4), "ev_pct": round(100 * (pw * dec - 1), 2)})
+        return out
+    if a.action == "scan":
+        return _tennis_scan(a)
+    cal = tennis.load_calibration()
+    if a.action == "validate":
+        return {k: cal.get(k) for k in ("fitted", "coverage", "serve_level", "form_sd", "validation", "elo", "sources")}
+    rows = tennis.load_matches(a.tour)
+    last = rows[-1]["date"]
+    extra = [r for r in tennis.load_sackmann(a.tour, range(int(last[:4]), 2100)) if r["date"] > last]
+    elo = tennis.Elo()
+    for r in rows + extra:
+        if r["winner"] is not None:
+            elo.update(r["p1"], r["p2"], r["winner"] == 1, r["surface"], r["best_of"], r["date"])
+    as_of = (extra[-1]["date"] if extra else last)
+    if a.action == "ratings":
+        since = a.since or f"{int(as_of[:4]) - 1}{as_of[4:]}"
+        return {"tour": a.tour, "as_of": as_of, "surface": a.surface,
+                "note": "ratings lose to bookmaker odds (log-loss 0.62 vs 0.59); context only",
+                "ratings": elo.table(a.surface, since, a.top)}
+    if a.action == "predict":
+        if not (a.a and a.b):
+            raise ValueError("predict needs --a and --b player names, e.g. --a 'Sinner J.' --b 'Alcaraz C.'")
+        p = elo.prob(a.a, a.b, a.surface, a.best_of)
+        out = tennis.price(p, a.tour, a.surface, a.best_of, a.final_tb, games_lines=a.games, handicaps_a=a.handicap)
+        out.pop("_dist")
+        return {"as_of": as_of, "a": a.a, "b": a.b, "elo_a": round(elo.rating(a.a, a.surface), 1),
+                "elo_b": round(elo.rating(a.b, a.surface), 1), "matches_a": elo.n.get(tennis.name_key(a.a), 0),
+                "matches_b": elo.n.get(tennis.name_key(a.b), 0),
+                "note": "Elo loses to the market; price bets from the devigged market (tennis price --ml)", **out}
+    raise ValueError(f"unknown tennis action {a.action!r}")
+
+
+def _tennis_scan(a):
+    """Every in-season tennis event on The Odds API: DraftKings/FanDuel vs the sharp no-vig price,
+    with total games and game handicaps priced from that price."""
+    from . import tennis
+    from .fetch import odds_api
+    keys = [s["key"] for s in odds_api.active_sports("Tennis") if a.tour == "all" or s["key"].startswith(f"tennis_{a.tour}")]
+    out = {"events": [], "quota": None, "tournaments": keys}
+    for key in keys:
+        res = odds_api.get_odds(key, a.markets, a.regions)
+        out["quota"] = res["quota"]
+        tour = "wta" if "_wta_" in key else "atp"
+        fmt = tennis.tournament_format(key, tour)
+        by_event: Dict[str, list] = {}
+        for r in res["rows"]:
+            by_event.setdefault(r["event_id"], []).append(r)
+        for ev, rows in by_event.items():
+            home, away = rows[0]["home"], rows[0]["away"]
+            pin = {r["name"]: r["price"] for r in rows if r["book"] == "pinnacle" and r["market"] == "h2h"}
+            cons = odds_api.consensus([r for r in rows if r["market"] == "h2h"])
+            p_home = None
+            if len(pin) == 2:
+                p_home = O.devig_american([pin[home], pin[away]])[0]
+            else:
+                c = cons.get((ev, "h2h", None, home, None))
+                p_home = c["fair_prob"] if c else None
+            item = {"tournament": key, "start": rows[0]["commence_time"], "a": home, "b": away, **fmt,
+                    "p_a": round(p_home, 4) if p_home else None, "fair_source": "pinnacle" if len(pin) == 2 else "consensus",
+                    "offers": []}
+            if p_home:
+                pr = tennis.price(p_home, tour, fmt["surface"], fmt["best_of"], fmt["final_tb"])
+                md = pr.pop("_dist")
+                item["exp_total_games"] = pr["exp_total_games"]
+                for r in rows:
+                    if r["book"] not in ("draftkings", "fanduel"):
+                        continue
+                    side = "a" if r["name"] == home else "b"
+                    if r["market"] == "h2h":
+                        o = tennis.evaluate_offer(md, "ml", side, None, r["price"])
+                    elif r["market"] == "totals":
+                        o = tennis.evaluate_offer(md, "games", r["name"].lower(), r["point"], r["price"])
+                    elif r["market"] == "spreads":
+                        o = tennis.evaluate_offer(md, "handicap", side, r["point"], r["price"])
+                    else:
+                        continue
+                    o["book"] = r["book"]
+                    o["selection"] = r["name"]
+                    item["offers"].append(o)
+                item["offers"].sort(key=lambda o: -o["ev_pct"])
+            out["events"].append(item)
+    out["events"].sort(key=lambda e: e["start"])
+    best = [dict(o, event=f"{e['a']} vs {e['b']}") for e in out["events"] for o in e["offers"] if o["ev_pct"] >= 100 * a.min_ev]
+    out["candidates"] = sorted(best, key=lambda o: -o["ev_pct"])
+    return out
+
+
 def cmd_liveread(a):
     """In-game read for WNBA/NBA: play-by-play facts, a fair live price, and live offers checked."""
     from . import liveread as lr
@@ -742,6 +884,30 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--out", help="write one patch file per bet here (for the tracker database)")
     s.add_argument("--now", help="timestamp to stamp updates with (ISO, UTC); default now")
     s.set_defaults(fn=cmd_live)
+
+    s = sub.add_parser("tennis", help="tennis: totals/handicaps/sets from the market, live prices, scan, ratings")
+    s.add_argument("action", choices=["price", "live", "scan", "ratings", "predict", "validate"])
+    s.add_argument("--tour", default="atp", choices=["atp", "wta", "all"])
+    s.add_argument("--surface", default="hard", choices=["hard", "clay", "grass", "carpet"])
+    s.add_argument("--best-of", type=int, default=3, choices=[3, 5])
+    s.add_argument("--final-tb", type=int, default=7, choices=[7, 10], help="final-set tiebreak (10 at Grand Slams)")
+    s.add_argument("--p", type=float, help="player A's win probability (e.g. the sharp no-vig price)")
+    s.add_argument("--ml", type=float, nargs=2, metavar=("A", "B"), help="moneyline pair to devig, e.g. -165 140")
+    s.add_argument("--games", type=float, nargs="+", default=[], help="total-games lines to price, e.g. 21.5 22.5")
+    s.add_argument("--handicap", type=float, nargs="+", default=[], help="A's game handicaps, e.g. -3.5 -2.5")
+    s.add_argument("--offer", nargs="+", default=[],
+                   help="book prices: ml:a:0:-150 games:over:22.5:-110 handicap:b:3.5:-115 sets:a:2-0:+140")
+    s.add_argument("--score", default="", help="live: set scores from A's side, e.g. '6-4 3-2'")
+    s.add_argument("--points", default="0-0", help="live: current game '30-15' (or tiebreak points '5-4'), A first")
+    s.add_argument("--server", default="a", choices=["a", "b"], help="live: who is serving now")
+    s.add_argument("--a", help="predict: player A, e.g. 'Sinner J.' or 'Jannik Sinner'")
+    s.add_argument("--b", help="predict: player B")
+    s.add_argument("--top", type=int, default=30)
+    s.add_argument("--since", help="ratings: only players with a match since this date")
+    s.add_argument("--markets", nargs="+", default=["h2h", "spreads", "totals"])
+    s.add_argument("--regions", nargs="+", default=["us", "eu"])
+    s.add_argument("--min-ev", type=float, default=0.03)
+    s.set_defaults(fn=cmd_tennis)
 
     s = sub.add_parser("liveread", help="in-game read (WNBA/NBA): play-by-play facts, fair live price, offers")
     s.add_argument("action", nargs="?", default="read", choices=["read", "validate"])

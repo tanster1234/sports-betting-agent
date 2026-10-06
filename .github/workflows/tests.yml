@@ -27,5 +27,7 @@ jobs:
           python -m betlab odds -110 -110
           python -m betlab wnba predict --home ATL --away NY --date 2026-10-04 --playoff
           python -m betlab backtest --markets total --price-at open --model-weight 0.35
+          python -m betlab tennis price --ml -165 140 --games 22.5 --offer games:over:22.5:-110
+          python -m betlab tennis live --p 0.6 --score "6-4 2-3" --points 15-40 --server a
           python -m betlab liveread --summary tests/fixtures/espn_wnba_live_summary.json --offer ml:away:0:110:dk --sharp ml:-105:-115
           python -m betlab liveread validate

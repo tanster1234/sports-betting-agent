@@ -187,6 +187,12 @@ def value_scan(rows: Sequence[dict], min_ev: float = 0.02, min_books: int = 3, m
     return sorted(found, key=lambda r: -r["ev_pct"])
 
 
+def active_sports(group: Optional[str] = None, api_key: Optional[str] = None) -> List[dict]:
+    """In-season sports (free endpoint: costs no credits), optionally one group such as 'Tennis'."""
+    js, _ = fetch_json(f"{BASE}/sports/?" + urlencode({"apiKey": api_key or _key()}))
+    return [s for s in js if group is None or s.get("group", "").lower() == group.lower()]
+
+
 def get_odds(sport: str, markets: Sequence[str] = FEATURED, regions: Sequence[str] = ("us",),
              bookmakers: Optional[Sequence[str]] = None) -> dict:
     js, hdrs = fetch_json(odds_url(sport, markets, regions, bookmakers=bookmakers))

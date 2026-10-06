@@ -38,6 +38,7 @@ adult user to act on — Claude never places bets.
 | `betting-analyst` | "what should I bet", picks, slate scans, single-game analysis, output card |
 | `wnba-betting` | anything WNBA — calibrated model, 2026 context, playoffs, props notes |
 | `multi-sport-context` | NBA / NFL / MLB / NHL / NCAAF / NCAAB context and pricing |
+| `tennis-betting` | ATP / WTA — match, total games, handicaps, sets, live, scan, surface Elo |
 | `odds-math` | conversions, devig, EV, hold, CLV, parlays, alt lines |
 | `player-props` | props and same-game parlays |
 | `sports-data-ingestion` | schedules, injuries, odds, line shopping, value scans |
@@ -58,7 +59,7 @@ adult user to act on — Claude never places bets.
 ## Development
 
 ```bash
-python3 -m pytest -q          # ~270 tests, a few seconds, stdlib + pytest only
+python3 -m pytest -q          # ~290 tests, a few seconds, stdlib + pytest only
 ruff check betlab tests       # lint (config in pyproject.toml)
 python3 -m betlab -h          # CLI help
 ```
@@ -74,4 +75,8 @@ python3 -m betlab -h          # CLI help
 - NFL pricing (`betlab nfl`) uses `data/nfl/calibration.json`, rebuilt by
   `scripts/refresh_nfl_data.py` (stdlib; downloads nflverse games to the gitignored
   `data/nfl/games.csv`). Golden numbers in `tests/test_nfl.py` — refit, docs and tests together.
+- Tennis pricing (`betlab tennis`) uses `data/tennis/calibration.json`, rebuilt by
+  `scripts/refresh_tennis_data.py` (stdlib; downloads results/odds and Sackmann stats to the gitignored
+  `data/tennis/`). Golden numbers in `tests/test_tennis.py` — refit, the `tennis-betting` skill table and
+  tests together.
 - Skill evals live in `evals/` (see `evals/README.md`).

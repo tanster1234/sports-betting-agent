@@ -6,6 +6,7 @@
 | `wnba/lines_2026_draftkings.csv` | DraftKings **opening and closing** spread / total / moneyline (with prices) for every 2026 game through Oct 1, 2026, plus final scores | 340 |
 
 | `nfl/calibration.json` | NFL margin/total model fitted on 2015–2025 closing lines and results: σ plus a weight per final margin (3, 7, 6, 10, 14 …) and per total — aggregate statistics only, with an out-of-sample check on 2024–25 | 3,028 games |
+| `tennis/calibration.json` | Tennis point model: tour serve-point rates by surface (2019–25), the fitted day-to-day form spread, held-out 2024+ checks of total games and set scores, and Elo vs bookmaker closing odds — aggregate statistics only | ATP 67,288 / WTA 43,512 matches |
 
 ## NFL data
 
@@ -21,6 +22,25 @@ python3 scripts/refresh_nfl_data.py --last 2025 --validate-split 2023   # also s
 ```
 nflverse `spread_line` is positive when the home team is favoured; betlab flips it so that, as
 everywhere else here, a negative home spread means the home team is favoured.
+
+## Tennis data
+
+The raw tennis files are **not** in the repo; `scripts/refresh_tennis_data.py` downloads them to
+`data/tennis/` (gitignored) from Hugging Face mirrors and refits `tennis/calibration.json`:
+
+- **Results with bookmaker closing odds** — tennis-data.co.uk (compiled in the Kaggle "dissfya"
+  ATP/WTA daily-pull datasets): ATP 2000 → 2026-03-15, WTA 2007 → 2025-11-08, main tour only, odds
+  with a ~5-7% margin (a mainstream book, not Pinnacle). Mirrors: `groundhog2107/atp_tennis`,
+  `Nevoreuven/tennis-betting-odds-model`. tennis-data.co.uk itself blocks cloud servers.
+- **Match statistics and later results** — Tennis databases, files, and algorithms by
+  [Jeff Sackmann / Tennis Abstract](https://github.com/JeffSackmann), licensed
+  [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) (non-commercial; credit
+  required), via the `Aneeshers/tennis-sackmann-archive` mirror (results through 2026-05-25).
+
+```bash
+python3 scripts/refresh_tennis_data.py                 # download + fit + validate (stdlib only)
+python3 scripts/refresh_tennis_data.py --no-download   # refit from local copies
+```
 
 ## Provenance and license
 
