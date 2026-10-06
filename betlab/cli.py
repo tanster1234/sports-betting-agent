@@ -211,6 +211,12 @@ def cmd_parlay(a):
     out = {}
     if decs:
         out["independent"] = independent_parlay(a.probs, decs)
+    elif not a.corr:
+        p_all = 1.0
+        for x in a.probs:
+            p_all *= x
+        out["independent"] = {"p_all": p_all, "fair_decimal": 1 / p_all if p_all else float("inf"),
+                              "fair_american": O.format_american(O.decimal_to_american(1 / p_all)) if 0 < p_all < 1 else None}
     if a.corr:
         corr = json.loads(a.corr)
         if a.offered:
@@ -823,6 +829,90 @@ def _mlb_scan(a):
     return out
 
 
+def _load_tickets(src):
+    """Tickets from a JSON file / '-' / inline JSON, or a directory of tracker <id>.json docs."""
+    import os
+    if src is None:
+        return []
+    if os.path.isdir(src):
+        out = []
+        for fn in sorted(os.listdir(src)):
+            if fn.endswith(".json"):
+                with open(os.path.join(src, fn)) as f:
+                    out.append(dict(json.load(f), id=fn[:-5]))
+        return out
+    if src == "-":
+        raw = json.load(sys.stdin)
+    elif os.path.exists(src):
+        with open(src) as f:
+            raw = json.load(f)
+    else:
+        raw = json.loads(src)
+    if isinstance(raw, dict):
+        raw = raw.get("tickets") or [dict(v, id=k) for k, v in raw.items()]
+    return list(raw)
+
+
+def cmd_slips(a):
+    """Check tickets together: shared legs/players/games across tickets, legs within a ticket that
+    need different game scripts, and the joint chance of every outcome."""
+    from . import slips
+    placed = _load_tickets(a.bets)
+    if not a.all:
+        placed = [t for t in placed if t.get("status", "open") == "open"]
+    proposed = _load_tickets(a.tickets)
+    for t in proposed:
+        t.setdefault("status", "proposed")
+    if not placed and not proposed:
+        raise ValueError("nothing to check: give --tickets (proposed) and/or --bets (tracker docs)")
+    res = slips.check(placed + proposed, resolver=None if a.offline else slips.espn_resolver(), sims=a.sims)
+    res["placed"] = [t["id"] for t in placed]
+    res["proposed"] = [str(t.get("id")) for t in proposed]
+    return res
+
+
+def cmd_postmortem(a):
+    """Post-mortem every settled leg: tags, a plain 'why', calibration by chance and lessons.
+    With --out, writes tracker patches: bets/<id>.json (legs with their post-mortem) and meta/lessons.json."""
+    import datetime as _dt
+    import os
+
+    from . import postmortem
+    tickets = _load_tickets(a.bets)
+    if a.since:
+        tickets = [t for t in tickets if str(t.get("eventDate") or "") >= a.since]
+    res = postmortem.review(tickets)
+    if a.out:
+        by_t: Dict[str, Dict[int, dict]] = {}
+        for r in res["records"]:
+            by_t.setdefault(r["ticket"], {})[int(r["id"].rsplit(":", 1)[1])] = r
+        os.makedirs(os.path.join(a.out, "bets"), exist_ok=True)
+        os.makedirs(os.path.join(a.out, "meta"), exist_ok=True)
+        written = []
+        for t in tickets:
+            recs = by_t.get(t["id"])
+            if not recs:
+                continue
+            legs = [dict(lg) for lg in t.get("legs", [])]
+            changed = False
+            for i, lg in enumerate(legs):
+                r = recs.get(i)
+                if r and r["result"] == "lost":
+                    pm = {"tags": r["tags"], "why": r["why"], "chance": r["chance"]}
+                    if lg.get("postmortem") != pm:
+                        lg["postmortem"] = pm
+                        changed = True
+            if changed:
+                with open(os.path.join(a.out, "bets", f"{t['id']}.json"), "w") as f:
+                    json.dump({"legs": legs}, f, indent=1)
+                written.append(t["id"])
+        lessons = dict(res["summary"], updatedAt=_dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        with open(os.path.join(a.out, "meta", "lessons.json"), "w") as f:
+            json.dump(lessons, f, indent=1)
+        res["written"] = {"bets": written, "meta": ["lessons"]}
+    return res
+
+
 def cmd_liveread(a):
     """In-game read for WNBA/NBA: play-by-play facts, a fair live price, and live offers checked."""
     from . import liveread as lr
@@ -1137,6 +1227,21 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--min-ev", type=float, default=0.02)
     s.add_argument("--top", type=int, default=15)
     s.set_defaults(fn=cmd_mlb)
+
+    s = sub.add_parser("slips", help="check tickets together: shared exposure, one-story legs, joint outcomes")
+    s.add_argument("action", choices=["check"])
+    s.add_argument("--tickets", help="proposed tickets: JSON file, '-' or inline JSON (tracker leg format)")
+    s.add_argument("--bets", help="placed tickets: directory of tracker <id>.json docs (open ones are used)")
+    s.add_argument("--all", action="store_true", help="include settled tickets from --bets too")
+    s.add_argument("--offline", action="store_true", help="don't look up teams/positions on ESPN")
+    s.add_argument("--sims", type=int, default=40000)
+    s.set_defaults(fn=cmd_slips)
+
+    s = sub.add_parser("postmortem", help="why each settled leg won or lost; calibration and lessons (tracker patches)")
+    s.add_argument("--bets", required=True, help="directory of tracker <id>.json docs (or a JSON list)")
+    s.add_argument("--out", help="write tracker patches here: bets/<id>.json and meta/lessons.json")
+    s.add_argument("--since", help="only tickets on/after this date (YYYY-MM-DD)")
+    s.set_defaults(fn=cmd_postmortem)
 
     s = sub.add_parser("liveread", help="in-game read (WNBA/NBA): play-by-play facts, fair live price, offers")
     s.add_argument("action", nargs="?", default="read", choices=["read", "validate"])

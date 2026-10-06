@@ -1,0 +1,39 @@
+{
+"athletes": [
+{
+"position": "offense",
+"items": [
+{
+"displayName": "Jahan Dotson",
+"position": {
+"abbreviation": "WR"
+}
+},
+{
+"displayName": "Drake London",
+"position": {
+"abbreviation": "WR"
+}
+},
+{
+"displayName": "Michael Penix Jr.",
+"position": {
+"abbreviation": "QB"
+}
+},
+{
+"displayName": "Bijan Robinson",
+"position": {
+"abbreviation": "RB"
+}
+},
+{
+"displayName": "Brian Robinson Jr.",
+"position": {
+"abbreviation": "RB"
+}
+}
+]
+}
+]
+}

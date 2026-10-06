@@ -1,0 +1,910 @@
+{
+ "fitted": "2026-10-06",
+ "seasons": "2021-2025",
+ "n_player_games": 90585,
+ "sd_margin_resid": 13.19,
+ "sd_total_resid": 13.4,
+ "margin_total_corr": 0.023,
+ "roles": "QB 20+ attempts, RB 8+ carries, WR 4+ targets, TE 3+ targets (average of his other games)",
+ "loadings": {
+  "pass_yds/QB": {
+   "margin": 0.1,
+   "total": 0.308,
+   "n": 2556
+  },
+  "rec_yds/RB": {
+   "margin": 0.002,
+   "total": 0.082,
+   "n": 3266
+  },
+  "rec_yds/TE": {
+   "margin": -0.013,
+   "total": 0.138,
+   "n": 2649
+  },
+  "rec_yds/WR": {
+   "margin": 0.076,
+   "total": 0.179,
+   "n": 5758
+  },
+  "receptions/RB": {
+   "margin": -0.081,
+   "total": 0.051,
+   "n": 3266
+  },
+  "receptions/TE": {
+   "margin": -0.074,
+   "total": 0.09,
+   "n": 2649
+  },
+  "receptions/WR": {
+   "margin": 0.022,
+   "total": 0.126,
+   "n": 5758
+  },
+  "rush_yds/QB": {
+   "margin": -0.023,
+   "total": 0.065,
+   "n": 2556
+  },
+  "rush_yds/RB": {
+   "margin": 0.282,
+   "total": 0.094,
+   "n": 3266
+  },
+  "td/RB": {
+   "margin": 0.303,
+   "total": 0.292,
+   "n": 3266
+  },
+  "td/TE": {
+   "margin": 0.134,
+   "total": 0.228,
+   "n": 2649
+  },
+  "td/WR": {
+   "margin": 0.187,
+   "total": 0.281,
+   "n": 5758
+  }
+ },
+ "pairs": {
+  "same_player": {
+   "pass_yds/QB|rush_yds/QB": {
+    "corr": 0.089,
+    "beyond_script": 0.072,
+    "n": 2556
+   },
+   "rec_yds/RB|receptions/RB": {
+    "corr": 0.746,
+    "beyond_script": 0.742,
+    "n": 3266
+   },
+   "rec_yds/RB|rush_yds/RB": {
+    "corr": 0.033,
+    "beyond_script": 0.025,
+    "n": 3266
+   },
+   "rec_yds/RB|td/RB": {
+    "corr": 0.182,
+    "beyond_script": 0.157,
+    "n": 3266
+   },
+   "rec_yds/TE|receptions/TE": {
+    "corr": 0.817,
+    "beyond_script": 0.803,
+    "n": 2649
+   },
+   "rec_yds/TE|td/TE": {
+    "corr": 0.332,
+    "beyond_script": 0.302,
+    "n": 2649
+   },
+   "rec_yds/WR|receptions/WR": {
+    "corr": 0.786,
+    "beyond_script": 0.761,
+    "n": 5758
+   },
+   "rec_yds/WR|td/WR": {
+    "corr": 0.418,
+    "beyond_script": 0.353,
+    "n": 5758
+   },
+   "receptions/RB|rush_yds/RB": {
+    "corr": 0.014,
+    "beyond_script": 0.032,
+    "n": 3266
+   },
+   "receptions/RB|td/RB": {
+    "corr": 0.114,
+    "beyond_script": 0.123,
+    "n": 3266
+   },
+   "receptions/TE|td/TE": {
+    "corr": 0.348,
+    "beyond_script": 0.337,
+    "n": 2649
+   },
+   "receptions/WR|td/WR": {
+    "corr": 0.348,
+    "beyond_script": 0.308,
+    "n": 5758
+   },
+   "rush_yds/RB|td/RB": {
+    "corr": 0.428,
+    "beyond_script": 0.315,
+    "n": 3266
+   }
+  },
+  "teammate": {
+   "pass_yds/QB|rec_yds/RB": {
+    "corr": 0.216,
+    "beyond_script": 0.19,
+    "n": 3075
+   },
+   "pass_yds/QB|rec_yds/TE": {
+    "corr": 0.293,
+    "beyond_script": 0.252,
+    "n": 2529
+   },
+   "pass_yds/QB|rec_yds/WR": {
+    "corr": 0.373,
+    "beyond_script": 0.31,
+    "n": 5489
+   },
+   "pass_yds/QB|receptions/RB": {
+    "corr": 0.162,
+    "beyond_script": 0.155,
+    "n": 3075
+   },
+   "pass_yds/QB|receptions/TE": {
+    "corr": 0.242,
+    "beyond_script": 0.222,
+    "n": 2529
+   },
+   "pass_yds/QB|receptions/WR": {
+    "corr": 0.296,
+    "beyond_script": 0.255,
+    "n": 5489
+   },
+   "pass_yds/QB|rush_yds/RB": {
+    "corr": -0.088,
+    "beyond_script": -0.145,
+    "n": 3075
+   },
+   "pass_yds/QB|td/RB": {
+    "corr": 0.053,
+    "beyond_script": -0.068,
+    "n": 3075
+   },
+   "pass_yds/QB|td/TE": {
+    "corr": 0.167,
+    "beyond_script": 0.083,
+    "n": 2529
+   },
+   "pass_yds/QB|td/WR": {
+    "corr": 0.203,
+    "beyond_script": 0.098,
+    "n": 5489
+   },
+   "rec_yds/RB|rec_yds/RB": {
+    "corr": 0.02,
+    "beyond_script": 0.013,
+    "n": 747
+   },
+   "rec_yds/RB|rec_yds/TE": {
+    "corr": 0.004,
+    "beyond_script": -0.007,
+    "n": 3182
+   },
+   "rec_yds/RB|rec_yds/WR": {
+    "corr": 0.009,
+    "beyond_script": -0.006,
+    "n": 6940
+   },
+   "rec_yds/RB|receptions/RB": {
+    "corr": 0.01,
+    "beyond_script": 0.006,
+    "n": 1494
+   },
+   "rec_yds/RB|receptions/TE": {
+    "corr": 0.024,
+    "beyond_script": 0.017,
+    "n": 3182
+   },
+   "rec_yds/RB|receptions/WR": {
+    "corr": 0.016,
+    "beyond_script": 0.005,
+    "n": 6940
+   },
+   "rec_yds/RB|rush_yds/QB": {
+    "corr": 0.027,
+    "beyond_script": 0.022,
+    "n": 3075
+   },
+   "rec_yds/RB|rush_yds/RB": {
+    "corr": -0.068,
+    "beyond_script": -0.076,
+    "n": 1494
+   },
+   "rec_yds/RB|td/RB": {
+    "corr": -0.058,
+    "beyond_script": -0.083,
+    "n": 1494
+   },
+   "rec_yds/RB|td/TE": {
+    "corr": 0.007,
+    "beyond_script": -0.012,
+    "n": 3182
+   },
+   "rec_yds/RB|td/WR": {
+    "corr": 0.001,
+    "beyond_script": -0.022,
+    "n": 6940
+   },
+   "rec_yds/TE|rec_yds/TE": {
+    "corr": -0.006,
+    "beyond_script": -0.026,
+    "n": 380
+   },
+   "rec_yds/TE|rec_yds/WR": {
+    "corr": -0.009,
+    "beyond_script": -0.032,
+    "n": 5534
+   },
+   "rec_yds/TE|receptions/RB": {
+    "corr": 0.031,
+    "beyond_script": 0.023,
+    "n": 3182
+   },
+   "rec_yds/TE|receptions/TE": {
+    "corr": 0.005,
+    "beyond_script": -0.008,
+    "n": 760
+   },
+   "rec_yds/TE|receptions/WR": {
+    "corr": 0.017,
+    "beyond_script": -0.0,
+    "n": 5534
+   },
+   "rec_yds/TE|rush_yds/QB": {
+    "corr": 0.034,
+    "beyond_script": 0.025,
+    "n": 2529
+   },
+   "rec_yds/TE|rush_yds/RB": {
+    "corr": -0.022,
+    "beyond_script": -0.031,
+    "n": 3182
+   },
+   "rec_yds/TE|td/RB": {
+    "corr": 0.01,
+    "beyond_script": -0.026,
+    "n": 3182
+   },
+   "rec_yds/TE|td/TE": {
+    "corr": 0.013,
+    "beyond_script": -0.016,
+    "n": 760
+   },
+   "rec_yds/TE|td/WR": {
+    "corr": 0.029,
+    "beyond_script": -0.007,
+    "n": 5534
+   },
+   "rec_yds/WR|rec_yds/WR": {
+    "corr": -0.011,
+    "beyond_script": -0.049,
+    "n": 4140
+   },
+   "rec_yds/WR|receptions/RB": {
+    "corr": -0.002,
+    "beyond_script": -0.005,
+    "n": 6940
+   },
+   "rec_yds/WR|receptions/TE": {
+    "corr": -0.013,
+    "beyond_script": -0.024,
+    "n": 5534
+   },
+   "rec_yds/WR|receptions/WR": {
+    "corr": 0.004,
+    "beyond_script": -0.021,
+    "n": 8280
+   },
+   "rec_yds/WR|rush_yds/QB": {
+    "corr": -0.017,
+    "beyond_script": -0.027,
+    "n": 5489
+   },
+   "rec_yds/WR|rush_yds/RB": {
+    "corr": -0.033,
+    "beyond_script": -0.071,
+    "n": 6940
+   },
+   "rec_yds/WR|td/RB": {
+    "corr": 0.026,
+    "beyond_script": -0.049,
+    "n": 6940
+   },
+   "rec_yds/WR|td/TE": {
+    "corr": 0.03,
+    "beyond_script": -0.021,
+    "n": 5534
+   },
+   "rec_yds/WR|td/WR": {
+    "corr": 0.022,
+    "beyond_script": -0.043,
+    "n": 8280
+   },
+   "receptions/RB|receptions/RB": {
+    "corr": 0.031,
+    "beyond_script": 0.022,
+    "n": 747
+   },
+   "receptions/RB|receptions/TE": {
+    "corr": 0.059,
+    "beyond_script": 0.048,
+    "n": 3182
+   },
+   "receptions/RB|receptions/WR": {
+    "corr": 0.023,
+    "beyond_script": 0.018,
+    "n": 6940
+   },
+   "receptions/RB|rush_yds/QB": {
+    "corr": 0.054,
+    "beyond_script": 0.049,
+    "n": 3075
+   },
+   "receptions/RB|rush_yds/RB": {
+    "corr": -0.114,
+    "beyond_script": -0.096,
+    "n": 1494
+   },
+   "receptions/RB|td/RB": {
+    "corr": -0.039,
+    "beyond_script": -0.03,
+    "n": 1494
+   },
+   "receptions/RB|td/TE": {
+    "corr": 0.002,
+    "beyond_script": 0.001,
+    "n": 3182
+   },
+   "receptions/RB|td/WR": {
+    "corr": -0.012,
+    "beyond_script": -0.011,
+    "n": 6940
+   },
+   "receptions/TE|receptions/TE": {
+    "corr": 0.024,
+    "beyond_script": 0.01,
+    "n": 380
+   },
+   "receptions/TE|receptions/WR": {
+    "corr": 0.023,
+    "beyond_script": 0.013,
+    "n": 5534
+   },
+   "receptions/TE|rush_yds/QB": {
+    "corr": 0.042,
+    "beyond_script": 0.034,
+    "n": 2529
+   },
+   "receptions/TE|rush_yds/RB": {
+    "corr": -0.055,
+    "beyond_script": -0.043,
+    "n": 3182
+   },
+   "receptions/TE|td/RB": {
+    "corr": -0.029,
+    "beyond_script": -0.033,
+    "n": 3182
+   },
+   "receptions/TE|td/TE": {
+    "corr": 0.004,
+    "beyond_script": -0.007,
+    "n": 760
+   },
+   "receptions/TE|td/WR": {
+    "corr": -0.007,
+    "beyond_script": -0.018,
+    "n": 5534
+   },
+   "receptions/WR|receptions/WR": {
+    "corr": 0.021,
+    "beyond_script": 0.005,
+    "n": 4140
+   },
+   "receptions/WR|rush_yds/QB": {
+    "corr": -0.004,
+    "beyond_script": -0.012,
+    "n": 5489
+   },
+   "receptions/WR|rush_yds/RB": {
+    "corr": -0.057,
+    "beyond_script": -0.075,
+    "n": 6940
+   },
+   "receptions/WR|td/RB": {
+    "corr": -0.015,
+    "beyond_script": -0.058,
+    "n": 6940
+   },
+   "receptions/WR|td/TE": {
+    "corr": 0.01,
+    "beyond_script": -0.022,
+    "n": 5534
+   },
+   "receptions/WR|td/WR": {
+    "corr": 0.01,
+    "beyond_script": -0.029,
+    "n": 8280
+   },
+   "rush_yds/QB|rush_yds/RB": {
+    "corr": 0.004,
+    "beyond_script": 0.005,
+    "n": 3075
+   },
+   "rush_yds/QB|td/RB": {
+    "corr": -0.001,
+    "beyond_script": -0.013,
+    "n": 3075
+   },
+   "rush_yds/QB|td/TE": {
+    "corr": 0.003,
+    "beyond_script": -0.009,
+    "n": 2529
+   },
+   "rush_yds/QB|td/WR": {
+    "corr": 0.001,
+    "beyond_script": -0.013,
+    "n": 5489
+   },
+   "rush_yds/RB|rush_yds/RB": {
+    "corr": -0.001,
+    "beyond_script": -0.089,
+    "n": 747
+   },
+   "rush_yds/RB|td/RB": {
+    "corr": -0.001,
+    "beyond_script": -0.114,
+    "n": 1494
+   },
+   "rush_yds/RB|td/TE": {
+    "corr": 0.006,
+    "beyond_script": -0.053,
+    "n": 3182
+   },
+   "rush_yds/RB|td/WR": {
+    "corr": 0.02,
+    "beyond_script": -0.059,
+    "n": 6940
+   },
+   "td/RB|td/RB": {
+    "corr": -0.106,
+    "beyond_script": -0.283,
+    "n": 747
+   },
+   "td/RB|td/TE": {
+    "corr": -0.018,
+    "beyond_script": -0.125,
+    "n": 3182
+   },
+   "td/RB|td/WR": {
+    "corr": -0.059,
+    "beyond_script": -0.198,
+    "n": 6940
+   },
+   "td/TE|td/TE": {
+    "corr": 0.062,
+    "beyond_script": -0.008,
+    "n": 380
+   },
+   "td/TE|td/WR": {
+    "corr": -0.072,
+    "beyond_script": -0.161,
+    "n": 5534
+   },
+   "td/WR|td/WR": {
+    "corr": 0.0,
+    "beyond_script": -0.114,
+    "n": 4140
+   }
+  },
+  "opponent": {
+   "pass_yds/QB|pass_yds/QB": {
+    "corr": 0.096,
+    "beyond_script": 0.011,
+    "n": 1206
+   },
+   "pass_yds/QB|rec_yds/RB": {
+    "corr": 0.019,
+    "beyond_script": -0.006,
+    "n": 3094
+   },
+   "pass_yds/QB|rec_yds/TE": {
+    "corr": 0.022,
+    "beyond_script": -0.022,
+    "n": 2509
+   },
+   "pass_yds/QB|rec_yds/WR": {
+    "corr": 0.049,
+    "beyond_script": 0.001,
+    "n": 5432
+   },
+   "pass_yds/QB|receptions/RB": {
+    "corr": -0.002,
+    "beyond_script": -0.026,
+    "n": 3094
+   },
+   "pass_yds/QB|receptions/TE": {
+    "corr": 0.016,
+    "beyond_script": -0.02,
+    "n": 2509
+   },
+   "pass_yds/QB|receptions/WR": {
+    "corr": 0.031,
+    "beyond_script": -0.005,
+    "n": 5432
+   },
+   "pass_yds/QB|rush_yds/QB": {
+    "corr": 0.023,
+    "beyond_script": 0.001,
+    "n": 2412
+   },
+   "pass_yds/QB|rush_yds/RB": {
+    "corr": 0.02,
+    "beyond_script": 0.019,
+    "n": 3094
+   },
+   "pass_yds/QB|td/RB": {
+    "corr": 0.049,
+    "beyond_script": -0.011,
+    "n": 3094
+   },
+   "pass_yds/QB|td/TE": {
+    "corr": 0.069,
+    "beyond_script": 0.012,
+    "n": 2509
+   },
+   "pass_yds/QB|td/WR": {
+    "corr": 0.108,
+    "beyond_script": 0.04,
+    "n": 5432
+   },
+   "rec_yds/RB|rec_yds/RB": {
+    "corr": 0.024,
+    "beyond_script": 0.017,
+    "n": 1975
+   },
+   "rec_yds/RB|rec_yds/TE": {
+    "corr": -0.006,
+    "beyond_script": -0.017,
+    "n": 3184
+   },
+   "rec_yds/RB|rec_yds/WR": {
+    "corr": -0.015,
+    "beyond_script": -0.03,
+    "n": 6940
+   },
+   "rec_yds/RB|receptions/RB": {
+    "corr": -0.004,
+    "beyond_script": -0.009,
+    "n": 3950
+   },
+   "rec_yds/RB|receptions/TE": {
+    "corr": -0.024,
+    "beyond_script": -0.031,
+    "n": 3184
+   },
+   "rec_yds/RB|receptions/WR": {
+    "corr": -0.019,
+    "beyond_script": -0.03,
+    "n": 6940
+   },
+   "rec_yds/RB|rush_yds/QB": {
+    "corr": -0.029,
+    "beyond_script": -0.034,
+    "n": 3094
+   },
+   "rec_yds/RB|rush_yds/RB": {
+    "corr": -0.017,
+    "beyond_script": -0.024,
+    "n": 3950
+   },
+   "rec_yds/RB|td/RB": {
+    "corr": 0.043,
+    "beyond_script": 0.019,
+    "n": 3950
+   },
+   "rec_yds/RB|td/TE": {
+    "corr": 0.013,
+    "beyond_script": -0.005,
+    "n": 3184
+   },
+   "rec_yds/RB|td/WR": {
+    "corr": 0.022,
+    "beyond_script": -0.0,
+    "n": 6940
+   },
+   "rec_yds/TE|rec_yds/TE": {
+    "corr": -0.006,
+    "beyond_script": -0.025,
+    "n": 1300
+   },
+   "rec_yds/TE|rec_yds/WR": {
+    "corr": 0.029,
+    "beyond_script": 0.003,
+    "n": 5592
+   },
+   "rec_yds/TE|receptions/RB": {
+    "corr": -0.033,
+    "beyond_script": -0.039,
+    "n": 3184
+   },
+   "rec_yds/TE|receptions/TE": {
+    "corr": -0.013,
+    "beyond_script": -0.025,
+    "n": 2600
+   },
+   "rec_yds/TE|receptions/WR": {
+    "corr": 0.015,
+    "beyond_script": -0.002,
+    "n": 5592
+   },
+   "rec_yds/TE|rush_yds/QB": {
+    "corr": -0.043,
+    "beyond_script": -0.052,
+    "n": 2509
+   },
+   "rec_yds/TE|rush_yds/RB": {
+    "corr": 0.022,
+    "beyond_script": 0.006,
+    "n": 3184
+   },
+   "rec_yds/TE|td/RB": {
+    "corr": 0.054,
+    "beyond_script": 0.01,
+    "n": 3184
+   },
+   "rec_yds/TE|td/TE": {
+    "corr": 0.002,
+    "beyond_script": -0.031,
+    "n": 2600
+   },
+   "rec_yds/TE|td/WR": {
+    "corr": 0.075,
+    "beyond_script": 0.033,
+    "n": 5592
+   },
+   "rec_yds/WR|rec_yds/WR": {
+    "corr": 0.032,
+    "beyond_script": 0.005,
+    "n": 6101
+   },
+   "rec_yds/WR|receptions/RB": {
+    "corr": -0.015,
+    "beyond_script": -0.03,
+    "n": 6940
+   },
+   "rec_yds/WR|receptions/TE": {
+    "corr": 0.026,
+    "beyond_script": 0.004,
+    "n": 5592
+   },
+   "rec_yds/WR|receptions/WR": {
+    "corr": 0.025,
+    "beyond_script": 0.005,
+    "n": 12202
+   },
+   "rec_yds/WR|rush_yds/QB": {
+    "corr": 0.022,
+    "beyond_script": 0.008,
+    "n": 5432
+   },
+   "rec_yds/WR|rush_yds/RB": {
+    "corr": 0.008,
+    "beyond_script": 0.013,
+    "n": 6940
+   },
+   "rec_yds/WR|td/RB": {
+    "corr": 0.026,
+    "beyond_script": -0.003,
+    "n": 6940
+   },
+   "rec_yds/WR|td/TE": {
+    "corr": 0.036,
+    "beyond_script": 0.006,
+    "n": 5592
+   },
+   "rec_yds/WR|td/WR": {
+    "corr": 0.071,
+    "beyond_script": 0.035,
+    "n": 12202
+   },
+   "receptions/RB|receptions/RB": {
+    "corr": -0.043,
+    "beyond_script": -0.039,
+    "n": 1975
+   },
+   "receptions/RB|receptions/TE": {
+    "corr": -0.047,
+    "beyond_script": -0.045,
+    "n": 3184
+   },
+   "receptions/RB|receptions/WR": {
+    "corr": -0.028,
+    "beyond_script": -0.036,
+    "n": 6940
+   },
+   "receptions/RB|rush_yds/QB": {
+    "corr": -0.016,
+    "beyond_script": -0.018,
+    "n": 3094
+   },
+   "receptions/RB|rush_yds/RB": {
+    "corr": -0.005,
+    "beyond_script": -0.033,
+    "n": 3950
+   },
+   "receptions/RB|td/RB": {
+    "corr": 0.051,
+    "beyond_script": 0.012,
+    "n": 3950
+   },
+   "receptions/RB|td/TE": {
+    "corr": 0.019,
+    "beyond_script": -0.004,
+    "n": 3184
+   },
+   "receptions/RB|td/WR": {
+    "corr": 0.037,
+    "beyond_script": 0.008,
+    "n": 6940
+   },
+   "receptions/TE|receptions/TE": {
+    "corr": -0.036,
+    "beyond_script": -0.039,
+    "n": 1300
+   },
+   "receptions/TE|receptions/WR": {
+    "corr": 0.007,
+    "beyond_script": -0.006,
+    "n": 5592
+   },
+   "receptions/TE|rush_yds/QB": {
+    "corr": -0.036,
+    "beyond_script": -0.041,
+    "n": 2509
+   },
+   "receptions/TE|rush_yds/RB": {
+    "corr": 0.009,
+    "beyond_script": -0.02,
+    "n": 3184
+   },
+   "receptions/TE|td/RB": {
+    "corr": 0.032,
+    "beyond_script": -0.017,
+    "n": 3184
+   },
+   "receptions/TE|td/TE": {
+    "corr": 0.029,
+    "beyond_script": -0.002,
+    "n": 2600
+   },
+   "receptions/TE|td/WR": {
+    "corr": 0.086,
+    "beyond_script": 0.047,
+    "n": 5592
+   },
+   "receptions/WR|receptions/WR": {
+    "corr": 0.011,
+    "beyond_script": -0.005,
+    "n": 6101
+   },
+   "receptions/WR|rush_yds/QB": {
+    "corr": 0.014,
+    "beyond_script": 0.005,
+    "n": 5432
+   },
+   "receptions/WR|rush_yds/RB": {
+    "corr": -0.004,
+    "beyond_script": -0.009,
+    "n": 6940
+   },
+   "receptions/WR|td/RB": {
+    "corr": 0.019,
+    "beyond_script": -0.011,
+    "n": 6940
+   },
+   "receptions/WR|td/TE": {
+    "corr": 0.037,
+    "beyond_script": 0.011,
+    "n": 5592
+   },
+   "receptions/WR|td/WR": {
+    "corr": 0.076,
+    "beyond_script": 0.044,
+    "n": 12202
+   },
+   "rush_yds/QB|rush_yds/QB": {
+    "corr": 0.018,
+    "beyond_script": 0.014,
+    "n": 1206
+   },
+   "rush_yds/QB|rush_yds/RB": {
+    "corr": 0.01,
+    "beyond_script": -0.003,
+    "n": 3094
+   },
+   "rush_yds/QB|td/RB": {
+    "corr": 0.041,
+    "beyond_script": 0.015,
+    "n": 3094
+   },
+   "rush_yds/QB|td/TE": {
+    "corr": -0.033,
+    "beyond_script": -0.051,
+    "n": 2509
+   },
+   "rush_yds/QB|td/WR": {
+    "corr": 0.058,
+    "beyond_script": 0.035,
+    "n": 5432
+   },
+   "rush_yds/RB|rush_yds/RB": {
+    "corr": -0.151,
+    "beyond_script": -0.08,
+    "n": 1975
+   },
+   "rush_yds/RB|td/RB": {
+    "corr": -0.08,
+    "beyond_script": -0.022,
+    "n": 3950
+   },
+   "rush_yds/RB|td/TE": {
+    "corr": -0.011,
+    "beyond_script": 0.006,
+    "n": 3184
+   },
+   "rush_yds/RB|td/WR": {
+    "corr": -0.028,
+    "beyond_script": -0.002,
+    "n": 6940
+   },
+   "td/RB|td/RB": {
+    "corr": -0.017,
+    "beyond_script": -0.011,
+    "n": 1975
+   },
+   "td/RB|td/TE": {
+    "corr": -0.006,
+    "beyond_script": -0.032,
+    "n": 3184
+   },
+   "td/RB|td/WR": {
+    "corr": 0.009,
+    "beyond_script": -0.017,
+    "n": 6940
+   },
+   "td/TE|td/TE": {
+    "corr": 0.026,
+    "beyond_script": -0.008,
+    "n": 1300
+   },
+   "td/TE|td/WR": {
+    "corr": 0.074,
+    "beyond_script": 0.035,
+    "n": 5592
+   },
+   "td/WR|td/WR": {
+    "corr": 0.039,
+    "beyond_script": -0.005,
+    "n": 6101
+   }
+  }
+ },
+ "source": "nflverse weekly player stats + nflverse games (closing spread/total)"
+}

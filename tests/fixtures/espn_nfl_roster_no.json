@@ -1,0 +1,33 @@
+{
+"athletes": [
+{
+"position": "offense",
+"items": [
+{
+"displayName": "Alvin Kamara",
+"position": {
+"abbreviation": "RB"
+}
+},
+{
+"displayName": "Chris Olave",
+"position": {
+"abbreviation": "WR"
+}
+},
+{
+"displayName": "Tyler Shough",
+"position": {
+"abbreviation": "QB"
+}
+},
+{
+"displayName": "Devaughn Vele",
+"position": {
+"abbreviation": "WR"
+}
+}
+]
+}
+]
+}

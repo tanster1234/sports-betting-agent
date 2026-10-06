@@ -69,6 +69,21 @@ Read them in this order:
 
 The report ends with a `verdict` line — quote it, then explain it in plain words.
 
+## Post-mortems after every slate
+
+When a slate settles, review every leg (won or lost) and update the tracker:
+```bash
+python3 -m betlab postmortem --bets <tracker docs dir> --out <patch dir>   # then push the patches
+```
+Each lost leg gets the chance we gave it and tags from the box score and closing line — *expected
+loss* (long shot), *upset* (70%+), *near miss*, *game script* (the game beat the spread/total the
+other way), *volume* (not his usual carries/targets/attempts), *TDs went elsewhere*, *shared* (same
+leg/player lost another ticket), *same player twice*, *conflict* (pulled against a leg on its own
+ticket), *only miss*. The summary checks calibration by chance bucket with its ± range and turns
+tag counts into lessons. Act at once on structural ones (shared, same player twice, conflict);
+treat result-based ones (upsets, game script, volume) as hypotheses until a few hundred legs
+back them — one bad night is not a rule.
+
 ## Importing a history
 
 Map the user's spreadsheet columns to `ledger add` flags and loop (keep `--price` exactly as
@@ -77,7 +92,8 @@ leave CLV empty rather than guessing.
 
 ## Monthly routine
 
-1. `report` → summary for the month and all-time.
+1. `report` → summary for the month and all-time; `postmortem` → calibration by chance bucket and
+   the lessons (are our 80% legs winning about 80%?).
 2. Update bankroll in `config/profile.json` (stakes are proportional; never raise units after a
    good month beyond what the new bankroll implies).
 3. Drop or shrink markets with ≥ 100 bets and negative CLV; keep markets with positive CLV even if

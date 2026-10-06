@@ -7,6 +7,7 @@
 
 | `nfl/calibration.json` | NFL margin/total model fitted on 2015–2025 closing lines and results: σ plus a weight per final margin (3, 7, 6, 10, 14 …) and per total — aggregate statistics only, with an out-of-sample check on 2024–25 | 3,028 games |
 | `mlb/calibration.json` | MLB half-inning model: run dispersion, per-inning and score-dependent 9th-inning rates, automatic-runner extra innings, walk-off margins — fitted on 2023–25 closing lines and runs by inning, with a held-out 2026 check of run lines, alt totals, team totals, F5 and NRFI — aggregate statistics only | 7,383 fit / 2,446 test games |
+| `nfl/leg_correlations.json` | How NFL props move with the game script (team beating the spread, game beating the total) and with each other — same player, teammates, opponents — measured on nflverse weekly player stats 2021–25 against closing lines; used by `betlab slips` | 90,585 player-games |
 | `tennis/calibration.json` | Tennis point model: tour serve-point rates by surface (2019–25), the fitted day-to-day form spread, held-out 2024+ checks of total games and set scores, and Elo vs bookmaker closing odds — aggregate statistics only | ATP 67,288 / WTA 43,512 matches |
 
 ## NFL data
@@ -77,6 +78,14 @@ python3 scripts/refresh_wnba_data.py --lines    # also re-download current-seaso
 ## Personal data
 
 `data/ledger/` holds your bet ledger and is gitignored. Don't commit it.
+
+## NFL prop correlations
+
+`scripts/refresh_nfl_leg_correlations.py` downloads nflverse weekly player stats
+(`stats_player_week_<season>.csv`, nflverse-data releases) to `data/nfl/player_stats/` (gitignored),
+joins them to `nfl/games.csv` closing lines, and writes `nfl/leg_correlations.json`. Each stat is
+compared with the player's average in his other games that season (a stand-in for the prop line);
+roles: QB 20+ pass attempts, RB 8+ carries, WR 4+ targets, TE 3+ targets.
 
 ## MLB data
 

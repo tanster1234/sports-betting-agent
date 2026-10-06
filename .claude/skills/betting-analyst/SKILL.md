@@ -74,6 +74,20 @@ A candidate qualifies only if **all** hold:
 
 Record near-misses (closest EV below threshold) for the PASS section.
 
+**Parlays and second tickets — check them together** before recommending one:
+```bash
+python3 -m betlab slips check --tickets proposed.json --bets <tracker docs dir>   # placed + proposed
+```
+- **One story:** every leg of a ticket should win in the same game. A pair marked "pull against
+  each other" (e.g. one team's running back over with the other team's running back over, −0.15)
+  either goes or gets replaced. Use the measured links, not intuition (NFL links are measured on
+  2021-25 games; basketball ones are assumptions — say so).
+- **Exposure:** no player or leg on two tickets unless the user wants the double exposure (one
+  injury or miss sinks both); flag two tickets riding on one game and give the chance that none
+  cash next to the "if unrelated" number.
+- **Weakest leg:** name it and show the ticket without it (chance, payout, EV, the average profit
+  per $1 bet); each extra leg adds the book's margin.
+
 ## Step 4 — Red team
 
 For every qualifying bet run `bet-red-team`: bias checklist, "what does the market know?", and

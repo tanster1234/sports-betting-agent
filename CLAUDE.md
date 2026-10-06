@@ -45,7 +45,7 @@ adult user to act on — Claude never places bets.
 | `sports-data-ingestion` | schedules, injuries, odds, line shopping, value scans |
 | `bet-red-team` | bias checklist + adversarial subagent before a bet |
 | `bankroll-management` | stakes, caps, drawdowns, stop-loss |
-| `bet-tracking` | ledger, closing lines, performance reviews |
+| `bet-tracking` | ledger, closing lines, performance reviews, leg post-mortems |
 | `backtesting` | testing strategies honestly; bundled 2026 WNBA backtest |
 | `live-betting` | games in progress — play-by-play read, comebacks, halftime/live prices vs sharp |
 | `responsible-gambling` | warning signs, limits, help resources |
@@ -84,4 +84,8 @@ python3 -m betlab -h          # CLI help
   (stdlib; downloads ESPN scores, runs by inning and closing odds since 2023 to the gitignored
   `data/mlb/games.csv`, fits on games before 2026 and validates on 2026). Golden numbers in
   `tests/test_mlb.py` — refit, the `mlb-betting` skill table and tests together.
+- Parlay checks (`betlab slips`) use `data/nfl/leg_correlations.json` — how NFL props move with the game
+  script and each other — rebuilt by `scripts/refresh_nfl_leg_correlations.py` (stdlib; nflverse weekly
+  player stats to the gitignored `data/nfl/player_stats/`). Golden numbers in `tests/test_slips.py`;
+  post-mortems (`betlab postmortem`) are tested there too.
 - Skill evals live in `evals/` (see `evals/README.md`).

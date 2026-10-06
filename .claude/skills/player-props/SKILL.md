@@ -86,6 +86,14 @@ python3 -m betlab prop dd --points 18 --rebounds 9.5 --assists 3   # double-doub
 Books already price obvious correlations (star over + team ML). Positive EV in SGPs is rare after
 their extra hold — require 10% EV and keep stakes small. Never add a leg to "boost" a payout.
 
+**NFL game script (measured, nflverse 2021-25, 90k player-games).** Relative to the line: a back's
+rushing yards rise when his team beats the spread (+0.28) — so the *other* team's back falls
+(the two backs' rushing overs: −0.15); a back's catches go slightly the other way (−0.08) and
+are unrelated to his own rushing (+0.01); QB passing yards follow the total (+0.31) and his
+receivers (WR yards +0.37); two backs on one team share the touchdowns (TD–TD −0.11). Run
+`python3 -m betlab slips check` on any SGP or set of tickets — it applies these, flags legs that
+need different games, and checks overlap with tickets already placed.
+
 ## Pitfalls
 
 - **Median vs mean**: right-skewed stats (points) have medians below means — lines near the mean

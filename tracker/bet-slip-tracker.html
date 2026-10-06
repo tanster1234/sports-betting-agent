@@ -84,6 +84,17 @@ button { cursor: pointer; }
 .legend-row span { display: inline-flex; align-items: center; gap: 5px; }
 .legend-row .dot { width: 10px; height: 10px; }
 
+/* Lessons: post-mortems of settled legs */
+.lessons { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.lesson { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; align-items: baseline; }
+.lesson .n { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; font-variant-numeric: tabular-nums; min-width: 1.6em; text-align: right; }
+.lesson .tag { font-weight: 600; }
+.lesson .txt { grid-column: 2; font-size: 0.85rem; color: var(--ink-2); }
+.cal td.r, .cal th.r { text-align: right; }
+.pm { font-size: 0.8rem; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 3px 6px; align-items: baseline; }
+.pm .chip { font-size: 0.68rem; padding: 0 7px; }
+.pm .chip[data-k="structural"] { border-color: var(--loss); color: var(--loss); }
+
 /* Books */
 .books { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .book { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; min-width: 0; }
@@ -256,6 +267,16 @@ textarea { min-height: 3.2em; resize: vertical; }
     <p class="foot-note" id="l-sports">Every leg counts, including the rest of a parlay after it has already lost. The count is saved with your bets, so deleting a ticket keeps its legs in the tally.</p>
   </section>
 
+  <section class="board" aria-labelledby="lessons-title" id="lessons-card" hidden>
+    <div class="section-head">
+      <h2 id="lessons-title">What the losses say</h2>
+      <span class="muted" style="font-size:0.8rem" id="lessons-when"></span>
+    </div>
+    <ul class="lessons" id="lessons-list"></ul>
+    <div class="table-scroll"><table class="cal" id="cal-table"></table></div>
+    <p class="foot-note" id="lessons-note"></p>
+  </section>
+
   <section class="section" aria-labelledby="books-title">
     <h2 id="books-title" class="eyebrow" style="font-size:0.75rem;font-family:var(--font-body)">Estimated balance by book</h2>
     <div class="books" id="books"></div>
@@ -331,7 +352,8 @@ textarea { min-height: 3.2em; resize: vertical; }
   var LEG_ICON = { pending: "", won: "✓", lost: "✕", push: "=", void: "=" };
   var LEG_WORD = { pending: "pending", won: "won", lost: "lost", push: "push", void: "void" };
 
-  var state = { db: null, bets: [], settings: null, legTally: null, tallyLoaded: false, loaded: false, writable: true, confirmDelete: null, cashOpen: {} };
+  var state = { db: null, bets: [], settings: null, legTally: null, lessons: null, tallyLoaded: false, loaded: false, writable: true, confirmDelete: null, cashOpen: {} };
+  var STRUCTURAL = { "shared": 1, "same player twice": 1, "conflict": 1 };
 
   // ---------- helpers ----------
   function $(id) { return document.getElementById(id); }
@@ -571,6 +593,38 @@ textarea { min-height: 3.2em; resize: vertical; }
     if (!tickets.length) strip.appendChild(h("span", { class: "muted", style: "font-size:0.85rem", text: "Legs from your tickets will show here." }));
   }
 
+  // ---------- render: lessons (written by the post-mortem review) ----------
+  function renderLessons() {
+    var L = state.lessons, card = $("lessons-card");
+    if (!L || !L.legs) { card.hidden = true; return; }
+    card.hidden = false;
+    $("lessons-when").textContent = L.legs + " settled legs" + (L.updatedAt ? " · reviewed " + fmtDate(String(L.updatedAt).slice(0, 10)) : "");
+    var list = $("lessons-list");
+    list.textContent = "";
+    (L.lessons || []).forEach(function (x) {
+      list.appendChild(h("li", { class: "lesson" },
+        h("span", { class: "n " + (STRUCTURAL[x.tag] ? "neg" : ""), text: String(x.lost_legs) }),
+        h("span", { class: "tag", text: x.tag.charAt(0).toUpperCase() + x.tag.slice(1) + (x.lost_legs === 1 ? " · 1 lost leg" : " · " + x.lost_legs + " lost legs") }),
+        h("span", { class: "txt", text: x.lesson })));
+    });
+    if (!(L.lessons || []).length) list.appendChild(h("li", { class: "muted", text: "No lost legs reviewed yet." }));
+    var t = $("cal-table");
+    t.textContent = "";
+    t.appendChild(h("thead", null, h("tr", null, h("th", { text: "Chance we gave it" }), h("th", { class: "r", text: "Legs" }),
+      h("th", { class: "r", text: "Expected wins" }), h("th", { class: "r", text: "Won" }))));
+    var tb = h("tbody");
+    (L.calibration || []).forEach(function (c) {
+      tb.appendChild(h("tr", null, h("td", { text: c.bucket + " (" + c.range + ")" }), h("td", { class: "r", text: String(c.legs) }),
+        h("td", { class: "r", text: c.expected_wins + " ± " + c.sd }), h("td", { class: "r", text: String(c.won) })));
+    });
+    tb.appendChild(h("tr", null, h("td", { text: "All legs", style: "font-weight:600" }), h("td", { class: "r", text: String(L.legs) }),
+      h("td", { class: "r", text: L.expected_wins + " ± " + L.sd }), h("td", { class: "r", text: String(L.won) })));
+    t.appendChild(tb);
+    $("lessons-note").textContent = "If our chances are right, each row's wins land within about its ± range most of the time. " +
+      (L.calibration_verdict ? L.calibration_verdict.charAt(0).toUpperCase() + L.calibration_verdict.slice(1) + ". " : "") +
+      "Red counts are mistakes in how the tickets were built (the same player twice, legs needing opposite games) — fix those now; the rest need a few hundred legs before they mean anything.";
+  }
+
   // ---------- render: books ----------
   function renderBooks() {
     var box = $("books");
@@ -775,7 +829,10 @@ textarea { min-height: 3.2em; resize: vertical; }
         }
         legList.appendChild(h("li", { class: "leg", "data-r": r },
           btn,
-          h("div", { class: "leg-pick" }, h("span", { class: "p", text: l.pick || "Leg " + (i + 1) }), liveLine, extra ? h("span", { class: "t", text: extra }) : null),
+          h("div", { class: "leg-pick" }, h("span", { class: "p", text: l.pick || "Leg " + (i + 1) }), liveLine, extra ? h("span", { class: "t", text: extra }) : null,
+            r === "lost" && l.postmortem && (l.postmortem.why || (l.postmortem.tags || []).length) ? h.apply(null, ["span", { class: "pm" }]
+              .concat((l.postmortem.tags || []).map(function (tg) { return h("span", { class: "chip", "data-k": STRUCTURAL[tg] ? "structural" : "", text: tg }); }))
+              .concat([l.postmortem.why ? h("span", { text: l.postmortem.why }) : null])) : null),
           h("span", { class: "leg-odds", text: l.price !== undefined && l.price !== null && l.price !== "" ? fmtOdds(l.price) : "" })));
       });
     }
@@ -872,6 +929,7 @@ textarea { min-height: 3.2em; resize: vertical; }
     renderLiveNote();
     renderSummary();
     renderLegs();
+    renderLessons();
     renderBooks();
     renderChart();
     renderLists();
@@ -956,6 +1014,10 @@ textarea { min-height: 3.2em; resize: vertical; }
     state.db = db;
     db.doc("meta/settings").onSnapshot(function (snap) {
       state.settings = snap.exists ? snap.data() : null;
+      render();
+    }, function () {});
+    db.doc("meta/lessons").onSnapshot(function (snap) {
+      state.lessons = snap.exists ? snap.data() : null;
       render();
     }, function () {});
     db.doc("meta/legTally").onSnapshot(function (snap) {

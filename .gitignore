@@ -24,6 +24,7 @@ venv/
 
 # NFL raw games (nflverse, unlicensed: downloaded by scripts/refresh_nfl_data.py, not redistributed)
 data/nfl/games.csv
+data/nfl/player_stats/
 
 # Tennis raw data (tennis-data.co.uk odds, Jeff Sackmann CC BY-NC-SA files): downloaded by
 # scripts/refresh_tennis_data.py, not redistributed; only data/tennis/calibration.json is committed

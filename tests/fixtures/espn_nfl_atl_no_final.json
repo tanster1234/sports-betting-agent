@@ -1,0 +1,445 @@
+{
+"header": {
+"id": "401872979",
+"competitions": [
+{
+"status": {
+"type": {
+"name": "STATUS_FINAL",
+"state": "post",
+"completed": true,
+"shortDetail": "Final"
+}
+},
+"competitors": [
+{
+"homeAway": "home",
+"score": "24",
+"team": {
+"id": "18",
+"abbreviation": "NO"
+}
+},
+{
+"homeAway": "away",
+"score": "45",
+"team": {
+"id": "1",
+"abbreviation": "ATL"
+}
+}
+]
+}
+]
+},
+"boxscore": {
+"players": [
+{
+"team": {
+"abbreviation": "ATL"
+},
+"statistics": [
+{
+"name": "passing",
+"keys": [
+"completions/passingAttempts",
+"passingYards",
+"yardsPerPassAttempt",
+"passingTouchdowns",
+"interceptions",
+"sacks-sackYardsLost",
+"adjQBR",
+"QBRating"
+],
+"labels": [
+"C/ATT",
+"YDS",
+"AVG",
+"TD",
+"INT",
+"SACKS",
+"QBR",
+"RTG"
+],
+"athletes": [
+{
+"athlete": {
+"displayName": "Michael Penix Jr."
+},
+"stats": [
+"15/20",
+"223",
+"11.2",
+"1",
+"0",
+"1-8",
+"79.6",
+"127.7"
+]
+}
+]
+},
+{
+"name": "rushing",
+"keys": [
+"rushingAttempts",
+"rushingYards",
+"yardsPerRushAttempt",
+"rushingTouchdowns",
+"longRushing"
+],
+"labels": [
+"CAR",
+"YDS",
+"AVG",
+"TD",
+"LONG"
+],
+"athletes": [
+{
+"athlete": {
+"displayName": "Bijan Robinson"
+},
+"stats": [
+"19",
+"145",
+"7.6",
+"2",
+"59"
+]
+},
+{
+"athlete": {
+"displayName": "Brian Robinson Jr."
+},
+"stats": [
+"14",
+"62",
+"4.4",
+"3",
+"11"
+]
+},
+{
+"athlete": {
+"displayName": "Michael Penix Jr."
+},
+"stats": [
+"2",
+"-2",
+"-1.0",
+"0",
+"-1"
+]
+}
+]
+},
+{
+"name": "receiving",
+"keys": [
+"receptions",
+"receivingYards",
+"yardsPerReception",
+"receivingTouchdowns",
+"longReception",
+"receivingTargets"
+],
+"labels": [
+"REC",
+"YDS",
+"AVG",
+"TD",
+"LONG",
+"TGTS"
+],
+"athletes": [
+{
+"athlete": {
+"displayName": "Drake London"
+},
+"stats": [
+"5",
+"96",
+"19.2",
+"0",
+"37",
+"6"
+]
+},
+{
+"athlete": {
+"displayName": "Jahan Dotson"
+},
+"stats": [
+"2",
+"54",
+"27.0",
+"1",
+"31",
+"3"
+]
+},
+{
+"athlete": {
+"displayName": "Brian Robinson Jr."
+},
+"stats": [
+"1",
+"5",
+"5.0",
+"0",
+"5",
+"1"
+]
+},
+{
+"athlete": {
+"displayName": "Bijan Robinson"
+},
+"stats": [
+"1",
+"2",
+"2.0",
+"0",
+"2",
+"2"
+]
+}
+]
+}
+]
+},
+{
+"team": {
+"abbreviation": "NO"
+},
+"statistics": [
+{
+"name": "passing",
+"keys": [
+"completions/passingAttempts",
+"passingYards",
+"yardsPerPassAttempt",
+"passingTouchdowns",
+"interceptions",
+"sacks-sackYardsLost",
+"adjQBR",
+"QBRating"
+],
+"labels": [
+"C/ATT",
+"YDS",
+"AVG",
+"TD",
+"INT",
+"SACKS",
+"QBR",
+"RTG"
+],
+"athletes": [
+{
+"athlete": {
+"displayName": "Tyler Shough"
+},
+"stats": [
+"30/48",
+"286",
+"6.0",
+"1",
+"0",
+"2-16",
+"69.4",
+"85.9"
+]
+}
+]
+},
+{
+"name": "rushing",
+"keys": [
+"rushingAttempts",
+"rushingYards",
+"yardsPerRushAttempt",
+"rushingTouchdowns",
+"longRushing"
+],
+"labels": [
+"CAR",
+"YDS",
+"AVG",
+"TD",
+"LONG"
+],
+"athletes": [
+{
+"athlete": {
+"displayName": "Alvin Kamara"
+},
+"stats": [
+"7",
+"23",
+"3.3",
+"2",
+"5"
+]
+},
+{
+"athlete": {
+"displayName": "Tyler Shough"
+},
+"stats": [
+"2",
+"5",
+"2.5",
+"0",
+"3"
+]
+}
+]
+},
+{
+"name": "receiving",
+"keys": [
+"receptions",
+"receivingYards",
+"yardsPerReception",
+"receivingTouchdowns",
+"longReception",
+"receivingTargets"
+],
+"labels": [
+"REC",
+"YDS",
+"AVG",
+"TD",
+"LONG",
+"TGTS"
+],
+"athletes": [
+{
+"athlete": {
+"displayName": "Chris Olave"
+},
+"stats": [
+"8",
+"116",
+"14.5",
+"0",
+"44",
+"12"
+]
+},
+{
+"athlete": {
+"displayName": "Devaughn Vele"
+},
+"stats": [
+"6",
+"54",
+"9.0",
+"1",
+"18",
+"9"
+]
+},
+{
+"athlete": {
+"displayName": "Alvin Kamara"
+},
+"stats": [
+"5",
+"35",
+"7.0",
+"0",
+"17",
+"7"
+]
+}
+]
+}
+]
+}
+]
+},
+"scoringPlays": [
+{
+"scoringType": {
+"name": "touchdown",
+"displayName": "Touchdown",
+"abbreviation": "TD"
+},
+"text": "Bijan Robinson 59 Yd Rush (Nick Folk Kick)"
+},
+{
+"scoringType": {
+"name": "touchdown",
+"displayName": "Touchdown",
+"abbreviation": "TD"
+},
+"text": "Bijan Robinson 4 Yd Rush (Nick Folk Kick)"
+},
+{
+"scoringType": {
+"name": "touchdown",
+"displayName": "Touchdown",
+"abbreviation": "TD"
+},
+"text": "Alvin Kamara 3 Yd Rush (Daniel Carlson Kick)"
+},
+{
+"scoringType": {
+"name": "touchdown",
+"displayName": "Touchdown",
+"abbreviation": "TD"
+},
+"text": "Brian Robinson Jr. 4 Yd Rush (Nick Folk Kick)"
+},
+{
+"scoringType": {
+"name": "touchdown",
+"displayName": "Touchdown",
+"abbreviation": "TD"
+},
+"text": "Brian Robinson Jr. 8 Yd Rush (Nick Folk Kick)"
+},
+{
+"scoringType": {
+"name": "touchdown",
+"displayName": "Touchdown",
+"abbreviation": "TD"
+},
+"text": "Alvin Kamara 5 Yd Rush (Daniel Carlson Kick)"
+},
+{
+"scoringType": {
+"name": "touchdown",
+"displayName": "Touchdown",
+"abbreviation": "TD"
+},
+"text": "Jahan Dotson 31 Yd pass from Michael Penix Jr. (Nick Folk Kick)"
+},
+{
+"scoringType": {
+"name": "touchdown",
+"displayName": "Touchdown",
+"abbreviation": "TD"
+},
+"text": "Brian Robinson Jr. 11 Yd Rush (Nick Folk Kick)"
+},
+{
+"scoringType": {
+"name": "touchdown",
+"displayName": "Touchdown",
+"abbreviation": "TD"
+},
+"text": "Devaughn Vele 3 Yd pass from Tyler Shough (Daniel Carlson Kick)"
+}
+],
+"pickcenter": [
+{
+"details": "NO -1.5",
+"spread": -1.5,
+"overUnder": 48.5
+}
+]
+}

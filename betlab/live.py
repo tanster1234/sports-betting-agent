@@ -167,6 +167,12 @@ def parse_box(js: dict) -> dict:
                     continue
                 rec = players.setdefault(key, {})
                 for k, v in zip(keys, a.get("stats") or []):
+                    if "/" in k and "/" in str(v):           # "completions/passingAttempts": "15/20"
+                        for kk, vv in zip(k.split("/"), str(v).split("/")):
+                            num = _stat_value(vv)
+                            if num is not None:
+                                rec[(gname, kk)] = num
+                        continue
                     val = _stat_value(v)
                     if val is not None:
                         rec[(gname, k)] = val

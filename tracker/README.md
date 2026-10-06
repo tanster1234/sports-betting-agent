@@ -19,6 +19,7 @@ outside claude.ai the page renders but cannot load or save bets.
 |---|---|
 | `meta/settings` | `startingBankroll: {DraftKings, FanDuel}` |
 | `meta/legTally` | saved leg results `legs: {"<betId>#<leg>": {r, s, d, p}}` plus `won`/`lost`/`push`/`pending` counts; the page merges every leg into it, so deleting a ticket keeps its legs in the count |
+| `meta/lessons` | post-mortem summary written by `betlab postmortem`: `legs`, `won`, `expected_wins`, `sd`, `calibration[]` (chance bucket, legs, expected wins ± sd, won), `lessons[]` (`tag`, `lost_legs`, `lesson`), `lost_by_tag`, `calibration_verdict`, `updatedAt` |
 | `bets/<id>` | one document per wager (fields below) |
 
 Bet fields: `placedAt`, `eventDate` (YYYY-MM-DD), `sport`, `tier` (free label: Safe, Medium,
@@ -27,7 +28,7 @@ placed), `toReturn` (total return shown on the slip), `boosted`, `quotedOdds` (p
 boost or line move), `fairProb` (devigged chance from the analysis, 0–1), `status` (`open`, `won`,
 `lost`, `push`, `void`, `cashout`), `returned`, `settledAt`, `order`, `notes`, and `legs[]` with
 `pick`, `price`, `kickoff` (ISO UTC), `fairProb`, `result` (`pending`, `won`, `lost`, `push`, `void`),
-and for live tracking `spec` and `live` (see below). Bets also get `liveUpdatedAt` and `needsReturn`.
+and for live tracking `spec` and `live` (see below); lost legs also get `postmortem: {tags, why, chance}`. Bets also get `liveUpdatedAt` and `needsReturn`.
 
 A parlay settles itself from its legs: any lost leg → lost; every leg won → won at `toReturn`;
 a push among otherwise-won legs asks for the amount the book actually paid.
@@ -35,6 +36,12 @@ a push among otherwise-won legs asks for the amount the book actually paid.
 The **Legs** card counts every leg on every ticket (won, lost, push/void, still to play), shows them
 as one circle per leg grouped by ticket, the hit rate of decided legs, and how many parlays lost on a
 single leg. Each slip also shows its own "2 of 5 legs won" line.
+
+The **What the losses say** card (shown once `meta/lessons` exists) lists the post-mortem lessons
+with how many lost legs each covers — red counts are ticket-building mistakes (the same player on
+two tickets, legs needing opposite games) — and a calibration table: legs by the chance we gave
+them, expected wins ± range, and actual wins. Each lost leg on its slip shows its tags and a short
+"why".
 
 ## Live tracking
 
