@@ -6,7 +6,7 @@ description: >
   starting pitchers and goalies, key numbers, injury reporting, market quirks and red flags — with
   numbers corrected against modern data (e.g. NBA home court ~2 pts, NFL ~1.5-2, not the old 3+).
   Use when analyzing or comparing any non-WNBA game or market; for WNBA use wnba-betting, for tennis
-  use tennis-betting.
+  use tennis-betting, for MLB pricing use mlb-betting.
 ---
 
 # Multi-sport context
@@ -24,7 +24,7 @@ distribution and the inputs that matter.
 | NCAAB / WNCAAB | normal | `--sport NCAAB` | σ ~10.5 (men), HCA ~3 |
 | NFL | **empirical** margin pmf (key numbers) | `MarginModel.from_pmf({...})`; normal only as a rough guide | σ ~13.5; 3 and 7 dominate |
 | NCAAF | normal (rough) / empirical | `--sport NCAAF` | σ ~15.5, HCA ~2.5 |
-| MLB | negative-binomial runs per team, extras rule | `price mlb --home-rate 4.7 --away-rate 4.2 --total-line 8.5` | team runs var ≈ 2× mean |
+| MLB | exact half-inning model priced from the sharp ML + total (use `mlb-betting`) | `mlb price --ml +120 -140 --total 8.5 -105 -115` | fitted on 2023–26 games; walk-offs, closers, extras rules |
 | NHL | Poisson goals, OT/SO rule, empty-net shift | `price nhl --home-rate 3.2 --away-rate 2.9 --empty-net 0.25` | pure Poisson under-states OT (16% vs ~22–24% real) |
 
 Approximate σ/HCA for non-WNBA sports are published-consensus figures, not fitted here —

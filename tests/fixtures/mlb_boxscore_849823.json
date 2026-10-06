@@ -1,0 +1,191 @@
+{
+"teams": {
+"away": {
+"team": {
+"name": "Atlanta Braves"
+},
+"pitchers": [
+678061,
+656550,
+669276,
+663158,
+800311,
+628452
+],
+"players": {
+"ID678061": {
+"person": {
+"fullName": "Ray Kerr"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "2.2",
+"numberOfPitches": 42,
+"gamesStarted": 1
+}
+}
+},
+"ID656550": {
+"person": {
+"fullName": "Grant Holmes"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "0.2",
+"numberOfPitches": 17,
+"gamesStarted": 0
+}
+}
+},
+"ID669276": {
+"person": {
+"fullName": "Dylan Lee"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "0.2",
+"numberOfPitches": 14,
+"gamesStarted": 0
+}
+}
+},
+"ID663158": {
+"person": {
+"fullName": "Robert Suarez"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "1.0",
+"numberOfPitches": 15,
+"gamesStarted": 0
+}
+}
+},
+"ID800311": {
+"person": {
+"fullName": "Didier Fuentes"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "3.2",
+"numberOfPitches": 47,
+"gamesStarted": 0
+}
+}
+},
+"ID628452": {
+"person": {
+"fullName": "Raisel Iglesias"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "0.1",
+"numberOfPitches": 3,
+"gamesStarted": 0
+}
+}
+}
+}
+},
+"home": {
+"team": {
+"name": "Los Angeles Dodgers"
+},
+"pitchers": [
+605483,
+592779,
+663460,
+623465,
+621242,
+683618,
+808963
+],
+"players": {
+"ID605483": {
+"person": {
+"fullName": "Blake Snell"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "3.2",
+"numberOfPitches": 90,
+"gamesStarted": 1
+}
+}
+},
+"ID592779": {
+"person": {
+"fullName": "Brock Stewart"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "0.1",
+"numberOfPitches": 2,
+"gamesStarted": 0
+}
+}
+},
+"ID663460": {
+"person": {
+"fullName": "Kris Bubic"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "0.2",
+"numberOfPitches": 17,
+"gamesStarted": 0
+}
+}
+},
+"ID623465": {
+"person": {
+"fullName": "Evan Phillips"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "0.1",
+"numberOfPitches": 4,
+"gamesStarted": 0
+}
+}
+},
+"ID621242": {
+"person": {
+"fullName": "Edwin D\u00edaz"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "1.0",
+"numberOfPitches": 12,
+"gamesStarted": 0
+}
+}
+},
+"ID683618": {
+"person": {
+"fullName": "Edgardo Henriquez"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "1.0",
+"numberOfPitches": 21,
+"gamesStarted": 0
+}
+}
+},
+"ID808963": {
+"person": {
+"fullName": "Roki Sasaki"
+},
+"stats": {
+"pitching": {
+"inningsPitched": "2.0",
+"numberOfPitches": 36,
+"gamesStarted": 0
+}
+}
+}
+}
+}
+}
+}

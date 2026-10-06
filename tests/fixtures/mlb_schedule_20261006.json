@@ -1,0 +1,95 @@
+{
+"dates": [
+{
+"date": "2026-10-06",
+"games": [
+{
+"gamePk": 849819,
+"gameType": "D",
+"gameDate": "2026-10-06T22:00:00Z",
+"status": {
+"detailedState": "Pre-Game"
+},
+"venue": {
+"name": "Truist Park"
+},
+"weather": {
+"condition": "Clear",
+"temp": "77",
+"wind": "8 mph, L To R"
+},
+"seriesStatus": {
+"result": "Series tied 1-1",
+"description": "NL Division Series"
+},
+"teams": {
+"away": {
+"team": {
+"id": 119,
+"abbreviation": "LAD",
+"name": "Los Angeles Dodgers"
+},
+"probablePitcher": {
+"id": 808967,
+"fullName": "Yoshinobu Yamamoto"
+},
+"score": 0
+},
+"home": {
+"team": {
+"id": 144,
+"abbreviation": "ATL",
+"name": "Atlanta Braves"
+},
+"probablePitcher": {
+"id": 519242,
+"fullName": "Chris Sale"
+},
+"score": 0
+}
+}
+},
+{
+"gamePk": 849826,
+"gameType": "D",
+"gameDate": "2026-10-07T01:30:00Z",
+"status": {
+"detailedState": "Scheduled"
+},
+"venue": {
+"name": "Petco Park"
+},
+"weather": {},
+"seriesStatus": {
+"result": "MIL leads 2-0",
+"description": "NL Division Series"
+},
+"teams": {
+"away": {
+"team": {
+"id": 158,
+"abbreviation": "MIL",
+"name": "Milwaukee Brewers"
+},
+"probablePitcher": {
+"id": 669160,
+"fullName": "Dustin May"
+}
+},
+"home": {
+"team": {
+"id": 135,
+"abbreviation": "SD",
+"name": "San Diego Padres"
+},
+"probablePitcher": {
+"id": 601713,
+"fullName": "Nick Pivetta"
+}
+}
+}
+}
+]
+}
+]
+}

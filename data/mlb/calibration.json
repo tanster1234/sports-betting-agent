@@ -1,0 +1,430 @@
+{
+ "params": {
+  "r": 0.3861,
+  "r_first": 0.4641,
+  "inning_mult": [
+   1.0396,
+   0.9271,
+   1.034,
+   1.0168,
+   1.0147,
+   1.0236,
+   0.9766,
+   0.9688,
+   0.9989
+  ],
+  "league_mu": 0.5007,
+  "ghost_mean": 1.1647,
+  "ghost_r": 1.3773,
+  "walkoff_cap": [
+   0.0,
+   0.7559,
+   0.0211,
+   0.0931,
+   0.1299
+  ],
+  "top9": [
+   0.8869,
+   0.911,
+   1.1195
+  ],
+  "bottom9": 0.8616
+ },
+ "fit": {
+  "n_train": 7383,
+  "n_test": 2446,
+  "test_from": "2026-01-01",
+  "dropped_bad_linescores": 11
+ },
+ "validation": {
+  "n_games": 2446,
+  "n_postseason": 17,
+  "markets": {
+   "away_-1.5": {
+    "n": 2446,
+    "predicted": 0.3541,
+    "actual": 0.3626,
+    "log_loss": 0.6411,
+    "log_loss_base_rate": 0.6549
+   },
+   "away_tt_o2.5": {
+    "n": 2446,
+    "predicted": 0.6875,
+    "actual": 0.6778,
+    "log_loss": 0.6195,
+    "log_loss_base_rate": 0.6285
+   },
+   "away_tt_o3.5": {
+    "n": 2446,
+    "predicted": 0.5486,
+    "actual": 0.538,
+    "log_loss": 0.6791,
+    "log_loss_base_rate": 0.6903
+   },
+   "away_tt_o4.5": {
+    "n": 2446,
+    "predicted": 0.4216,
+    "actual": 0.4186,
+    "log_loss": 0.6662,
+    "log_loss_base_rate": 0.6799
+   },
+   "away_tt_o5.5": {
+    "n": 2446,
+    "predicted": 0.314,
+    "actual": 0.3217,
+    "log_loss": 0.6154,
+    "log_loss_base_rate": 0.6282
+   },
+   "extra_innings": {
+    "n": 2446,
+    "predicted": 0.0999,
+    "actual": 0.0859,
+    "log_loss": 0.2934,
+    "log_loss_base_rate": 0.2928
+   },
+   "f5_home_lead": {
+    "n": 2446,
+    "predicted": 0.4453,
+    "actual": 0.4513,
+    "log_loss": 0.6813,
+    "log_loss_base_rate": 0.6884
+   },
+   "f5_over_4.5": {
+    "n": 2446,
+    "predicted": 0.4895,
+    "actual": 0.5004,
+    "log_loss": 0.6779,
+    "log_loss_base_rate": 0.6931
+   },
+   "f5_tie": {
+    "n": 2446,
+    "predicted": 0.1542,
+    "actual": 0.1545,
+    "log_loss": 0.4287,
+    "log_loss_base_rate": 0.4305
+   },
+   "home_-1.5": {
+    "n": 2446,
+    "predicted": 0.3492,
+    "actual": 0.3618,
+    "log_loss": 0.6463,
+    "log_loss_base_rate": 0.6545
+   },
+   "home_tt_o2.5": {
+    "n": 2446,
+    "predicted": 0.7109,
+    "actual": 0.6991,
+    "log_loss": 0.5984,
+    "log_loss_base_rate": 0.6116
+   },
+   "home_tt_o3.5": {
+    "n": 2446,
+    "predicted": 0.566,
+    "actual": 0.5646,
+    "log_loss": 0.6711,
+    "log_loss_base_rate": 0.6848
+   },
+   "home_tt_o4.5": {
+    "n": 2446,
+    "predicted": 0.4299,
+    "actual": 0.444,
+    "log_loss": 0.6769,
+    "log_loss_base_rate": 0.6869
+   },
+   "home_tt_o5.5": {
+    "n": 2446,
+    "predicted": 0.3143,
+    "actual": 0.3295,
+    "log_loss": 0.626,
+    "log_loss_base_rate": 0.6338
+   },
+   "nrfi": {
+    "n": 2446,
+    "predicted": 0.5,
+    "actual": 0.493,
+    "log_loss": 0.689,
+    "log_loss_base_rate": 0.6931
+   },
+   "one_run": {
+    "n": 2446,
+    "predicted": 0.2967,
+    "actual": 0.2756,
+    "log_loss": 0.5892,
+    "log_loss_base_rate": 0.5887
+   },
+   "total_+1": {
+    "n": 2351,
+    "predicted": 0.4074,
+    "actual": 0.402,
+    "log_loss": 0.6741,
+    "log_loss_base_rate": 0.6738
+   },
+   "total_+2": {
+    "n": 2365,
+    "predicted": 0.3248,
+    "actual": 0.3268,
+    "log_loss": 0.6332,
+    "log_loss_base_rate": 0.6319
+   },
+   "total_-1": {
+    "n": 2321,
+    "predicted": 0.5994,
+    "actual": 0.601,
+    "log_loss": 0.6708,
+    "log_loss_base_rate": 0.6726
+   },
+   "total_-2": {
+    "n": 2340,
+    "predicted": 0.6994,
+    "actual": 0.7004,
+    "log_loss": 0.6077,
+    "log_loss_base_rate": 0.6105
+   }
+  },
+  "calibration": {
+   "away_-1.5": [
+    {
+     "predicted": 0.254,
+     "actual": 0.245,
+     "n": 489
+    },
+    {
+     "predicted": 0.314,
+     "actual": 0.352,
+     "n": 489
+    },
+    {
+     "predicted": 0.35,
+     "actual": 0.35,
+     "n": 489
+    },
+    {
+     "predicted": 0.389,
+     "actual": 0.413,
+     "n": 489
+    },
+    {
+     "predicted": 0.463,
+     "actual": 0.453,
+     "n": 490
+    }
+   ],
+   "f5_home_lead": [
+    {
+     "predicted": 0.37,
+     "actual": 0.372,
+     "n": 489
+    },
+    {
+     "predicted": 0.418,
+     "actual": 0.425,
+     "n": 489
+    },
+    {
+     "predicted": 0.446,
+     "actual": 0.458,
+     "n": 489
+    },
+    {
+     "predicted": 0.471,
+     "actual": 0.493,
+     "n": 489
+    },
+    {
+     "predicted": 0.521,
+     "actual": 0.508,
+     "n": 490
+    }
+   ],
+   "home_-1.5": [
+    {
+     "predicted": 0.257,
+     "actual": 0.266,
+     "n": 489
+    },
+    {
+     "predicted": 0.314,
+     "actual": 0.327,
+     "n": 489
+    },
+    {
+     "predicted": 0.348,
+     "actual": 0.372,
+     "n": 489
+    },
+    {
+     "predicted": 0.381,
+     "actual": 0.417,
+     "n": 489
+    },
+    {
+     "predicted": 0.446,
+     "actual": 0.427,
+     "n": 490
+    }
+   ],
+   "nrfi": [
+    {
+     "predicted": 0.458,
+     "actual": 0.403,
+     "n": 489
+    },
+    {
+     "predicted": 0.488,
+     "actual": 0.503,
+     "n": 489
+    },
+    {
+     "predicted": 0.503,
+     "actual": 0.524,
+     "n": 489
+    },
+    {
+     "predicted": 0.515,
+     "actual": 0.452,
+     "n": 489
+    },
+    {
+     "predicted": 0.537,
+     "actual": 0.584,
+     "n": 490
+    }
+   ],
+   "total_+1": [
+    {
+     "predicted": 0.384,
+     "actual": 0.409,
+     "n": 470
+    },
+    {
+     "predicted": 0.397,
+     "actual": 0.381,
+     "n": 470
+    },
+    {
+     "predicted": 0.408,
+     "actual": 0.402,
+     "n": 470
+    },
+    {
+     "predicted": 0.417,
+     "actual": 0.406,
+     "n": 470
+    },
+    {
+     "predicted": 0.432,
+     "actual": 0.412,
+     "n": 471
+    }
+   ],
+   "total_-1": [
+    {
+     "predicted": 0.568,
+     "actual": 0.554,
+     "n": 464
+    },
+    {
+     "predicted": 0.586,
+     "actual": 0.586,
+     "n": 464
+    },
+    {
+     "predicted": 0.599,
+     "actual": 0.606,
+     "n": 464
+    },
+    {
+     "predicted": 0.613,
+     "actual": 0.614,
+     "n": 464
+    },
+    {
+     "predicted": 0.631,
+     "actual": 0.645,
+     "n": 465
+    }
+   ]
+  },
+  "run_line_vs_market": {
+   "n": 2446,
+   "log_loss_model": 0.6762,
+   "log_loss_market": 0.6766,
+   "mean_abs_diff": 0.0117,
+   "actual_cover": 0.4955,
+   "model_mean": 0.4879,
+   "market_mean": 0.4948
+  },
+  "final_score_loglik_per_game": {
+   "model": -4.7689,
+   "independent_poisson": -5.2868
+  },
+  "mean_total": {
+   "model": 8.99,
+   "actual": 8.946
+  },
+  "summary": {
+   "home_-1.5": {
+    "n": 2446,
+    "predicted": 0.3492,
+    "actual": 0.3618,
+    "log_loss": 0.6463,
+    "log_loss_base_rate": 0.6545
+   },
+   "nrfi": {
+    "n": 2446,
+    "predicted": 0.5,
+    "actual": 0.493,
+    "log_loss": 0.689,
+    "log_loss_base_rate": 0.6931
+   },
+   "extra_innings": {
+    "n": 2446,
+    "predicted": 0.0999,
+    "actual": 0.0859,
+    "log_loss": 0.2934,
+    "log_loss_base_rate": 0.2928
+   },
+   "one_run": {
+    "n": 2446,
+    "predicted": 0.2967,
+    "actual": 0.2756,
+    "log_loss": 0.5892,
+    "log_loss_base_rate": 0.5887
+   },
+   "total_+1": {
+    "n": 2351,
+    "predicted": 0.4074,
+    "actual": 0.402,
+    "log_loss": 0.6741,
+    "log_loss_base_rate": 0.6738
+   },
+   "f5_tie": {
+    "n": 2446,
+    "predicted": 0.1542,
+    "actual": 0.1545,
+    "log_loss": 0.4287,
+    "log_loss_base_rate": 0.4305
+   },
+   "run_line_vs_market": {
+    "n": 2446,
+    "log_loss_model": 0.6762,
+    "log_loss_market": 0.6766,
+    "mean_abs_diff": 0.0117,
+    "actual_cover": 0.4955,
+    "model_mean": 0.4879,
+    "market_mean": 0.4948
+   },
+   "final_score_loglik_per_game": {
+    "model": -4.7689,
+    "independent_poisson": -5.2868
+   }
+  }
+ },
+ "source": {
+  "games": "ESPN scoreboard + ESPN odds (closing line of the book ESPN shows)",
+  "seasons": "2023-2026",
+  "n_games": 9840,
+  "last_game": "2026-10-06",
+  "fitted": "2026-10-06"
+ }
+}

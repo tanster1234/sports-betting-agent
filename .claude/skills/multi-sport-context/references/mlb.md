@@ -25,11 +25,11 @@
 5. **Lineups and platoons**: confirmed lineups ~2–4 hours before first pitch; handedness splits.
 
 ## Pricing
-```bash
-python3 -m betlab price mlb --home-rate 4.7 --away-rate 4.1 --total-line 8.5 --total-prices -110 -110 --ml -145 125
-```
-Use F5 when your edge is about the starters (removes bullpen variance). Run line -1.5 needs a
-2+ run win; extra-inning games are treated as 1-run games.
+Use the `mlb-betting` skill: `python3 -m betlab mlb price --ml +125 -145 --total 8.5 -110 -110`
+prices run lines, alt totals, team totals, F5 and first inning from the sharp moneyline + total
+with a model fitted on every 2023–26 game; `mlb scan` checks DraftKings/FanDuel; `mlb context`
+lists probable pitchers, recent starts and bullpen workload. Use F5 when your edge is about the
+starters (removes bullpen variance) — and price it from the sharp F5 line when one is posted.
 
 ## Red flags
 - Starter not confirmed; opener/bulk games; pitcher returning from injury with a pitch limit.

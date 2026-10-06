@@ -29,3 +29,7 @@ data/nfl/games.csv
 # scripts/refresh_tennis_data.py, not redistributed; only data/tennis/calibration.json is committed
 data/tennis/*_odds.csv
 data/tennis/sackmann/
+
+# MLB raw games: ESPN scores + closing odds downloaded by scripts/refresh_mlb_data.py,
+# not redistributed; only data/mlb/calibration.json is committed
+data/mlb/games.csv

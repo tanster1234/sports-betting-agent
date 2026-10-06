@@ -39,6 +39,7 @@ adult user to act on — Claude never places bets.
 | `wnba-betting` | anything WNBA — calibrated model, 2026 context, playoffs, props notes |
 | `multi-sport-context` | NBA / NFL / MLB / NHL / NCAAF / NCAAB context and pricing |
 | `tennis-betting` | ATP / WTA — match, total games, handicaps, sets, live, scan, surface Elo |
+| `mlb-betting` | MLB — run lines, alt totals, team totals, F5, NRFI from the sharp ML + total; scan; pitchers/bullpen context |
 | `odds-math` | conversions, devig, EV, hold, CLV, parlays, alt lines |
 | `player-props` | props and same-game parlays |
 | `sports-data-ingestion` | schedules, injuries, odds, line shopping, value scans |
@@ -59,7 +60,7 @@ adult user to act on — Claude never places bets.
 ## Development
 
 ```bash
-python3 -m pytest -q          # ~290 tests, a few seconds, stdlib + pytest only
+python3 -m pytest -q          # ~300 tests, ~10 seconds, stdlib + pytest only
 ruff check betlab tests       # lint (config in pyproject.toml)
 python3 -m betlab -h          # CLI help
 ```
@@ -79,4 +80,8 @@ python3 -m betlab -h          # CLI help
   `scripts/refresh_tennis_data.py` (stdlib; downloads results/odds and Sackmann stats to the gitignored
   `data/tennis/`). Golden numbers in `tests/test_tennis.py` — refit, the `tennis-betting` skill table and
   tests together.
+- MLB pricing (`betlab mlb`) uses `data/mlb/calibration.json`, rebuilt by `scripts/refresh_mlb_data.py`
+  (stdlib; downloads ESPN scores, runs by inning and closing odds since 2023 to the gitignored
+  `data/mlb/games.csv`, fits on games before 2026 and validates on 2026). Golden numbers in
+  `tests/test_mlb.py` — refit, the `mlb-betting` skill table and tests together.
 - Skill evals live in `evals/` (see `evals/README.md`).

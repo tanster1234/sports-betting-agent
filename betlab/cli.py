@@ -616,6 +616,213 @@ def _tennis_scan(a):
     return out
 
 
+def _mlb_gd(a):
+    """Solve the game from --ml/--total (sharp prices) or --p-home."""
+    from . import mlb
+    if a.total is None:
+        raise ValueError("mlb price needs --total LINE [OVER UNDER], e.g. --total 8.5 -105 -115")
+    line = a.total[0]
+    over, under = (a.total[1], a.total[2]) if len(a.total) >= 3 else (-110.0, -110.0)
+    if a.p_home is not None:
+        p_home = a.p_home
+        p_over = O.devig_american([over, under])[0]
+        src = "given"
+    elif a.ml:
+        p_home, p_over = mlb.market_probs(a.ml[0], a.ml[1], line, over, under)
+        src = "devigged --ml/--total"
+    else:
+        raise ValueError("give the moneyline pair with --ml AWAY HOME (e.g. --ml +120 -140) or --p-home 0.56")
+    return mlb.solve(p_home, line, p_over, postseason=bool(a.postseason)), src, p_home, p_over
+
+
+def _mlb_offers(gd, offers):
+    from . import mlb
+    out = []
+    for o in offers or []:
+        parts = o.split(":")
+        if len(parts) not in (4, 5):
+            raise ValueError(f"bad --offer {o!r}; use market:side:line:price[:book], e.g. runline:home:-1.5:+140, "
+                             "total:over:8.5:-105, team_total:home_over:4.5:+100, f5_ml:away:0:+110, "
+                             "f5_total:under:4.5:-115, nrfi:nrfi:0:-120, ml:away:0:+125")
+        market, side, line, price = parts[:4]
+        ln = None if market in ("ml", "f5_ml", "nrfi") else float(line)
+        r = mlb.evaluate_offer(gd, market, side.lower(), ln, float(price))
+        if len(parts) == 5:
+            r["book"] = parts[4]
+        out.append(r)
+    return out
+
+
+def cmd_mlb(a):
+    """MLB: every derived market priced from the sharp moneyline + total; scan; pitcher/bullpen context."""
+    from . import mlb
+    if a.action == "validate":
+        cal = mlb.load_calibration()
+        if not cal:
+            raise ValueError("no data/mlb/calibration.json; run scripts/refresh_mlb_data.py")
+        return cal
+    if a.action == "context":
+        import datetime as _dt
+
+        from .fetch import mlb_stats
+        return {"date": a.date or _dt.date.today().isoformat(),
+                "games": mlb_stats.game_context(a.date or _dt.date.today().isoformat(), a.team)}
+    if a.action == "scan":
+        return _mlb_scan(a)
+    gd, src, p_home, p_over = _mlb_gd(a)
+    tt = []
+    for x in a.team_totals:
+        side, line = x.split(":")
+        tt.append((side, float(line)))
+    out = {"p_source": src, "postseason": bool(a.postseason), "market_p_home": round(p_home, 4),
+           "market_p_over": round(p_over, 4),
+           **mlb.price(gd, totals=a.totals or [a.total[0] - 1, a.total[0], a.total[0] + 1],
+                       run_lines=a.run_lines, team_totals=tt, f5_totals=a.f5_totals)}
+    offers = _mlb_offers(gd, a.offer)
+    if offers:
+        out["offers"] = offers
+    return out
+
+
+MLB_SHARP_PERIOD_MARKETS = ("h2h_1st_5_innings", "totals_1st_5_innings", "totals_1st_1_innings")
+
+
+def _mlb_anchor_periods(gd, rows, home, away):
+    """Replace the model's F5 / first-inning pieces with the sharp book's own lines where posted
+    (starters drive those markets; the full-game split assumes typical starters and bullpens)."""
+    from . import mlb
+    from .fetch import odds_api
+    done = []
+    for book in ["pinnacle"] + [b for b in odds_api.SHARP_WEIGHTS if b != "pinnacle"]:
+        br = [r for r in rows if r["book"] == book]
+        nr = {r["name"]: r["price"] for r in br if r["market"] == "totals_1st_1_innings" and r.get("point") == 0.5}
+        if "first_inning" not in done and len(nr) == 2:
+            gd = mlb.anchor_nrfi(gd, O.devig_american([nr["Under"], nr["Over"]])[0])
+            done.append("first_inning")
+        f5t = {r["name"]: (r["point"], r["price"]) for r in br if r["market"] == "totals_1st_5_innings"}
+        f5m = {r["name"]: r["price"] for r in br if r["market"] == "h2h_1st_5_innings"}
+        if "f5" not in done and len(f5t) == 2 and f5t["Over"][0] == f5t["Under"][0]:
+            p_over = O.devig_american([f5t["Over"][1], f5t["Under"][1]])[0]
+            p_h = O.devig_american([f5m[home], f5m[away]])[0] if home in f5m and away in f5m else None
+            gd = mlb.anchor_f5(gd, f5t["Over"][0], p_over, p_h)
+            done.append("f5")
+    return gd, done
+
+
+def _sharp_two_way(rows, book="pinnacle"):
+    """No-vig probabilities for every two-way market the sharp book posts: {(market, point, name): p}."""
+    pairs: Dict[tuple, list] = {}
+    for r in rows:
+        if r["book"] == book and r["market"] in ("h2h", "spreads", "totals", "h2h_1st_5_innings",
+                                                 "totals_1st_5_innings", "totals_1st_1_innings"):
+            pt = r.get("point")
+            pairs.setdefault((r["event_id"], r["market"], None if pt is None else abs(pt)), []).append(r)
+    out = {}
+    for rs in pairs.values():
+        if len(rs) == 2 and (rs[0].get("point") is None or rs[0]["point"] in (rs[1]["point"], -rs[1]["point"])):
+            for r, p in zip(rs, O.devig_american([rs[0]["price"], rs[1]["price"]])):
+                out[(r["market"], r.get("point"), r["name"])] = p
+    return out
+
+
+MLB_EVENT_MARKETS = ("alternate_spreads", "alternate_totals", "team_totals", "h2h_1st_5_innings",
+                     "spreads_1st_5_innings", "totals_1st_5_innings", "totals_1st_1_innings")
+
+
+def _mlb_row_offer(gd, r, home, away):
+    """Map one Odds API row to an MLB offer (None if the market isn't priced)."""
+    from . import mlb
+    m, name, pt = r["market"], r["name"], r.get("point")
+    side = "home" if name == home else "away" if name == away else name.lower()
+    if m == "h2h":
+        return mlb.evaluate_offer(gd, "ml", side, None, r["price"])
+    if m in ("spreads", "alternate_spreads"):
+        return mlb.evaluate_offer(gd, "runline", side, pt, r["price"]) if side in ("home", "away") else None
+    if m in ("totals", "alternate_totals"):
+        return mlb.evaluate_offer(gd, "total", side, pt, r["price"])
+    if m == "team_totals":
+        team = r.get("description")
+        t = "home" if team == home else "away" if team == away else None
+        return mlb.evaluate_offer(gd, "team_total", f"{t}_{side}", pt, r["price"]) if t else None
+    if m == "h2h_1st_5_innings" and side in ("home", "away"):
+        return mlb.evaluate_offer(gd, "f5_ml", side, None, r["price"])
+    if m == "spreads_1st_5_innings" and side in ("home", "away"):
+        return mlb.evaluate_offer(gd, "f5_runline", side, pt, r["price"])
+    if m == "totals_1st_5_innings":
+        return mlb.evaluate_offer(gd, "f5_total", side, pt, r["price"])
+    if m == "totals_1st_1_innings" and pt == 0.5:
+        return mlb.evaluate_offer(gd, "nrfi", "nrfi" if side == "under" else "yrfi", None, r["price"])
+    return None
+
+
+def _mlb_scan(a):
+    """Today's MLB board: fair prices from the sharp moneyline + total, DraftKings/FanDuel offers checked
+    (main markets; with --deep also alt lines, team totals, F5 and first inning — costs more credits)."""
+    import datetime as _dt
+
+    from . import mlb
+    from .fetch import odds_api
+    res = odds_api.get_odds("baseball_mlb", ["h2h", "spreads", "totals"], a.regions)
+    quota = res["quota"]
+    by_event: Dict[str, list] = {}
+    for r in res["rows"]:
+        by_event.setdefault(r["event_id"], []).append(r)
+    out = {"events": [], "quota": quota}
+    for ev, rows in by_event.items():
+        home, away = rows[0]["home"], rows[0]["away"]
+        if a.team and not any(a.team.lower() in t.lower() for t in (home, away)):
+            continue
+        start = rows[0]["commence_time"]
+        if a.date and start[:10] not in (a.date, (_dt.date.fromisoformat(a.date) + _dt.timedelta(1)).isoformat()):
+            continue
+        sharp = [r for r in rows if r["book"] == "pinnacle"] or [r for r in rows if r["book"] in odds_api.SHARP_WEIGHTS]
+        ml = {r["name"]: r["price"] for r in sharp if r["market"] == "h2h"}
+        tot = {r["name"]: (r["point"], r["price"]) for r in sharp if r["market"] == "totals"}
+        if len(ml) != 2 or len(tot) != 2:
+            out["events"].append({"game": f"{away} @ {home}", "start": start, "note": "no sharp moneyline + total yet"})
+            continue
+        line = tot["Over"][0]
+        p_home, p_over = mlb.market_probs(ml[away], ml[home], line, tot["Over"][1], tot["Under"][1])
+        post = a.postseason if a.postseason is not None else int(start[5:7]) >= 10
+        gd = mlb.solve(p_home, line, p_over, postseason=post)
+        pr = mlb.price(gd, totals=[line - 1, line, line + 1], team_totals=[("home", 3.5), ("home", 4.5), ("away", 3.5), ("away", 4.5)],
+                       f5_totals=[4.5])
+        anchored = []
+        if a.deep:
+            er = odds_api.get_event_odds("baseball_mlb", ev, MLB_EVENT_MARKETS, ["us"])
+            rows = rows + er["rows"]
+            sh = odds_api.get_event_odds("baseball_mlb", ev, list(MLB_SHARP_PERIOD_MARKETS), ["eu"])
+            out["quota"] = sh["quota"]
+            gd, anchored = _mlb_anchor_periods(gd, sh["rows"], home, away)
+            if anchored:
+                pr["f5"] = mlb.price(gd, f5_totals=[4.5])["f5"]
+                pr["first_inning"] = mlb.price(gd)["first_inning"]
+        sharp_p = _sharp_two_way(rows + (sh["rows"] if a.deep else []))
+        offers = []
+        for r in rows:
+            if r["book"] not in ("draftkings", "fanduel"):
+                continue
+            o = _mlb_row_offer(gd, r, home, away)
+            if not o:
+                continue
+            o["fair_source"] = "model"
+            sp = sharp_p.get((r["market"], r.get("point"), r["name"]))
+            if sp is not None:                         # the sharp book posts this exact line: use it
+                dec = O.american_to_decimal(r["price"])
+                o.update(model_p=o["p_win"], p_win=round(sp, 4), p_push=0.0, ev_pct=round(100 * (sp * dec - 1), 2),
+                         fair=O.format_american(O.decimal_to_american(1 / sp)), fair_source="sharp")
+            offers.append({**o, "book": r["book"], "selection": f"{r.get('description') or ''} {r['name']}".strip(),
+                           "odds_market": r["market"]})
+        offers.sort(key=lambda o: -o["ev_pct"])
+        out["events"].append({"game": f"{away} @ {home}", "start": start, "postseason": post, "anchored_to_sharp": anchored,
+                              "sharp": {"source": sharp[0]["book"], "ml": {"away": ml[away], "home": ml[home]},
+                                        "total": [line, tot["Over"][1], tot["Under"][1]]},
+                              "fair": pr, "offers": offers[: a.top]})
+    out["candidates"] = sorted([dict(o, game=e["game"]) for e in out["events"] for o in e.get("offers", [])
+                                if o["ev_pct"] >= 100 * a.min_ev], key=lambda o: -o["ev_pct"])
+    return out
+
+
 def cmd_liveread(a):
     """In-game read for WNBA/NBA: play-by-play facts, a fair live price, and live offers checked."""
     from . import liveread as lr
@@ -908,6 +1115,28 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--regions", nargs="+", default=["us", "eu"])
     s.add_argument("--min-ev", type=float, default=0.03)
     s.set_defaults(fn=cmd_tennis)
+
+    s = sub.add_parser("mlb", help="MLB: run lines, totals, team totals, F5, NRFI priced from the market; scan; context")
+    s.add_argument("action", choices=["price", "scan", "context", "validate"])
+    s.add_argument("--ml", type=float, nargs=2, metavar=("AWAY", "HOME"), help="moneyline pair to devig, e.g. +120 -140")
+    s.add_argument("--p-home", type=float, help="home win probability instead of --ml")
+    s.add_argument("--total", type=float, nargs="+", help="main total and its prices: LINE [OVER UNDER], e.g. 8.5 -105 -115")
+    s.add_argument("--postseason", action="store_true", default=None,
+                   help="no automatic runner in extra innings (scan: auto from the date)")
+    s.add_argument("--totals", type=float, nargs="+", default=[], help="total lines to price (default: main ±1)")
+    s.add_argument("--run-lines", type=float, nargs="+", default=[-1.5, 1.5, -2.5, 2.5], help="HOME run lines to price")
+    s.add_argument("--team-totals", nargs="+", default=["home:4.5", "away:4.5"], help="side:line, e.g. home:4.5 away:3.5")
+    s.add_argument("--f5-totals", type=float, nargs="+", default=[4.5])
+    s.add_argument("--offer", nargs="+", default=[],
+                   help="book prices, market:side:line:price[:book], e.g. runline:home:-1.5:+140 total:over:8.5:-105 "
+                        "team_total:home_over:4.5:+100 f5_ml:away:0:+110 f5_total:under:4.5:-115 nrfi:nrfi:0:-120")
+    s.add_argument("--date", help="context/scan: YYYY-MM-DD (default today)")
+    s.add_argument("--team", help="context/scan: only games with this team")
+    s.add_argument("--deep", action="store_true", help="scan: also alt lines, team totals, F5 and first inning (more credits)")
+    s.add_argument("--regions", nargs="+", default=["us", "eu"])
+    s.add_argument("--min-ev", type=float, default=0.02)
+    s.add_argument("--top", type=int, default=15)
+    s.set_defaults(fn=cmd_mlb)
 
     s = sub.add_parser("liveread", help="in-game read (WNBA/NBA): play-by-play facts, fair live price, offers")
     s.add_argument("action", nargs="?", default="read", choices=["read", "validate"])

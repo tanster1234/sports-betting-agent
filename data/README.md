@@ -6,6 +6,7 @@
 | `wnba/lines_2026_draftkings.csv` | DraftKings **opening and closing** spread / total / moneyline (with prices) for every 2026 game through Oct 1, 2026, plus final scores | 340 |
 
 | `nfl/calibration.json` | NFL margin/total model fitted on 2015–2025 closing lines and results: σ plus a weight per final margin (3, 7, 6, 10, 14 …) and per total — aggregate statistics only, with an out-of-sample check on 2024–25 | 3,028 games |
+| `mlb/calibration.json` | MLB half-inning model: run dispersion, per-inning and score-dependent 9th-inning rates, automatic-runner extra innings, walk-off margins — fitted on 2023–25 closing lines and runs by inning, with a held-out 2026 check of run lines, alt totals, team totals, F5 and NRFI — aggregate statistics only | 7,383 fit / 2,446 test games |
 | `tennis/calibration.json` | Tennis point model: tour serve-point rates by surface (2019–25), the fitted day-to-day form spread, held-out 2024+ checks of total games and set scores, and Elo vs bookmaker closing odds — aggregate statistics only | ATP 67,288 / WTA 43,512 matches |
 
 ## NFL data
@@ -76,3 +77,20 @@ python3 scripts/refresh_wnba_data.py --lines    # also re-download current-seaso
 ## Personal data
 
 `data/ledger/` holds your bet ledger and is gitignored. Don't commit it.
+
+## MLB data
+
+The raw MLB table is **not** in the repo; `scripts/refresh_mlb_data.py` builds it in
+`data/mlb/games.csv` (gitignored) from ESPN's public endpoints — one scoreboard call per date
+(final scores, runs by inning, regular season vs postseason) and one odds call per game (the
+closing and opening moneyline, run line and total of the book ESPN shows: DraftKings in 2026,
+ESPN BET in 2024–25, the consensus or ESPN BET line in 2023) — then refits `mlb/calibration.json`.
+Rain-shortened and suspended games (linescores that don't add up) are dropped.
+
+```bash
+python3 scripts/refresh_mlb_data.py                  # download 2023..yesterday (resumes) + fit + validate
+python3 scripts/refresh_mlb_data.py --no-download    # refit from the local copy (~10 min on 4 cores)
+```
+Probable pitchers, game logs, bullpen use and weather come live from the MLB Stats API
+(statsapi.mlb.com, no key) via `betlab mlb context`.
+
