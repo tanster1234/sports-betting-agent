@@ -24,6 +24,7 @@ from typing import Dict, Iterable, List, Optional, Sequence
 
 _ND = NormalDist()
 SETTLED = {"win", "loss", "push", "half_win", "half_loss"}
+ENTERTAINMENT = "entertainment"     # quiet-day picks (betlab/quietday.py): no edge by design
 
 
 def _ret(b: dict) -> float:
@@ -176,8 +177,17 @@ def verdict(n: int, roi_t: dict, clv_t: dict) -> str:
 
 def performance_report(bets: Iterable[dict], bankroll_start: Optional[float] = None,
                        group_by: Sequence[str] = ("sport", "market", "book", "tier")) -> dict:
-    rows = [b for b in bets if b.get("status") in SETTLED and b.get("pnl") is not None]
+    """Skill record (ROI, CLV, calibration, verdict) over value bets; money (drawdown, tilt) over every bet.
+
+    Quiet-day picks (tier ``entertainment``) are bets with no edge by design, so they are kept out
+    of the record that judges skill and summarised on their own.
+    """
+    every = [b for b in bets if b.get("status") in SETTLED and b.get("pnl") is not None]
+    rows = [b for b in every if b.get("tier") != ENTERTAINMENT]
+    fun = [b for b in every if b.get("tier") == ENTERTAINMENT]
     out: dict = {"overall": _summ(rows)}
+    if fun:
+        out["entertainment"] = _summ(fun)
     lo, hi = bootstrap_roi_ci(rows)
     if lo is not None:
         out["overall"]["roi_ci95_pct"] = [round(100 * lo, 2), round(100 * hi, 2)]
@@ -199,8 +209,8 @@ def performance_report(bets: Iterable[dict], bankroll_start: Optional[float] = N
     out["by_month"] = {k: _summ(v) for k, v in sorted(months.items())}
     out["calibration"] = calibration(rows)
     out["brier"] = brier_scores(rows)
-    out["drawdown"] = drawdown(rows, bankroll_start)
-    out["tilt"] = tilt_check(rows)
+    out["drawdown"] = drawdown(every, bankroll_start)
+    out["tilt"] = tilt_check(every)
     roi = (out["overall"]["roi_pct"] or 0) / 100
     out["bets_needed_to_confirm_current_roi"] = bets_needed(roi) if roi > 0 else None
     out["verdict"] = verdict(len(rows), roi_t, clv_t)
@@ -219,6 +229,10 @@ def render_markdown(rep: dict, title: str = "Performance review") -> str:
         t, pv = c.get('t'), c.get('p_value')
         L.append(f"**Avg CLV** {o['avg_clv_pct']}% over {o['clv_n']} bets (t = {t:.2f}, p = {pv:.3f}, share positive {c.get('share_positive')})"
                  if isinstance(t, float) and isinstance(pv, float) else f"**Avg CLV** {o['avg_clv_pct']}% over {o['clv_n']} bets")
+    if rep.get("entertainment"):
+        e = rep["entertainment"]
+        L.append(f"**Quiet-day picks** (entertainment, not in the record above) {e['wins']}-{e['losses']}-{e['pushes']}"
+                 f"  |  **Staked** {e['staked']}  |  **P&L** {e['pnl']}")
     L += ["", f"**Verdict:** {rep['verdict']}", ""]
     if rep.get("bets_needed_to_confirm_current_roi"):
         L.append(f"_At the current ROI you need ~{rep['bets_needed_to_confirm_current_roi']} bets before it is distinguishable from zero._\n")

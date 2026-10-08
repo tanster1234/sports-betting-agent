@@ -271,6 +271,15 @@ def cmd_ledger(a):
     return L.bets(a.status)
 
 
+def cmd_quietday(a):
+    from . import quietday
+    L, prof = _ledger(a)
+    raw = sys.stdin.read() if a.json == "-" else open(a.json).read()
+    done = quietday.picks_today(L.bets(), prof.get("timezone") or "America/New_York")
+    return {"bankroll": a.bankroll or prof["bankroll"], "profile": prof["_source"],
+            **quietday.pick(json.loads(raw), prof, a.bankroll, done)}
+
+
 def cmd_report(a):
     from .report import performance_report, render_markdown
     L, prof = _ledger(a)
@@ -990,6 +999,16 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--bankroll", type=float)
     s.add_argument("--exposed", help='JSON of existing exposure, e.g. {"__day__":0.03}')
     s.set_defaults(fn=cmd_stake)
+
+    s = sub.add_parser("quietday", help="no value bet today: the single bet closest to fair, small fixed stake, "
+                                        "labelled entertainment (opt-in)")
+    s.add_argument("--json", required=True,
+                   help="file or - for stdin: [{label,p_win,price|decimal,p_push?,market,book,game,start}] "
+                        "with p_win from the sharp no-vig price")
+    s.add_argument("--profile")
+    s.add_argument("--bankroll", type=float)
+    s.add_argument("--ledger", help="ledger to check today's picks against (default: profile ledger_path)")
+    s.set_defaults(fn=cmd_quietday)
 
     s = sub.add_parser("price", help="price game lines from a margin/total model")
     s.add_argument("kind", choices=["game", "convert", "spread-from-prob", "period", "alt", "keys", "total", "mlb", "nhl"])

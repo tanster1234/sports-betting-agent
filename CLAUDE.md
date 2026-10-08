@@ -12,7 +12,10 @@ adult user to act on — Claude never places bets.
 - **Start from the market.** Blend model probabilities with the devigged market price
   (profile `model_weight`) before computing EV; raw model probabilities are overconfident.
 - **Require a computed edge and a stated information edge** for any recommendation; otherwise
-  output PASS with fair prices and "bet only at X or better" numbers.
+  output PASS with fair prices and "bet only at X or better" numbers. If the user has opted in
+  (profile `quiet_day_pick`), a PASS day may add one **quiet-day pick**: the single bet closest to
+  the sharp fair price, labelled "entertainment, not value", at a small fixed stake
+  (`python3 -m betlab quietday`), logged with `--tier entertainment`.
 - **Size with fractional Kelly + caps** (`python3 -m betlab stake`), never by confidence tiers.
 - **Use current data** with timestamps; if live fetches are blocked (sandbox network policy),
   fall back to WebSearch/WebFetch and say so.

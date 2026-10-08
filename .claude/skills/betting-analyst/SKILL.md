@@ -122,6 +122,27 @@ People read these answers, not auditors: the internal machinery (betlab, profile
 ledger state, file paths) belongs in that closing block, not in the reasoning, and every
 term a casual bettor might not know gets a few plain words the first time it appears.
 
+### Quiet-day pick (opt-in)
+
+When nothing qualifies and the user has opted in (profile `quiet_day_pick.enabled`, or they asked
+for it), add **one** quiet-day pick after the PASS verdict. It is the single DK/FD bet closest to
+fair, not a recommendation of value:
+```bash
+python3 -m betlab quietday --json candidates.json    # [{label,p_win,price,market,book,game,start}]
+```
+- Candidates are the singles you already priced today against a sharp no-vig price (Pinnacle,
+  the exchange or the sharp-weighted consensus) — never a model-only number, never a parlay.
+  For long shots use the conservative devig (`shin`); if two sharp references disagree, use the
+  lower probability.
+- Fresh prices only (< 15 minutes); otherwise give the "skip if worse than" price and let the user
+  check the app.
+- Stake is fixed and small (`stake_pct`, 1% of bankroll by default), at most one a day, and there
+  is no pick if even the cheapest bet costs more than `max_cost_pct` (3%). Never on a day the
+  stop-loss is hit, and never framed as a way to win anything back.
+- Write it in plain words, headed **Quiet-day pick — entertainment, not value**: the bet, book and
+  price, the stake, what it costs on average ("about 1¢ per $1"), and the skip-if-worse price.
+  Log it with `--tier entertainment` so the record that judges skill leaves it out.
+
 ## Step 7 — Log
 
 Give a ready-to-run ledger command for each bet (`bet-tracking`):

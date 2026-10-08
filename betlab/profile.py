@@ -39,6 +39,9 @@ DEFAULTS: dict = {
         "NFL": {"spread": 0.0, "total": 0.0, "moneyline": 0.0, "prop": 0.5},
     },
     "devig_method": "multiplicative",
+    # Opt-in: on a day with no value bet, name the one single bet closest to the sharp fair price,
+    # labelled entertainment, at a small fixed stake (see betlab/quietday.py).
+    "quiet_day_pick": {"enabled": False, "stake_pct": 0.01, "max_cost_pct": 0.03, "max_per_day": 1},
     "stop_loss_drawdown_pct": 0.20,
     "daily_stop_loss_pct": 0.05,
     "books": ["DraftKings", "FanDuel", "BetMGM", "Caesars", "Fanatics", "theScore Bet"],
@@ -94,6 +97,11 @@ def validate(p: dict) -> None:
         raise ValueError("kelly_multiplier above 0.5 is not allowed: model error makes >half-Kelly a bankroll risk")
     if float(p["max_bet_pct"]) > 0.05:
         raise ValueError("max_bet_pct above 5% of bankroll per bet is not allowed")
+    q = p.get("quiet_day_pick") or {}
+    if float(q.get("stake_pct", 0.01)) > 0.02:
+        raise ValueError("quiet_day_pick.stake_pct above 2% of bankroll is not allowed: it is a bet with no edge")
+    if not 0 <= float(q.get("max_cost_pct", 0.03)) <= 0.05:
+        raise ValueError("quiet_day_pick.max_cost_pct must be in [0, 0.05]")
 
 
 def unit_size(p: dict) -> float:

@@ -9,7 +9,7 @@ A disciplined sports-betting analysis system for [Claude Code](https://claude.co
   skills need — devig (5 methods), EV, push-aware and simultaneous Kelly, CLV, spread/total/
   moneyline/alt/1H pricing, props, correlated parlays, playoff series, a Kalman rating model,
   MLB/NHL scoring models, a tamper-evident bet ledger, performance reports and a no-look-ahead
-  backtester. **311 tests**, lint-clean, runs on Python 3.9+.
+  backtester. **321 tests**, lint-clean, runs on Python 3.9+.
 - **Real WNBA data**: 3,318 games (2013 → Oct 1, 2026) and DraftKings **opening and closing**
   lines for all 340 games of 2026, used to calibrate the model and to backtest it honestly.
 
@@ -49,7 +49,7 @@ Full tables: [`.claude/skills/wnba-betting/references/calibration.md`](.claude/s
 ```bash
 git clone https://github.com/tanster1234/sports-betting-agent && cd sports-betting-agent
 cp config/profile.example.json config/profile.json      # set your bankroll, books, state
-python3 -m pip install pytest && python3 -m pytest      # 311 tests, a few seconds
+python3 -m pip install pytest && python3 -m pytest      # 321 tests, a few seconds
 python3 -m betlab wnba predict --home ATL --away NY --date 2026-10-04 --playoff
 claude                                                  # open Claude Code in the repo
 ```
@@ -125,6 +125,7 @@ python3 -m betlab mlb price --ml +120 -140 --total 8.5 -105 -115 --offer runline
 python3 -m betlab mlb context --team ATL                           # probable pitchers, last starts, bullpen use, weather
 python3 -m betlab slips check --tickets proposed.json --bets tracker-bets/   # parlays: one story? same player twice? P(none cash)
 python3 -m betlab postmortem --bets tracker-bets/ --out patches/    # why each leg lost; calibration; lessons for the tracker
+python3 -m betlab quietday --json candidates.json                  # no value today: the bet closest to fair, small stake (opt-in)
 python3 -m betlab nfl price --spread -3 --total 44.5 --alt -2.5 -7 --teaser 6 \
     --offer spread:home:-2.5:-135 total:over:41.5:-150               # NFL alt lines/teasers off the main line
 python3 -m betlab nfl predict --date 2026-10-04                     # NFL ratings lines (QB-adjusted; loses to closes)
@@ -132,7 +133,7 @@ python3 -m betlab nfl predict --date 2026-10-04                     # NFL rating
 
 ## Testing — four layers
 
-1. **Unit + property tests** (`tests/`, 311): golden values for every formula, invariants
+1. **Unit + property tests** (`tests/`, 321): golden values for every formula, invariants
    (devig sums to 1, push-aware Kelly maximises log growth, series probabilities sum to 1,
    simulations hit their target moments), ledger integrity (double settlement refused,
    hash chain catches edits/deletions), parsers tested on real ESPN payloads.

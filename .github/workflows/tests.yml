@@ -34,3 +34,4 @@ jobs:
           python -m betlab slips check --offline --tickets '[{"id":"a","stake":5,"odds":260,"legs":[{"pick":"Over 44.5","fairProb":0.5,"spec":{"event":"1","league":"nfl","market":"total","side":"over","line":44.5}},{"pick":"QB 250+","fairProb":0.55,"spec":{"event":"1","league":"nfl","market":"player","player":"Q B","stat":"passYards","side":"over","line":249.5,"team_side":"home","position":"QB"}}]}]'
           python -m betlab liveread --summary tests/fixtures/espn_wnba_live_summary.json --offer ml:away:0:110:dk --sharp ml:-105:-115
           python -m betlab liveread validate
+          echo '[{"label":"CLE ML","p_win":0.521,"price":-112,"market":"moneyline"}]' | python -m betlab quietday --json -

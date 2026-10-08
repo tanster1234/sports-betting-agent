@@ -45,6 +45,11 @@ or decimal; settling twice is refused without a correction reason.
 the closing number. Get it from ESPN (`fetch espn-summary` → `odds[0].close`), the book, or an
 odds screen right before start. Pinnacle or consensus closes are better than the book you used.
 
+**Quiet-day picks** (`betting-analyst`, no edge by design) are logged with `--tier entertainment`.
+The review keeps them out of the record that judges skill (ROI, CLV, calibration, verdict) and
+shows them on their own line; drawdown and the stop-loss still count them, because the money is
+real.
+
 ## Reviews
 
 ```bash

@@ -23,6 +23,8 @@
   },
   "_model_weight_note": "Weight on YOUR model vs the market in logit space. Raise only after your CLV proves the model adds information. NFL is 0: the NFL ratings lose to closing lines in walk-forward tests (2021-25).",
   "devig_method": "multiplicative",
+  "quiet_day_pick": {"enabled": false, "stake_pct": 0.01, "max_cost_pct": 0.03, "max_per_day": 1},
+  "_quiet_day_note": "Opt-in. On a day with no value bet, name the one single bet closest to the sharp fair price, labelled entertainment, not value, at stake_pct of bankroll; none if even that costs more than max_cost_pct. Log it with --tier entertainment so it stays out of the skill record (python3 -m betlab quietday).",
   "stop_loss_drawdown_pct": 0.20,
   "daily_stop_loss_pct": 0.05,
   "books": ["DraftKings", "FanDuel", "BetMGM", "Caesars", "Fanatics", "theScore Bet"],
